@@ -1,0 +1,72 @@
+@import './palette';
+
+@media (max-width: 850px) {
+  .data-map {
+    flex-flow: column wrap;
+  }
+  .data-form-list {
+    flex: 0.5;
+  }
+}
+
+@media (min-width: 850px) {
+  .data-map {
+    flex-flow: row wrap;
+  }
+  .data-form-list {
+    width: 250px;
+  }
+}
+
+.data-map {
+  display: flex;
+  flex: 1;
+  align-content: flex-start;
+  .data-form-list {
+    background: white;
+    border-left: 1px solid @main_border;
+    overflow-y: auto;
+    .data-form-list-title {
+      font-size: 18px;
+      padding: 10px 5px;
+      border-bottom: 1px solid @BORDER_COLOR;
+      h4 {
+        margin: 0;
+      }
+    }
+
+      .data-form-list-item {
+        color: @main;
+        padding: 10px 5px;
+        border-bottom: 1px solid @main_border;
+        cursor: pointer;
+        h4 {
+          margin: 0 0 0 5px;
+          display: inline;
+        }
+        .count {
+          margin: 0 0 0 5px;
+          float: right;
+        }
+      }
+
+    li.active {
+      color: red;
+    }
+  }
+  .map {
+    min-width: 300px;
+    min-height: 300px;
+    flex-grow: 1;
+    border-left: 1px solid @main_border;
+  }
+}
+
+.form-label {
+  font-weight: 600;
+  margin: 0;
+}
+
+.form-note {
+  font-size: 12px;
+}

@@ -1,0 +1,6 @@
+---
+applications:
+  - name: efc-web
+    buildpack: https://github.com/cloudfoundry-community/staticfile-buildpack.git
+    path: ../public
+    memory: 64M

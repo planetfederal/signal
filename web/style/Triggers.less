@@ -1,0 +1,50 @@
+@import './palette';
+
+@media (max-width: 600px) {
+  .trigger-props {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 850px) {
+  .trigger-details {
+    flex-flow: column wrap;
+  }
+  .trigger-props {
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 850px) {
+  .trigger-details {
+    flex-flow: row wrap;
+  }
+  .trigger-props {
+    width: 250px;
+  }
+}
+
+.trigger-details {
+  height: 100%;
+  display: flex;
+  flex: 1;
+  .trigger-props {
+    overflow-y: auto;
+    padding: 10px 10px 0 10px !important;
+  }
+  .trigger-map {
+    flex: 1;
+    min-width: 300px;
+    min-height: 300px;
+  }
+}
+
+.rule-list {
+  padding-bottom: 10px;
+}
+
+.add-rule {
+  h4 {
+    margin-top: 0px;
+  }
+}
