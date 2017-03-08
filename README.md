@@ -1,8 +1,8 @@
-## signal
+## Signal
 
 Version 0.8
 
-signal is a collection of software components from spatialconnect-server that enables email alerts on geospatial triggers
+Signal is a geospatial event processing system
 
 ### db setup
 
