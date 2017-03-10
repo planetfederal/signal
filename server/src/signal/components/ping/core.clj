@@ -14,13 +14,9 @@
 
 (ns signal.components.ping.core
   (:require [com.stuartsierra.component :as component]
-            [signal.components.http.intercept :as intercept]
-            [signal.components.http.response :as response]
-            [signal.components.mqtt.core :as mqttapi]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
             [signal.components.kafka.core :as kafka]
-            [clojure.core.async :as async]
             [clj-time.local :as l])
   (:import [java.util.concurrent Executors TimeUnit]))
 
@@ -38,18 +34,10 @@
   (let [pool (Executors/newScheduledThreadPool 1)]
     (.scheduleAtFixedRate pool #(send-ping kafka-comp) 0 5 TimeUnit/SECONDS)))
 
-(defn mqtt-ping
-  "Responds with pong as a way to ensure mqtt broker is reachable"
-  [mqttcomp message]
-  (mqttapi/publish-scmessage mqttcomp
-                             (:reply_to message)
-                             (assoc message :payload {:result "pong"})))
-
-(defrecord PingComponent [mqtt kafka]
+(defrecord PingComponent [kafka]
   component/Lifecycle
   (start [this]
     (log/debug "Starting Ping Component")
-    (mqttapi/subscribe mqtt "/ping" (partial mqtt-ping mqtt))
     (ping-kafka kafka)
     this)
   (stop [this]

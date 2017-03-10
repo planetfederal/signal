@@ -18,7 +18,6 @@
             [signal.test-utils :as utils]
             [clojure.spec :as spec]
             [clojure.spec.gen :as gen]
-            [signal.components.mqtt.core :as mqttapi]
             [clojure.data.json :as json]
             [clojure.walk :refer [keywordize-keys]])
   (:import (java.net URLEncoder URLDecoder)
@@ -76,37 +75,7 @@
       (let [store (-> (utils/request-get "/api/stores") :result first)
             res (utils/request-delete (str "/api/stores/" (:id store)))]
         (is (= "success" (:result res))
-            "The response should contain a success message")))
-
-    (testing "Creating a store through REST api produces a valid message on config/update topic"
-      (let [mqtt (:mqtt user/system-val)
-            msg-handler (fn [name m]
-                          (is (= name (get-in m [:payload :name])))
-                          (is (= (.value SCCommand/CONFIG_ADD_STORE) (:action m))))]
-        (mqttapi/subscribe mqtt "/config/update" (partial msg-handler (:name test-store)))
-        (utils/request-post "/api/stores" test-store)
-        (Thread/sleep 1000)))
-
-    (testing "Updating a store through REST api produces a valid message on config/update topic"
-      (let [mqtt (:mqtt user/system-val)
-            store (-> (utils/request-get "/api/stores") :result first)
-            updated-store (assoc store :name "foo")
-            msg-handler (fn [id m]
-                          (is (= id (get-in m [:payload :id])))
-                          (is (= (.value SCCommand/CONFIG_UPDATE_STORE) (:action m))))]
-        (mqttapi/subscribe mqtt "/config/update" (partial msg-handler (:id store)))
-        (utils/request-put (str "/api/stores/" (:id store)) updated-store)
-        (Thread/sleep 1000)))
-
-    (testing "Deleting a store through REST api produces a valid message on config/update topic"
-      (let [mqtt (:mqtt user/system-val)
-            store (-> (utils/request-get "/api/stores") :result first)
-            msg-handler (fn [id m]
-                          (is (= id (get-in m [:payload :id])))
-                          (is (= (.value SCCommand/CONFIG_REMOVE_STORE) (:action m))))]
-        (mqttapi/subscribe mqtt "/config/update" (partial msg-handler (:id store)))
-        (utils/request-delete (str "/api/stores/" (:id store)))
-        (Thread/sleep 1000)))))
+            "The response should contain a success message")))))
 
 (deftest wfs-get-caps-proxy
   (testing "Sending a request to /api/wfs/getCapabilities?url=<wfs-endpoint> returns a list of layernames"

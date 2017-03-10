@@ -20,44 +20,9 @@
             [signal.server :refer [make-signal-server]]
             [clojure.tools.logging :as log]))
 
-(defn init-dev []
-  (log/info "Initializing dev system for repl")
-  (signal.db.conn/migrate)
-  (System/setProperty "javax.net.ssl.trustStore"
-                      (or (System/getenv "TRUST_STORE")
-                          "tls/test-cacerts.jks"))
-  (System/setProperty "javax.net.ssl.trustStoreType"
-                      (or (System/getenv "TRUST_STORE_TYPE")
-                          "JKS"))
-  (System/setProperty "javax.net.ssl.trustStorePassword"
-                      (or (System/getenv "TRUST_STORE_PASSWORD")
-                          "changeit"))
-  (System/setProperty "javax.net.ssl.keyStore"
-                      (or (System/getenv "KEY_STORE")
-                          "tls/test-keystore.p12"))
-  (System/setProperty "javax.net.ssl.keyStoreType"
-                      (or (System/getenv "KEY_STORE_TYPE")
-                          "pkcs12"))
-  (System/setProperty "javax.net.ssl.keyStorePassword"
-                      (or (System/getenv "KEY_STORE_PASSWORD")
-                          "somepass"))
-  (make-signal-server {:http-config {:env                     :dev
-                                     ::server/join?           false
-                                     ::server/allowed-origins {:creds true
-                                                               :allowed-origins (constantly true)}}
-                       :mqtt-config {:broker-url (or (System/getenv "MQTT_BROKER_URL")
-                                                     "tcp://localhost:1883")}
-                       :kafka-producer-config {:servers  (or (System/getenv "BOOTSTRAP_SERVERS")
-                                                             "localhost:9092")
-                                               :timeout-ms 2000}
-                       :kafka-consumer-config {:servers  (or (System/getenv "BOOTSTRAP_SERVERS")
-                                                             "localhost:9092")
-                                               :group-id (or (System/getenv "GROUP_ID")
-                                                             "sc-consumers")}}))
-
 (def system-val nil)
 
-(defn init-signal-dev []
+(defn init-dev []
   (log/info "Initializing dev system for repl")
   (signal.db.conn/migrate)
   (System/setProperty "javax.net.ssl.trustStore"
@@ -86,9 +51,6 @@
 (defn init []
   (alter-var-root #'system-val (constantly (init-dev))))
 
-(defn init-signal []
-  (alter-var-root #'system-val (constantly (init-signal-dev))))
-
 (defn start []
   (alter-var-root #'system-val component/start-system))
 
@@ -100,14 +62,10 @@
   (init)
   (start))
 
-(defn go-signal []
-  (init-signal)
-  (start))
-
 (defn reset []
   (stop)
   (go))
 
 (defn reset-signal []
   (stop)
-  (go-signal))
+  (go))

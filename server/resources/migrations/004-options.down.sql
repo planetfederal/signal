@@ -13,4 +13,3 @@
 --  limitations under the License.
 
 ALTER TABLE signal.stores DROP COLUMN options;
-ALTER TABLE signal.forms DROP COLUMN options;

@@ -14,28 +14,10 @@
 
 (ns signal.components.notification.core
   (:require [com.stuartsierra.component :as component]
-            [signal.components.mqtt.core :as mqttapi]
             [clojure.core.async :refer [chan <!! >!! close! go alt!]]
             [postal.core :refer [send-message]]
             [signal.components.notification.db :as notifmodel]
             [clojure.tools.logging :as log]))
-
-(defn- send->device [mqtt device-id message]
-  (mqttapi/publish-map mqtt (str "/notify/" device-id) message))
-
-(defn- send->devices [mqtt devices message]
-  (map (fn [device-id]
-         (send->device mqtt device-id message)) devices))
-
-(defn- send->all [mqtt message]
-  (mqttapi/publish-map mqtt "/notify" message))
-
-(defn- send->mobile [mqtt message]
-  (case (count (:to message))
-    0 (send->all mqtt message)
-    1 (send->device mqtt (first (:to message)) message)
-    (send->devices mqtt (:to message) message))
-  (map notifmodel/mark-as-sent (:notif_id message)))
 
 (def conn {:host (or (System/getenv "SMTP_HOST")
                      "email-smtp.us-east-1.amazonaws.com")
@@ -65,12 +47,11 @@
                   (notifmodel/mark-as-sent id))
                 recipients))))
 
-(defn- process-channel [mqtt input-channel]
+(defn- process-channel [input-channel]
   (go (while true
         (let [v (<!! input-channel)]
           (case (:output_type v)
             :email (send->email v)
-            :mobile (if-not (empty? mqtt) (send->mobile mqtt v)) ; For Signal that doesn't have an mqtt component
             "default")))))
 
 (defn notify [notifcomp message message-type info]
@@ -82,13 +63,13 @@
   [notif-comp id]
   (notifmodel/find-notif-by-id id))
 
-(defrecord NotificationComponent [mqtt]
+(defrecord NotificationComponent []
   component/Lifecycle
   (start [this]
     (log/debug "Starting Notification Component")
     (let [c (chan)]
-      (process-channel mqtt c)
-      (assoc this :mqtt mqtt :send-channel c)))
+      (process-channel c)
+      (assoc this :send-channel c)))
   (stop [this]
     (log/debug "Stopping Notification Component")
     (close! (:send-channel this))
@@ -99,7 +80,7 @@
   (start [this]
     (log/debug "Starting Signal")
     (let [c (chan)]
-      (process-channel nil c)
+      (process-channel c)
       (assoc this :send-channel c)))
   (stop [this]
     this))

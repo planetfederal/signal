@@ -13,4 +13,3 @@
 --  limitations under the License.
 
 ALTER TABLE signal.stores ADD COLUMN options json;
-ALTER TABLE signal.forms ADD COLUMN options json;

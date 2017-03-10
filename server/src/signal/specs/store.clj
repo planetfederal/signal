@@ -14,8 +14,7 @@
 
 (ns signal.specs.store
   (:require [clojure.spec :as s]
-            [clojure.test.check.generators :as gen]
-            [signal.components.team.db :as teammodel]))
+            [clojure.test.check.generators :as gen]))
 
 (defn uuid-string-gen []
   (->>
@@ -31,8 +30,7 @@
 (s/def :store/version string?)
 (s/def :store/uri string?)
 (s/def :store/name string?)
-(s/def :store/team_id (s/with-gen pos-int?
-                        #(s/gen (set (map :id (teammodel/all))))))
+(s/def :store/team_id pos-int?)
 (s/def :store/default_layers (s/coll-of string?))
 (s/def ::store-spec (s/keys :req-un [:store/name :store/store_type
                                      :store/team_id :store/version :store/uri

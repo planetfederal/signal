@@ -12,25 +12,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-DROP TABLE IF EXISTS signal.organizations CASCADE;
-DROP TRIGGER IF EXISTS update_updated_at_organizations ON signal.organizations;
-DROP TABLE IF EXISTS signal.teams CASCADE;
-DROP TRIGGER IF EXISTS update_updated_at_teams ON signal.teams;
 DROP TABLE IF EXISTS signal.stores CASCADE;
 DROP TRIGGER IF EXISTS update_updated_at_stores ON signal.stores;
-DROP TABLE IF EXISTS signal.forms CASCADE;
-DROP TRIGGER IF EXISTS update_updated_at_forms ON signal.forms;
-DROP TABLE IF EXISTS signal.devices CASCADE;
-DROP TRIGGER IF EXISTS update_updated_at_devices ON signal.devices;
-DROP TABLE IF EXISTS signal.device_locations CASCADE;
-DROP TRIGGER IF EXISTS update_updated_at_device_locations ON signal.device_locations;
-DROP TABLE IF EXISTS signal.form_data CASCADE;
-DROP TRIGGER IF EXISTS update_updated_at_form_data ON signal.form_data;
-DROP TABLE IF EXISTS signal.form_fields CASCADE;
-DROP TRIGGER IF EXISTS update_updated_at_form_fields ON signal.form_fields;
-DROP TABLE IF EXISTS signal.user_team CASCADE;
 DROP TABLE IF EXISTS signal.users CASCADE;
-DROP TYPE IF EXISTS signal.form_type;
 DROP TRIGGER IF EXISTS update_updated_at_users ON signal.users;
 DROP TABLE IF EXISTS signal.triggers;
 DROP TRIGGER IF EXISTS update_updated_at_triggers ON signal.triggers;

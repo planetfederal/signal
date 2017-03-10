@@ -30,8 +30,7 @@
 
 (defn get-token
   [user]
-  (let [teams  (usermodel/find-teams {:user_id (:id user)})
-        claims {:user (assoc user :teams teams)
+  (let [claims {:user user
                 :exp  (-> 2 weeks from-now)}]
     ;; todo: encrypt the token
     (jwt/sign claims secret)))

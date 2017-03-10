@@ -16,8 +16,6 @@
   (:require [com.stuartsierra.component :as component]
             [yesql.core :refer [defqueries]]
             [clojure.spec :as s]
-            [signal.components.http.intercept :as intercept]
-            [signal.components.http.response :as response]
             [signal.components.trigger.db :as triggermodel]
             [signal.components.notification.core :as notificationapi]
             [clojure.core.async :as async]
@@ -28,8 +26,7 @@
             [clojure.data.json :as json]
             [signal.trigger.definition.geo
              :refer [make-within-clause]]
-            [clojure.tools.logging :as log]
-            [signal.components.form.db :as formmodel]))
+            [clojure.tools.logging :as log]))
 
 (def falsey-triggers
   "Triggers that don't evaluate to true"

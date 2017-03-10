@@ -19,8 +19,6 @@
             [clj-http.client :as client]
             [cljts.io :as jtsio]
             [signal.specs.store]
-            [signal.components.mqtt.core :as mqttapi]
-            [signal.entity.scmessage :as scm]
             [overtone.at-at :refer [every, mk-pool, stop, stop-and-reset-pool!]]
             [clojure.tools.logging :as log])
   (:import (com.boundlessgeo.spatialconnect.schema SCCommand)))

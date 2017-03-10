@@ -1,15 +1,9 @@
 (ns signal.components.http.ping
   (:require [signal.components.http.response :as response]
-            [signal.components.mqtt.core :as mqttapi]
             [signal.components.http.intercept :as intercept]
             [clojure.core.async :as async]
             [clojure.data.json :as json]
             [signal.components.kafka.core :as kafka]))
-
-(defn http-mq-post [mqtt context]
-  (let [m (:json-params context)]
-    (mqttapi/publish-map mqtt (:topic m) (:payload m)))
-  (response/ok "success"))
 
 (defn- pong
   "Responds with pong as a way to ensure http service is reachable"

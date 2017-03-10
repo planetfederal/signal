@@ -1,19 +1,12 @@
-(ns signal.signal
+(ns signal.server
   (:gen-class)                                              ; for -main method in uberjar
   (:require [io.pedestal.http :as server]
             [signal.components.http.core :as http]
             [com.stuartsierra.component :as component]
-            [signal.components.ping.core :as ping]
             [signal.components.user.core :as user]
-            [signal.components.team.core :as team]
-            [signal.components.device.core :as device]
-            [signal.components.config.core :as config]
             [signal.components.store.core :as store]
-            [signal.components.location.core :as location]
             [signal.components.trigger.core :as trigger]
-            [signal.components.mqtt.core :as mqtt]
             [signal.components.notification.core :as notification]
-            [signal.components.form.core :as form]
             [clojure.tools.logging :as log]))
 
 (defrecord SignalServer [http-service]
@@ -37,13 +30,12 @@
   (let [{:keys [http-config]} config-options]
     (component/system-map
      :user (user/make-user-component)
-     :team (team/make-team-component)
      :notify (component/using (notification/make-signal-notification-component) [])
      :trigger (component/using (trigger/make-trigger-component) [:notify])
      :store (component/using (store/make-store-component) [:trigger])
      :http-service (component/using
-                    (http/make-signal-http-service-component http-config)
-                    [:user :team :trigger
+                    (http/make-http-service-component http-config)
+                    [:user :trigger
                      :store :notify])
      :server (component/using (new-signal-server) [:http-service]))))
 
