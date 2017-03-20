@@ -13,7 +13,10 @@ psql -U postgres -d signal -c "CREATE EXTENSION IF NOT EXISTS pgcrypto" -h local
 psql -U postgres -d signal -c "CREATE EXTENSION IF NOT EXISTS postgis" -h localhost
 psql -U signal   -d signal -c "CREATE SCHEMA IF NOT EXISTS signal" -h localhost
 ```
-
+OR
+```
+sh db.sh
+```
 ### email setup
 
 signal uses Amazon's SES to send email so you will first need to [setup an SMTP
