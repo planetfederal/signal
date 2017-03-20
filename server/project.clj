@@ -66,8 +66,6 @@
                    :dependencies [[io.pedestal/pedestal.service-tools "0.5.1"]
                                   [org.clojure/test.check "0.9.0"]]
                    :plugins [[test2junit "1.2.2"]]}
-             :signal {:main signal.signal
-                      :uberjar-name "signal.jar"}
              :uberjar {:aot :all
                        :dependencies [[org.clojure/test.check "0.9.0"]]}}
   :test2junit-output-dir "target/test-results"

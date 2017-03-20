@@ -1,0 +1,26 @@
+version: '2'
+services:
+  nginx:
+    image: jwilder/nginx-proxy
+    ports:
+      - '80:80'
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  postgis:
+    image: mdillon/postgis
+    ports:
+      - '5432:5432'
+
+  signal-server:
+    build: .
+    command: 'java -jar /opt/server/target/signal-server.jar'
+    depends_on:
+      - postgis
+    ports:
+      - '8085:8085'
+    environment:
+      - DB_HOST=postgis
+      - VIRTUAL_HOST=signal-server
+      - TRUST_STORE=/opt/server/tls/test-cacerts.jks
+      - KEY_STORE=/opt/server/tls/test-keystore.p12
