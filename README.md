@@ -6,16 +6,17 @@ Signal is a geospatial event processing system
 
 ### db setup
 
-Since signal currently uses the same db schema as spatialconnect-server,
-you need to ensure that the spacon user and db exists:
-
 ```
-createuser spacon --createdb -h localhost -U postgres
-createdb spacon -O spacon -h localhost -U postgres
-psql -U postgres -d spacon -c "CREATE EXTENSION IF NOT EXISTS pgcrypto" -h localhost -U postgres
-psql -U postgres -d spacon -c "CREATE EXTENSION IF NOT EXISTS postgis" -h localhost -U postgres
+createuser signal --createdb -h localhost -U postgres
+createdb signal -O signal -h localhost -U postgres
+psql -U postgres -d signal -c "CREATE EXTENSION IF NOT EXISTS pgcrypto" -h localhost
+psql -U postgres -d signal -c "CREATE EXTENSION IF NOT EXISTS postgis" -h localhost
+psql -U signal   -d signal -c "CREATE SCHEMA IF NOT EXISTS signal" -h localhost
 ```
-
+OR
+```
+sh db.sh
+```
 ### email setup
 
 signal uses Amazon's SES to send email so you will first need to [setup an SMTP
@@ -31,9 +32,9 @@ export SMTP_PASSWORD=<your smtp password>
 ### to run in development
 
 ```
-cd /path/to/spatialconnect-server/server
+cd /path/to/signal/server
 lein migrate
-lein with-profile signal run
+lein run
 ```
 In another tab,
 ```
