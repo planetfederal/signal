@@ -5,10 +5,11 @@
 Before running the migration you'll need to create a db and add the
 extensions:
 ```
-createdb signal -O signal
-psql -U postgres -d signal -c "CREATE EXTENSION IF NOT EXISTS pgcrypto"
-psql -U postgres -d signal -c "CREATE EXTENSION IF NOT EXISTS postgis"
-psql -U signal   -d signal -c "CREATE SCHEMA IF NOT EXISTS signal"
+createuser signal --createdb -h localhost -U postgres
+createdb signal -O signal -h localhost -U postgres
+psql -U postgres -d signal -c "CREATE EXTENSION IF NOT EXISTS pgcrypto" -h localhost
+psql -U postgres -d signal -c "CREATE EXTENSION IF NOT EXISTS postgis" -h localhost
+psql -U signal   -d signal -c "CREATE SCHEMA IF NOT EXISTS signal" -h localhost
 ```
 
 `lein migrate`
