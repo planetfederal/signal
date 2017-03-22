@@ -1,6 +1,6 @@
 ## Signal
 
-Version 0.8
+Version 0.8.4
 
 Signal is a geospatial event processing system
 
@@ -38,17 +38,24 @@ lein run
 ```
 In another tab,
 ```
-cd /path/to/spatialconnect-server/web
+cd /path/to/signal-server/web
 npm install
 npm run start:local
 ```
 
-### to build the container
+### to build the containers
 
 ```
-docker build -t boundlessgeo/spatialconnect-server:signal -f Dockerfile.signal .
+docker build -t boundlessgeo/signal-server:signal .
+docker build -t boundlessgeo/signal-web:signal -f web/Dockerfile web/
 ```
 
+### Running With Docker Compose ###
+
+```
+docker-compose up signal-server
+docker-compose up signal-web
+```
 
 ## Using signal
 
