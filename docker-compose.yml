@@ -25,3 +25,10 @@ services:
       - TRUST_STORE=/opt/server/tls/test-cacerts.jks
       - KEY_STORE=/opt/server/tls/test-keystore.p12
       - AUTO_MIGRATE=true
+  signal-web:
+    build: 'web/'
+    ports:
+      - '8080:80'
+    environment:
+      - VIRTUAL_HOST=signal-web
+      - DOMAIN_NAME=signal-web

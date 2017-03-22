@@ -13,10 +13,10 @@ WORKDIR /web
 RUN npm install
 RUN npm run build:dev
 
-COPY ./nginx-config/signal.conf /etc/nginx/conf.d/signal.conf
-COPY ./nginx-config/signal-tls.conf /
-COPY ./public/ /usr/share/nginx/html
+# COPY ./nginx-config/signal.conf /etc/nginx/conf.d/signal.conf
+# COPY ./nginx-config/signal-tls.conf /
+RUN cp -r /web/public/* /usr/share/nginx/html/
 
-COPY ./nginx-config/start.sh /
+# COPY ./nginx-config/start.sh /
 # COPY dhparams.pem /etc/ssl/private/
-CMD /start.sh
+# CMD /start.sh
