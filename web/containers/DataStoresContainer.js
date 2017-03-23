@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
 import { emptyStore } from '../utils';
 import * as dataStoresActions from '../ducks/dataStores';
 import DataStoresList from '../components/DataStoresList';
@@ -53,7 +52,7 @@ class DataStoresContainer extends Component {
   }
 
   render() {
-    const { loading, stores, children, selectedTeamId } = this.props;
+    const { loading, stores, children } = this.props;
     if (children) {
       return (
         <div className="wrapper">
@@ -66,10 +65,10 @@ class DataStoresContainer extends Component {
     return (
       <div className="wrapper">
         <section className="main">
-          {selectedTeamId ? <div>
+          <div>
             {loading ? <p>Fetching Data Stores...</p> : this.renderStoreForm() }
-            <DataStoresList dataStores={stores} selectedTeamId={selectedTeamId} />
-          </div> : <p><Link to="/teams">Join</Link> a team to view Stores.</p>}
+            <DataStoresList dataStores={stores} />
+          </div>
         </section>
       </div>
     );
@@ -81,7 +80,6 @@ DataStoresContainer.propTypes = {
   loading: PropTypes.bool.isRequired,
   stores: PropTypes.object.isRequired,
   children: PropTypes.object,
-  selectedTeamId: PropTypes.number,
   storeErrors: PropTypes.object,
   layerList: PropTypes.array,
 };
@@ -91,7 +89,6 @@ const mapStateToProps = state => ({
   stores: state.sc.dataStores.stores,
   storeErrors: state.sc.dataStores.storeErrors,
   layerList: state.sc.dataStores.layerList,
-  selectedTeamId: state.sc.auth.selectedTeamId,
 });
 
 const mapDispatchToProps = dispatch => ({

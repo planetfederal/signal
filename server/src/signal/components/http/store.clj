@@ -23,7 +23,7 @@
 (defn http-put-store
   "Updates a store using the json body then publishes
   a config update message about the newly updated store"
-  [mqtt-comp store-comp request]
+  [store-comp request]
   (log/debug "Updating store")
   (let [store (:json-params request)
         id (get-in request [:path-params :id])]
@@ -37,7 +37,7 @@
 (defn http-post-store
   "Creates a new store using the json body then publishes
   a config update message about the newly updated store"
-  [mqtt-comp store-comp request]
+  [store-comp request]
   (let [store (:json-params request)]
     (log/debug "Validating store")
     (if (s/valid? :signal.specs.store/store-spec store)

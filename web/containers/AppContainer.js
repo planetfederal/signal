@@ -26,7 +26,6 @@ class AppContainer extends Component {
 
     this.toggleMenu = this.toggleMenu.bind(this);
     this.closeMenu = this.closeMenu.bind(this);
-    this.changeTeam = this.changeTeam.bind(this);
   }
 
   componentDidMount() {
@@ -55,10 +54,6 @@ class AppContainer extends Component {
     this.setState({ width: getWindowWidth() });
   }
 
-  changeTeam(event) {
-    this.props.actions.changeTeam(event.target.value);
-  }
-
   render() {
     return (
       <div id="app">
@@ -68,7 +63,6 @@ class AppContainer extends Component {
             {...this.props}
             closeMenu={this.closeMenu}
             menuOpen={this.props.menu.open}
-            changeTeam={this.changeTeam}
           />
           {this.props.children}
         </div>
@@ -81,7 +75,6 @@ AppContainer.propTypes = {
   children: PropTypes.object,
   menu: PropTypes.object.isRequired,
   menuActions: PropTypes.object.isRequired,
-  actions: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => ({

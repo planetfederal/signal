@@ -56,9 +56,6 @@
       (response/ok {:token (get-token user)}))))
 
 (defn authorize-user
-  ;; Currently, this is used by the mqtt broker to ensure that only authenticated users are able to connect to the
-  ;; broker.  Eventually we will want to use this handler to ensure that a user has permission to subscribe or publish
-  ;; to a specific topic.
   [request]
   (let [auth-data (try (some->> (proto/-parse oauth-backend request)
                                 (proto/-authenticate oauth-backend request))

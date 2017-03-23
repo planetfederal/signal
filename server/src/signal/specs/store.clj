@@ -30,8 +30,7 @@
 (s/def :store/version string?)
 (s/def :store/uri string?)
 (s/def :store/name string?)
-(s/def :store/team_id pos-int?)
 (s/def :store/default_layers (s/coll-of string?))
 (s/def ::store-spec (s/keys :req-un [:store/name :store/store_type
-                                     :store/team_id :store/version :store/uri
+                                     :store/version :store/uri
                                      :store/default_layers]))

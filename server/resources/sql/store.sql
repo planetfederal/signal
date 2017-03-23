@@ -12,8 +12,13 @@ WHERE id = :id AND deleted_at IS NULL
 
 -- name: insert-store<!
 -- creates a new store
-INSERT INTO signal.stores ( name,  store_type,  version,  uri,  options,        style,        default_layers,  team_id, created_at, updated_at)
-VALUES (:name, :store_type, :version, :uri, :options::json, :style::json, :default_layers, :team_id, NOW(),      NOW())
+INSERT INTO signal.stores (
+name,  store_type,  version,  uri,
+options, default_layers, created_at,
+updated_at)
+VALUES (:name, :store_type, :version,
+:uri, :options::json, :default_layers,
+NOW(), NOW())
 
 -- name: update-store<!
 -- updates store
@@ -22,7 +27,6 @@ name = :name,
 store_type = :store_type,
 version = :version,
 uri = :uri,
-team_id = :team_id,
 options = :options::json,
 style = :style::json,
 default_layers = :default_layers,
