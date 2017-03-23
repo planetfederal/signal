@@ -15,7 +15,7 @@ psql -U signal   -d signal -c "CREATE SCHEMA IF NOT EXISTS signal" -h localhost
 ```
 OR
 ```
-sh db.sh
+$> sh db.sh
 ```
 ### email setup
 
@@ -27,6 +27,13 @@ Then you need to set environment variables so signal can use them to send email.
 ```
 export SMTP_USERNAME=<your smtp username>
 export SMTP_PASSWORD=<your smtp password>
+```
+
+### remote database
+```
+export DB_HOST=<hostname>
+export DB_NAME=<username>
+export DB_PASSWORD=<password>
 ```
 
 ### to run in development
