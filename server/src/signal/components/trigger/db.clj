@@ -19,7 +19,7 @@
             [yesql.core :refer [defqueries]]
             [clojure.data.json :as json]
             [signal.util.db :as dbutil]
-            [signal.specs.trigger :as trigger-spec]
+            [signal.specs.trigger :as rule-spec]
             [clojure.tools.logging :as log])
   (:import (org.postgresql.util PGobject)))
 
@@ -82,7 +82,7 @@
   "Creates a trigger definition"
   [t]
   (log/debug "Validating trigger against spec")
-  (if (s/valid? :signal.specs.trigger/trigger-spec t)
+  (if (s/valid? :signal.specs.trigger/rule-spec t)
     (do
       (let [entity (map->entity t)
             new-trigger (insert-trigger<!
@@ -92,7 +92,7 @@
                             :created_at (:created_at new-trigger)
                             :updated_at (:updated_at new-trigger)))))
     (log/error (str "Failed to create new trigger b/c"
-                    (s/explain-str :signal.specs.trigger/trigger-spec t)))))
+                    (s/explain-str :signal.specs.trigger/rule-spec t)))))
 
 (defn modify
   "Update trigger"
@@ -112,20 +112,20 @@
 
 (s/fdef find-by-id
         :args (s/cat :id (s/and int? pos?))
-        :ret (s/spec :signal.specs.trigger/trigger-spec))
+        :ret (s/spec :signal.specs.trigger/rule-spec))
 
 (s/fdef all
         :args empty?
-        :ret (s/coll-of :signal.specs.trigger/trigger-spec))
+        :ret (s/coll-of :signal.specs.trigger/rule-spec))
 
 (s/fdef create
-        :args (s/cat :trigger (s/spec :signal.specs.trigger/trigger-spec))
-        :ret (s/spec :signal.specs.trigger/trigger-spec))
+        :args (s/cat :trigger (s/spec :signal.specs.trigger/rule-spec))
+        :ret (s/spec :signal.specs.trigger/rule-spec))
 
 (s/fdef modify
         :args (s/cat :id (s/and int? pos?)
-                     :t (s/spec :signal.specs.trigger/trigger-spec))
-        :ret (s/spec :signal.specs.trigger/trigger-spec))
+                     :t (s/spec :signal.specs.trigger/rule-spec))
+        :ret (s/spec :signal.specs.trigger/rule-spec))
 
 (s/fdef delete
         :args (s/cat :id (s/and int? pos?)))

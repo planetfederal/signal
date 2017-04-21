@@ -16,25 +16,52 @@
   (:require [clojure.spec :as s]
             [signal.specs.geojson]))
 
-(s/def :trigger/comparator-spec (s/with-gen
-                                  (s/and string? #(contains? #{"$geowithin"} %))
-                                  #(s/gen #{"$geowithin"})))
+(s/def :source/http string?)
+(s/def :source/geojson string?)
+(s/def :source/wfs string?)
+(s/def ::source (s/or :http :source/http 
+                     :geojson :source/geojson 
+                     :wfs :source/wfs))
 
-;;; spec for trigger
-(s/def :trigger/name string?)
-(s/def :trigger/description string?)
-(s/def :trigger/stores (s/coll-of string?))
-(s/def :trigger/emails (s/coll-of string?))
-(s/def :trigger/devices (s/coll-of string?))
-(s/def :trigger/recipients (s/keys :req-un [:trigger/emails :trigger/devices]))
-(s/def :trigger/id pos-int?)
-(s/def :trigger/lhs (s/coll-of string?))
-(s/def :trigger/comparator :trigger/comparator-spec)
-(s/def :trigger/rhs :signal.specs.geojson/featurecollectionpolygon-spec)
-(s/def :trigger/rule (s/keys :req-un [:trigger/lhs :trigger/comparator :trigger/rhs :trigger/id]))
-(s/def :trigger/rules (s/coll-of (s/or :no-rules empty? :some-rules :trigger/rule)))
-(s/def :trigger/repeated boolean?)
-(s/def ::trigger-spec (s/keys :req-un
-                              [:trigger/name :trigger/description
-                               :trigger/stores :trigger/recipients
-                               :trigger/rules :trigger/repeated]))
+(s/def :filter/identity/type #{"identity"})
+(s/def :filter/identity (s/keys :req [:filter/identity/type]))
+(s/def ::filters (s/or :identity :filter/identity))
+
+(s/def :reducer/identity/type #{"identity"})
+(s/def :reducer/identity (s/keys :req [:reducer/identity/type]))
+(s/def ::reducers (s/or :identity :reducer/identity))
+
+(s/def :predicate/geowithin/def :signal.specs.geojson/featurecollectionpolygon-spec)
+(s/def :predicate/geowithin/type #{"$geowithin"})
+(s/def :predicate/geowithin (s/keys :predicate/geowithin/def :predicate/geowithin/type))
+(s/def :predicate/available (s/or :geowithin :predicate/geowithin))
+(s/def ::predicate :predicate/available)
+
+(s/def :sink/kafka string?)
+(s/def :sink/email (s/coll-of string?))
+(s/def :sink/device (s/coll-of string?))
+(s/def :sink/wfs string?)
+(s/def ::sink (s/or :kafka :sink/kafka 
+                    :email :sink/email 
+                    :wfs :sink/wfs))
+
+(s/def :rule/id pos-int?)
+(s/def :rule/name string?)
+(s/def :rule/description string?)
+(s/def :rule/repeated boolean?)
+(s/def :rule/sources (s/or :http :source/http 
+                           :geojson :source/geojson 
+                           :wfs :source/wfs))
+
+(s/def :rule/filters (s/coll-of :reducer/identity))
+(s/def :rule/reducers (s/coll-of :reducer/identity))
+(s/def :rule/predicates (s/coll-of :predicate))
+(s/def :rule/sink (s/or :kafka :sink/kafka 
+                        :email :sink/email 
+                        :device :sink/device 
+                        :wfs :sink/wfs))
+
+(s/def ::rule-spec (s/keys :req-un
+                              [:rule/name :rule/description
+                               :rule/repeated
+                               :rule/sources :rule/filters :rule/reducers :rule/predicates :rule/sink]))
