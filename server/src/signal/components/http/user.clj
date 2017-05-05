@@ -3,7 +3,7 @@
             [clojure.tools.logging :as log]
             [clojure.spec :as s]
             [signal.specs.user]
-            [signal.components.user.core :as userapi]
+            [signal.components.user.user :as userapi]
             [signal.components.http.response :as response]))
 
 (defn http-get-all-users

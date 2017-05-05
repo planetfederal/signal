@@ -3,8 +3,8 @@
   (:require [io.pedestal.http :as server]
             [signal.components.http.core :as http]
             [com.stuartsierra.component :as component]
-            [signal.components.user.core :as user]
-            [signal.components.store.core :as store]
+            [signal.components.user.user :as user]
+            [signal.components.store.poller :as store]
             [signal.components.trigger.core :as trigger]
             [signal.components.notification.core :as notification]
             [clojure.tools.logging :as log]))

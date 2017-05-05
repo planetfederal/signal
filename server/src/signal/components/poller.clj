@@ -12,7 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.components.store.core
+(ns signal.components.store.poller
   (:require [com.stuartsierra.component :as component]
             [signal.components.store.db :as storemodel]
             [signal.components.trigger.core :as triggerapi]

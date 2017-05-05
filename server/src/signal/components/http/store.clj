@@ -6,7 +6,7 @@
             [clojure.spec :as s]
             [clojure.tools.logging :as log]
             [signal.entity.scmessage :as scm]
-            [signal.components.store.core :as storeapi])
+            [signal.components.store.poller :as storeapi])
   (:import (com.boundlessgeo.spatialconnect.schema SCCommand)))
 
 (defn http-get-store
