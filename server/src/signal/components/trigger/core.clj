@@ -22,7 +22,7 @@
             [signal.entity.notification
              :refer [make-mobile-notification, make-email-notification]]
             [cljts.io :as jtsio]
-            [signal.trigger.protocol :as proto-clause]
+            [signal.protocols.clause :as proto-clause]
             [clojure.data.json :as json]
             [signal.trigger.definition.geo
              :refer [make-within-clause]]

@@ -14,54 +14,24 @@
 
 (ns signal.specs.trigger
   (:require [clojure.spec :as s]
+            [signal.specs.source]
+            [signal.specs.filter]
+            [signal.specs.reducer]
+            [signal.specs.predicate]
+            [signal.specs.sink]
             [signal.specs.geojson]))
 
-(s/def :source/http string?)
-(s/def :source/geojson string?)
-(s/def :source/wfs string?)
-(s/def ::source (s/or :http :source/http 
-                     :geojson :source/geojson 
-                     :wfs :source/wfs))
+(s/def :trigger/id pos-int?)
+(s/def :trigger/name string?)
+(s/def :trigger/description string?)
+(s/def :trigger/repeated boolean?)
+(s/def :trigger/persistent boolean?)
 
-(s/def :filter/identity/type #{"identity"})
-(s/def :filter/identity (s/keys :req [:filter/identity/type]))
-(s/def ::filters (s/or :identity :filter/identity))
-
-(s/def :reducer/identity/type #{"identity"})
-(s/def :reducer/identity (s/keys :req [:reducer/identity/type]))
-(s/def ::reducers (s/or :identity :reducer/identity))
-
-(s/def :predicate/geowithin/def :signal.specs.geojson/featurecollectionpolygon-spec)
-(s/def :predicate/geowithin/type #{"$geowithin"})
-(s/def :predicate/geowithin (s/keys :predicate/geowithin/def :predicate/geowithin/type))
-(s/def :predicate/available (s/or :geowithin :predicate/geowithin))
-(s/def ::predicate :predicate/available)
-
-(s/def :sink/kafka string?)
-(s/def :sink/email (s/coll-of string?))
-(s/def :sink/device (s/coll-of string?))
-(s/def :sink/wfs string?)
-(s/def ::sink (s/or :kafka :sink/kafka 
-                    :email :sink/email 
-                    :wfs :sink/wfs))
-
-(s/def :rule/id pos-int?)
-(s/def :rule/name string?)
-(s/def :rule/description string?)
-(s/def :rule/repeated boolean?)
-(s/def :rule/sources (s/or :http :source/http 
-                           :geojson :source/geojson 
-                           :wfs :source/wfs))
-
-(s/def :rule/filters (s/coll-of :reducer/identity))
-(s/def :rule/reducers (s/coll-of :reducer/identity))
-(s/def :rule/predicates (s/coll-of :predicate))
-(s/def :rule/sink (s/or :kafka :sink/kafka 
-                        :email :sink/email 
-                        :device :sink/device 
-                        :wfs :sink/wfs))
-
-(s/def ::rule-spec (s/keys :req-un
-                              [:rule/name :rule/description
-                               :rule/repeated
-                               :rule/sources :rule/filters :rule/reducers :rule/predicates :rule/sink]))
+(s/def ::trigger-spec (s/keys :req-un
+                              [:trigger/id :trigger/name :trigger/description
+                               :trigger/repeated :trigger/persistent
+                               :signal.specs.source/source
+                               :signal.specs.filter/filters
+                               :signal.specs.reducer/reducers
+                               :signal.specs.predicate/predicates
+                               :signal.specs.sink/sink]))

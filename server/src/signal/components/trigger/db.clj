@@ -110,22 +110,22 @@
   [id]
   (delete-trigger! {:id (java.util.UUID/fromString id)}))
 
-(s/fdef find-by-id
-        :args (s/cat :id (s/and int? pos?))
-        :ret (s/spec :signal.specs.trigger/rule-spec))
-
-(s/fdef all
-        :args empty?
-        :ret (s/coll-of :signal.specs.trigger/rule-spec))
-
-(s/fdef create
-        :args (s/cat :trigger (s/spec :signal.specs.trigger/rule-spec))
-        :ret (s/spec :signal.specs.trigger/rule-spec))
-
-(s/fdef modify
-        :args (s/cat :id (s/and int? pos?)
-                     :t (s/spec :signal.specs.trigger/rule-spec))
-        :ret (s/spec :signal.specs.trigger/rule-spec))
-
-(s/fdef delete
-        :args (s/cat :id (s/and int? pos?)))
+;(s/fdef find-by-id
+;        :args (s/cat :id (s/and int? pos?))
+;        :ret (s/spec :signal.specs.trigger/rule-spec))
+;
+;(s/fdef all
+;        :args empty?
+;        :ret (s/coll-of :signal.specs.trigger/rule-spec))
+;
+;(s/fdef create
+;        :args (s/cat :trigger (s/spec :signal.specs.trigger/rule-spec))
+;        :ret (s/spec :signal.specs.trigger/rule-spec))
+;
+;(s/fdef modify
+;        :args (s/cat :id (s/and int? pos?)
+;                     :t (s/spec :signal.specs.trigger/rule-spec))
+;        :ret (s/spec :signal.specs.trigger/rule-spec))
+;
+;(s/fdef delete
+;        :args (s/cat :id (s/and int? pos?)))
