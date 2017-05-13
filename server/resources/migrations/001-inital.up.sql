@@ -26,64 +26,18 @@ CREATE OR REPLACE FUNCTION signal.update_updated_at_column()
     END;
 ' LANGUAGE 'plpgsql';
 
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role_type') THEN
-        CREATE TYPE signal.user_role_type AS ENUM ('user','admin');
-    END IF;
-END$$;
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role_type') THEN
-        CREATE TYPE signal.user_role_type AS ENUM ('user','admin');
-    END IF;
-END$$;
-
-CREATE TABLE IF NOT EXISTS signal.stores
-(
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_type TEXT,
-  version TEXT,
-  uri TEXT,
-  name TEXT,
-  default_layers TEXT[],
-  created_at timestamp DEFAULT NOW(),
-  updated_at timestamp DEFAULT NOW(),
-  deleted_at timestamp with time zone
-)
-WITH (
-  OIDS=FALSE
-);
-
-CREATE TRIGGER update_updated_at_stores
-    BEFORE UPDATE ON signal.stores FOR EACH ROW EXECUTE
-    PROCEDURE signal.update_updated_at_column();
-
-CREATE TABLE IF NOT EXISTS signal.users (
-  id            serial PRIMARY KEY,
-  name          TEXT NOT NULL CHECK (name <> ''),
-  email         TEXT NOT NULL UNIQUE,
-  role          user_role_type,
-  created_at    timestamp DEFAULT NOW(),
-  updated_at    timestamp DEFAULT NOW(),
-  deleted_at    timestamp with time zone,
-  password      TEXT NOT NULL
-);
-
-CREATE TRIGGER update_updated_at_users
-    BEFORE UPDATE ON signal.users FOR EACH ROW EXECUTE
-    PROCEDURE signal.update_updated_at_column();
 CREATE TABLE IF NOT EXISTS signal.triggers
 (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT,
-  stores TEXT[],
   description TEXT,
-  recipients json,
-  rules json,
+  name TEXT,
+  persistent BOOL,
   repeated BOOL,
+  reducers json,
+  filters json,
+  predicates []
+  source json,
+  sink json,
   created_at timestamp DEFAULT NOW(),
   updated_at timestamp DEFAULT NOW(),
   deleted_at timestamp with time zone
@@ -95,3 +49,45 @@ WITH (
 CREATE TRIGGER update_updated_at_triggers
     BEFORE UPDATE ON signal.triggers FOR EACH ROW EXECUTE
     PROCEDURE signal.update_updated_at_column();
+
+CREATE TABLE IF NOT EXISTS signal.notifications
+(
+  id SERIAL PRIMARY KEY,
+  trigger_id UUID,
+  created_at timestamp DEFAULT NOW(),
+  updated_at timestamp DEFAULT NOW(),
+  deleted_at timestamp with time zone,
+  device_id integer UNIQUE,
+  CONSTRAINT notifications_triggers_fkey FOREIGN KEY (trigger_id)
+    REFERENCES signal.triggers(id) MATCH SIMPLE
+    ON UPDATE CASCADE ON DELETE SET NULL
+)
+WITH (
+  OIDS=FALSE
+);
+
+CREATE TRIGGER update_updated_at_notifications
+    BEFORE UPDATE ON signal.notifications FOR EACH ROW EXECUTE
+    PROCEDURE signal.update_updated_at_column();
+
+
+CREATE TYPE signal.message_type AS ENUM ('trigger');
+
+CREATE TABLE signal.messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    info json,
+    type signal.message_type,
+    created_at timestamp DEFAULT NOW()
+) WITH (
+    OIDS=FALSE
+);
+
+ALTER TABLE signal.notifications ADD COLUMN recipient text;
+ALTER TABLE signal.notifications ADD COLUMN message_id UUID;
+ALTER TABLE signal.notifications ADD CONSTRAINT notifications_messages_fkey
+    FOREIGN KEY (message_id) REFERENCES signal.messages (id) MATCH SIMPLE
+    ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE signal.notifications DROP COLUMN IF EXISTS device_id;
+ALTER TABLE signal.notifications DROP COLUMN IF EXISTS trigger_id;
+ALTER TABLE signal.notifications ADD COLUMN sent timestamp DEFAULT NULL;
+ALTER TABLE signal.notifications ADD COLUMN delivered timestamp DEFAULT NULL;

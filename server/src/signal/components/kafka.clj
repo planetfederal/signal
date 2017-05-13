@@ -12,7 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.components.kafka.core
+(ns signal.components.kafka
   (:require [com.stuartsierra.component :as component]
             [clojure.core.async :as async]
             [clojure.core.async.impl.protocols :as p]

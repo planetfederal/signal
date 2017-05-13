@@ -12,12 +12,12 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.components.trigger.core
+(ns signal.components.trigger
   (:require [com.stuartsierra.component :as component]
             [yesql.core :refer [defqueries]]
             [clojure.spec :as s]
-            [signal.components.trigger.db :as triggermodel]
-            [signal.components.notification.core :as notificationapi]
+            [signal.components.db :as db]
+            [signal.components.notification :as notificationapi]
             [clojure.core.async :as async]
             [signal.entity.notification
              :refer [make-mobile-notification, make-email-notification]]
@@ -78,7 +78,7 @@
 (defn- load-triggers
   "Fetches all triggers from db and loads them into memory"
   []
-  (let [triggers (doall (triggermodel/all))]
+  (let [triggers (doall (db/triggers))]
     (doall (map add-trigger triggers))))
 
 (defn- handle-success
@@ -87,7 +87,7 @@
   (let [body    (doall (map #(proto-clause/notification % value) (:rules trigger)))
         emails  (get-in trigger [:recipients :emails])
         devices (get-in trigger [:recipients :devices])
-        trigger (triggermodel/find-by-id (:id trigger))
+        trigger (db/trigger-by-id (:id trigger))
         payload {:time    (str (new java.util.Date))
                  :value   (json/read-str (jtsio/write-geojson value))
                  :trigger trigger}]
@@ -117,7 +117,7 @@
       (if-not (:repeated trigger)
         (do
           (log/info "Removing trigger " (:name trigger) " with id:" (:id trigger))
-          (triggermodel/delete (:id trigger)))))))
+          (db/delete-trigger (:id trigger)))))))
 
 (defn- handle-failure
   "Makes the trigger invalid b/c it failed the test value."
@@ -168,27 +168,27 @@
 
 (defn all
   [trigger-comp]
-  (triggermodel/all))
+  (db/triggers))
 
 (defn find-by-id
   [trigger-comp id]
-  (triggermodel/find-by-id id))
+  (db/trigger-by-id id))
 
 (defn create
   [trigger-comp t]
-  (let [trigger (triggermodel/create t)]
+  (let [trigger (db/create-trigger t)]
     (add-trigger trigger)
     trigger))
 
 (defn modify
   [trigger-comp id t]
-  (let [trigger (triggermodel/modify id t)]
+  (let [trigger (db/modify-trigger id t)]
     (add-trigger trigger)
     trigger))
 
 (defn delete
   [trigger-comp id]
-  (triggermodel/delete id)
+  (db/delete-trigger id)
   (evict-trigger id))
 
 (defrecord TriggerComponent [notify]

@@ -2,10 +2,11 @@
   (:require [signal.components.http.response :as response]
             [signal.components.http.intercept :as intercept]
             [cljts.io :as jtsio]
-            [signal.components.trigger.core :as triggerapi]
+            [signal.components.trigger :as triggerapi]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
-            [clojure.spec :as s]))
+            [clojure.spec :as s]
+            [signal.components.trigger :as triggerapi]))
 
 (defn http-get-all-triggers
   "Returns http response of all triggers"

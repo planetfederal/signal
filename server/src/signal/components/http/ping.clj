@@ -3,7 +3,7 @@
             [signal.components.http.intercept :as intercept]
             [clojure.core.async :as async]
             [clojure.data.json :as json]
-            [signal.components.kafka.core :as kafka]))
+            [signal.components.kafka :as kafka]))
 
 (defn- pong
   "Responds with pong as a way to ensure http service is reachable"

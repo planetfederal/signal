@@ -1,7 +1,7 @@
 (ns signal.components.http.notification
   (:require [signal.components.http.response :as response]
             [signal.components.http.intercept :as intercept]
-            [signal.components.notification.core :as notifapi]))
+            [signal.components.notification :as notifapi]))
 
 (defn http-get-notif [notif-comp context]
   (let [id (Integer/parseInt (get-in context [:path-params :id]))]

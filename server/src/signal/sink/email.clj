@@ -1,0 +1,1 @@
+(ns signal.sink.email)

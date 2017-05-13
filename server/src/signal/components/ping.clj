@@ -12,11 +12,11 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.components.ping.core
+(ns signal.components.ping
   (:require [com.stuartsierra.component :as component]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
-            [signal.components.kafka.core :as kafka]
+            [signal.components.kafka.kafka :as kafka]
             [clj-time.local :as l])
   (:import [java.util.concurrent Executors TimeUnit]))
 

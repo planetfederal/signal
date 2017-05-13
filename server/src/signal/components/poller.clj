@@ -12,10 +12,10 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.components.store.poller
+(ns signal.components.poller
   (:require [com.stuartsierra.component :as component]
             [signal.components.store.db :as storemodel]
-            [signal.components.trigger.core :as triggerapi]
+            [signal.components.trigger :as triggerapi]
             [clj-http.client :as client]
             [cljts.io :as jtsio]
             [signal.specs.store]
@@ -77,30 +77,10 @@
   (stop-polling (keyword id)))
 
 (defn load-polling-stores [trigger]
-  (doall (map (partial add-polling-store trigger) (storemodel/all))))
+  (doall (map (partial add-polling-store trigger) (list 1 2 3))))
 
-(defn create [store-comp s]
-  (let [new-store (storemodel/create s)]
-    (add-polling-store (:trigger store-comp) new-store)
-    new-store))
-
-(defn modify [store-comp id s]
-  (let [updated-store (storemodel/modify id s)]
-
-    (add-polling-store (:trigger store-comp) updated-store)
-    updated-store))
-
-(defn find-by-id [store-comp id]
-  (storemodel/find-by-id id))
-
-(defn delete [store-comp id]
-  (storemodel/delete id)
-  (remove-polling-store id))
-
-(defn all [store-comp]
-  (storemodel/all))
-
-(defrecord StoreComponent [trigger]
+(defrecord PollingManagementComponent
+  [trigger]
   component/Lifecycle
   (start [this]
     (log/debug "Starting Store Component")
@@ -111,4 +91,4 @@
     this))
 
 (defn make-store-component []
-  (map->StoreComponent {}))
+  (map->PollingManagementComponent {}))

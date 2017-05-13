@@ -3,10 +3,8 @@
   (:require [io.pedestal.http :as server]
             [signal.components.http.core :as http]
             [com.stuartsierra.component :as component]
-            [signal.components.user.user :as user]
-            [signal.components.store.poller :as store]
-            [signal.components.trigger.core :as trigger]
-            [signal.components.notification.core :as notification]
+            [signal.components.trigger :as trigger]
+            [signal.components.notification :as notification]
             [clojure.tools.logging :as log]))
 
 (defrecord SignalServer [http-service]
@@ -29,14 +27,11 @@
   (log/debug "Making server config with these options" config-options)
   (let [{:keys [http-config]} config-options]
     (component/system-map
-     :user (user/make-user-component)
      :notify (component/using (notification/make-signal-notification-component) [])
      :trigger (component/using (trigger/make-trigger-component) [:notify])
-     :store (component/using (store/make-store-component) [:trigger])
      :http-service (component/using
                     (http/make-http-service-component http-config)
-                    [:user :trigger
-                     :store :notify])
+                    [:trigger :notify])
      :server (component/using (new-signal-server) [:http-service]))))
 
 (defn -main

@@ -12,11 +12,11 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.components.notification.core
+(ns signal.components.notification
   (:require [com.stuartsierra.component :as component]
             [clojure.core.async :refer [chan <!! >!! close! go alt!]]
             [postal.core :refer [send-message]]
-            [signal.components.notification.db :as notifmodel]
+            [signal.components.db :as db]
             [clojure.tools.logging :as log]))
 
 (def conn {:host (or (System/getenv "SMTP_HOST")
@@ -44,7 +44,7 @@
   (let [recipients (do (zipmap (:notif-ids message) (:to message)))]
     (doall (map (fn [[id recipient]]
                   (email-recipient id recipient message)
-                  (notifmodel/mark-as-sent id))
+                  (db/mark-as-sent id))
                 recipients))))
 
 (defn- process-channel [input-channel]
@@ -55,13 +55,13 @@
             "default")))))
 
 (defn notify [notifcomp message message-type info]
-  (let [ids (map :id (notifmodel/create-notifications (:to message) message-type info))]
+  (let [ids (map :id (db/create-notifications (:to message) message-type info))]
     (go (>!! (:send-channel notifcomp)
              (assoc message :notif-ids ids)))))
 
 (defn find-notif-by-id
   [notif-comp id]
-  (notifmodel/find-notif-by-id id))
+  (db/find-notif-by-id id))
 
 (defrecord NotificationComponent []
   component/Lifecycle
@@ -84,9 +84,6 @@
       (assoc this :send-channel c)))
   (stop [this]
     this))
-
-(defn make-notification-component []
-  (->NotificationComponent nil))
 
 (defn make-signal-notification-component []
   (->SignalNotificationComponent))

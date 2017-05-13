@@ -17,10 +17,7 @@
    [io.pedestal.http :as http]
    [io.pedestal.http.route :as route]
    [com.stuartsierra.component :as component]
-   [signal.components.http.auth :as auth]
    [signal.components.http.notification :as notif-http]
-   [signal.components.http.store :as store-http]
-   [signal.components.http.user :as user-http]
    [signal.components.http.trigger :as trigger-http]
    [clojure.tools.logging :as log]))
 
@@ -30,11 +27,8 @@
     (log/debug "Starting SignalHttpService")
     (let [routes #(route/expand-routes
                    (clojure.set/union #{}
-                                      (auth/routes)
-                                      (user-http/routes user)
                                       (notif-http/routes notify)
-                                      (trigger-http/routes trigger)
-                                      (store-http/routes store)))]
+                                      (trigger-http/routes trigger)))]
       (assoc this :service-def (merge http-config
                                       {:env                     :prod
                                        ::http/routes            routes
