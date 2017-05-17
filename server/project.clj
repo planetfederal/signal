@@ -11,6 +11,7 @@
                  [yesql "0.5.2"]
                  [cljfmt "0.5.1"]
                  [org.postgresql/postgresql "9.4-1201-jdbc4"]
+                 [com.gfredericks/test.chuck "0.2.7"]
                  [clojure.jdbc/clojure.jdbc-c3p0 "0.3.1"]
                  [listora/uuid "0.1.2"]
                  [ch.qos.logback/logback-classic "1.1.7"
@@ -52,8 +53,8 @@
             [jonase/eastwood "0.2.3"]
             [lein-codox "0.10.2"]
             [lein-cloverage "1.0.9"]
-            [cider/cider-nrepl "0.13.0"]
-            ]
+            [cider/cider-nrepl "0.13.0"]]
+
   :aliases {"migrate" ["run" "-m" "signal.db.conn/migrate"]
             "rollback" ["run" "-m" "signal.db.conn/rollback"]
             "sampledata" ["run" "-m" "signal.generate-data"]}
@@ -65,13 +66,16 @@
   :profiles {:dev {:source-paths ["dev"]
                    :resource-paths ["config", "resources"]
                    :dependencies [[io.pedestal/pedestal.service-tools "0.5.1"]
+                                  [org.clojure/tools.namespace "0.2.3"]
+                                  [org.clojure/java.classpath "0.2.0"]
                                   [org.clojure/test.check "0.9.0"]]
                    :plugins [[test2junit "1.2.2"]]}
              :uberjar {:aot :all
                        :dependencies [[org.clojure/test.check "0.9.0"]]}
              :user {
-               :plugins  [[cider/cider-nrepl "0.13.0"]]
-               :dependencies [[org.clojure/tools.nrepl "0.2.12"]]}}
+                    :plugins  [[cider/cider-nrepl "0.13.0"]
+                               [refactor-nrepl "1.1.0"]]
+                    :dependencies [[org.clojure/tools.nrepl "0.2.12"]]}}
   :test2junit-output-dir "target/test-results"
   :test2junit-run-ant true
   :uberjar-name "signal-server.jar"

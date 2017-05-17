@@ -15,6 +15,7 @@
 --CREATE EXTENSION IF NOT EXISTS pgcrypto;
 --CREATE EXTENSION IF NOT EXISTS postgis;
 
+
 CREATE SCHEMA IF NOT EXISTS signal;
 SET search_path=signal,public;
 
@@ -35,7 +36,7 @@ CREATE TABLE IF NOT EXISTS signal.triggers
   repeated BOOL,
   reducers json,
   filters json,
-  predicates []
+  predicates json,
   source json,
   sink json,
   created_at timestamp DEFAULT NOW(),
@@ -50,26 +51,6 @@ CREATE TRIGGER update_updated_at_triggers
     BEFORE UPDATE ON signal.triggers FOR EACH ROW EXECUTE
     PROCEDURE signal.update_updated_at_column();
 
-CREATE TABLE IF NOT EXISTS signal.notifications
-(
-  id SERIAL PRIMARY KEY,
-  trigger_id UUID,
-  created_at timestamp DEFAULT NOW(),
-  updated_at timestamp DEFAULT NOW(),
-  deleted_at timestamp with time zone,
-  device_id integer UNIQUE,
-  CONSTRAINT notifications_triggers_fkey FOREIGN KEY (trigger_id)
-    REFERENCES signal.triggers(id) MATCH SIMPLE
-    ON UPDATE CASCADE ON DELETE SET NULL
-)
-WITH (
-  OIDS=FALSE
-);
-
-CREATE TRIGGER update_updated_at_notifications
-    BEFORE UPDATE ON signal.notifications FOR EACH ROW EXECUTE
-    PROCEDURE signal.update_updated_at_column();
-
 
 CREATE TYPE signal.message_type AS ENUM ('trigger');
 
@@ -82,12 +63,24 @@ CREATE TABLE signal.messages (
     OIDS=FALSE
 );
 
-ALTER TABLE signal.notifications ADD COLUMN recipient text;
-ALTER TABLE signal.notifications ADD COLUMN message_id UUID;
-ALTER TABLE signal.notifications ADD CONSTRAINT notifications_messages_fkey
-    FOREIGN KEY (message_id) REFERENCES signal.messages (id) MATCH SIMPLE
-    ON UPDATE CASCADE ON DELETE CASCADE;
-ALTER TABLE signal.notifications DROP COLUMN IF EXISTS device_id;
-ALTER TABLE signal.notifications DROP COLUMN IF EXISTS trigger_id;
-ALTER TABLE signal.notifications ADD COLUMN sent timestamp DEFAULT NULL;
-ALTER TABLE signal.notifications ADD COLUMN delivered timestamp DEFAULT NULL;
+CREATE TABLE IF NOT EXISTS signal.notifications
+(
+  id SERIAL PRIMARY KEY,
+  created_at timestamp DEFAULT NOW(),
+  updated_at timestamp DEFAULT NOW(),
+  deleted_at timestamp with time zone,
+  recipient text,
+  message_id UUID,
+  sent timestamp DEFAULT NULL,
+  delivered timestamp DEFAULT NULL,
+  CONSTRAINT notifications_message_key FOREIGN KEY (message_id)
+    REFERENCES signal.messages (id) MATCH SIMPLE ON UPDATE
+    CASCADE ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
+);
+
+CREATE TRIGGER update_updated_at_notifications
+    BEFORE UPDATE ON signal.notifications FOR EACH ROW EXECUTE
+    PROCEDURE signal.update_updated_at_column();

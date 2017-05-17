@@ -57,8 +57,8 @@
 
 (def result->map
   {:result-set-fn doall
-   :row-fn row-fn
-   :identifiers clojure.string/lower-case})
+   :row-fn        row-fn
+   :identifiers   clojure.string/lower-case})
 
 ;;;;;;;;;;;;UTILS;;;;;;;;;;;;;;;;;;
 (deftype StringArray [items]
@@ -161,28 +161,39 @@
           (first)
           trigger-entity->map))
 
+;(defn map->trigger-entity
+;  "Converts input map to prepare for database insertion"
+;  [t]
+;  (cond-> t
+;          (some? (:source t))
+;          (assoc :source (json/write-str (:source t)))
+;          (some? (:filters t))
+;          (assoc :filters (json/write-str (:filters t)))
+;          (some? (:reducers t))
+;          (assoc :reducers (json/write-str (:reducers t)))
+;          (some? (:predicates t))
+;          (assoc :predicates (json/write-str (:predicates t)))))
+
 (defn map->trigger-entity
-  "Converts input map to prepare for database insertion"
-  [t]
-  (cond-> t
-          (some? (:rules t))
-          (assoc :rules (json/write-str (:rules t)))
-          (some? (:recipients t))
-          (assoc :recipients (json/write-str (:recipients t)))))
+  [trg]
+  (into trg
+        (let [json-keys (list :source :filters :reducers :predicates :sink)]
+             (map (fn [ky]
+                     (if-let [value (get trg ky)]
+                       {ky (json/write-str value)}
+                       {})) json-keys))))
 
 (defn create-trigger
   "Creates a trigger definition"
   [t]
   (log/debug "Validating trigger against spec")
-  (if (s/valid? :signal.specs.trigger/rule-spec t)
+  (if (s/valid? :signal.specs.trigger/trigger-spec t)
     (do
       (let [entity (map->trigger-entity t)
-            new-trigger (insert-trigger<!
-                          (assoc entity
-                            :stores (->StringArray (:stores t))))]
+            new-trigger (insert-trigger<! entity)]
         (trigger-entity->map (assoc t :id (:id new-trigger)
-                              :created_at (:created_at new-trigger)
-                              :updated_at (:updated_at new-trigger)))))
+                                      :created_at (:created_at new-trigger)
+                                      :updated_at (:updated_at new-trigger)))))
     (log/error (str "Failed to create new trigger b/c"
                     (s/explain-str :signal.specs.trigger/rule-spec t)))))
 
@@ -195,8 +206,8 @@
                             :stores
                             (->StringArray (:stores t))))]
     (trigger-entity->map (assoc t :id (:id updated-trigger)
-                          :created_at (:created_at updated-trigger)
-                          :updated_at (:updated_at updated-trigger)))))
+                                  :created_at (:created_at updated-trigger)
+                                  :updated_at (:updated_at updated-trigger)))))
 (defn delete-trigger
   "Delete trigger"
   [id]
