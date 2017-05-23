@@ -1,4 +1,4 @@
-(ns signal.protocols.input)
+(ns signal.protocols.protocol)
 
 (defprotocol IInput
   (start [this])
