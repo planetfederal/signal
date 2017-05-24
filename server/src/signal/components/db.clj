@@ -23,7 +23,7 @@
 
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
 (defqueries "sql/notification.sql" {:connection db/db-spec})
-(defqueries "sql/trigger.sql" {:connection db/db-spec})
+(defqueries "sql/processor.sql" {:connection db/db-spec})
 
 ;;;;;;;;;;;SANITIZERS;;;;;;;;
 (defn sanitize-timestamps [v]
@@ -32,10 +32,10 @@
 (defn sanitize-user [u]
   (dissoc (sanitize-timestamps u) :password :created_at))
 
-(defn- sanitize [trigger]
-  (dissoc trigger :created_at :updated_at :deleted_at))
+(defn- sanitize [processor]
+  (dissoc processor :created_at :updated_at :deleted_at))
 
-(defn- trigger-entity->map [t]
+(defn- processor-entity->map [t]
   (-> t
       (assoc :id (.toString (:id t)))
       (assoc :created_at (.toString (:created_at t)))
@@ -146,22 +146,22 @@
   (mark-as-delivered! {:id notif-id}))
 
 ;;;;;;;;;;;;TRIGGERS;;;;;;;;;;;
-(defn triggers
-  "Returns all the active triggers"
+(defn processors
+  "Returns all the active processors"
   []
-  (log/debug "Fetching all active triggers from db")
+  (log/debug "Fetching all active processors from db")
   (map (fn [t]
-         (trigger-entity->map t)) (trigger-list-query {} result->map)))
+         (processor-entity->map t)) (processor-list-query {} result->map)))
 
-(defn trigger-by-id
-  "Find trigger by identifier"
+(defn processor-by-id
+  "Find processor by identifier"
   [id]
-  (log/debugf "Finding triggers with id %s from db" id)
+  (log/debugf "Finding processors with id %s from db" id)
   (some-> (find-by-id-query {:id (java.util.UUID/fromString id)} result->map)
           (first)
-          trigger-entity->map))
+          processor-entity->map))
 
-;(defn map->trigger-entity
+;(defn map->processor-entity
 ;  "Converts input map to prepare for database insertion"
 ;  [t]
 ;  (cond-> t
@@ -174,7 +174,7 @@
 ;          (some? (:predicates t))
 ;          (assoc :predicates (json/write-str (:predicates t)))))
 
-(defn map->trigger-entity
+(defn map->processor-entity
   [trg]
   (into trg
         (let [json-keys (list :source :filters :reducers :predicates :sink)]
@@ -183,32 +183,32 @@
                        {ky (json/write-str value)}
                        {})) json-keys))))
 
-(defn create-trigger
-  "Creates a trigger definition"
+(defn create-processor
+  "Creates a processor definition"
   [t]
-  (log/debug "Validating trigger against spec")
-  (if (s/valid? :signal.specs.trigger/trigger-spec t)
+  (log/debug "Validating processor against spec")
+  (if (s/valid? :signal.specs.processor/processor-spec t)
     (do
-      (let [entity (map->trigger-entity t)
-            new-trigger (insert-trigger<! entity)]
-        (trigger-entity->map (assoc t :id (:id new-trigger)
-                                      :created_at (:created_at new-trigger)
-                                      :updated_at (:updated_at new-trigger)))))
-    (log/error (str "Failed to create new trigger b/c"
-                    (s/explain-str :signal.specs.trigger/rule-spec t)))))
+      (let [entity (map->processor-entity t)
+            new-processor (insert-processor<! entity)]
+        (processor-entity->map (assoc t :id (:id new-processor)
+                                      :created_at (:created_at new-processor)
+                                      :updated_at (:updated_at new-processor)))))
+    (log/error (str "Failed to create new processor b/c"
+                    (s/explain-str :signal.specs.processor/rule-spec t)))))
 
-(defn modify-trigger
-  "Update trigger"
+(defn modify-processor
+  "Update processor"
   [id t]
-  (let [entity (map->trigger-entity (assoc t :id (java.util.UUID/fromString id)))
-        updated-trigger (update-trigger<!
+  (let [entity (map->processor-entity (assoc t :id (java.util.UUID/fromString id)))
+        updated-processor (update-processor<!)
                           (assoc entity
                             :stores
-                            (->StringArray (:stores t))))]
-    (trigger-entity->map (assoc t :id (:id updated-trigger)
-                                  :created_at (:created_at updated-trigger)
-                                  :updated_at (:updated_at updated-trigger)))))
-(defn delete-trigger
-  "Delete trigger"
+                            (->StringArray (:stores t)))]
+    (processor-entity->map (assoc t :id (:id updated-processor)
+                                  :created_at (:created_at updated-processor)
+                                  :updated_at (:updated_at updated-processor)))))
+(defn delete-processor
+  "Delete processor"
   [id]
-  (delete-trigger! {:id (java.util.UUID/fromString id)}))
+  (delete-processor! {:id (java.util.UUID/fromString id)}))

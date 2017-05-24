@@ -2,14 +2,14 @@ import React, { Component, PropTypes } from 'react';
 import Dropzone from 'react-dropzone';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
-import TriggerItem from './TriggerItem';
-import { TriggerForm } from './TriggerForm';
+import ProcessorItem from './ProcessorItem';
+import { ProcessorForm } from './ProcessorForm';
 import PropertyListItem from './PropertyListItem';
-import '../style/Triggers.less';
+import '../style/Processors.less';
 
 const format = new ol.format.GeoJSON();
 
-const triggerStyle = new ol.style.Style({
+const processorStyle = new ol.style.Style({
   fill: new ol.style.Fill({
     color: 'rgba(255, 0, 0, 0.1)',
   }),
@@ -29,14 +29,14 @@ const newRuleStyle = new ol.style.Style({
   }),
 });
 
-class TriggerDetails extends Component {
+class ProcessorDetails extends Component {
   constructor(props) {
     super(props);
     this.state = {
       addingRule: false,
       editing: false,
       editingRule: false,
-      editingTrigger: false,
+      editingProcessor: false,
       creating: false,
       drawing: false,
       uploading: false,
@@ -55,9 +55,9 @@ class TriggerDetails extends Component {
     this.onDelete = this.onDelete.bind(this);
     this.onAddRule = this.onAddRule.bind(this);
     this.onRuleComparatorChange = this.onRuleComparatorChange.bind(this);
-    this.onEditTrigger = this.onEditTrigger.bind(this);
-    this.onCancelEditTrigger = this.onCancelEditTrigger.bind(this);
-    this.onEditTriggerSave = this.onEditTriggerSave.bind(this);
+    this.onEditProcessor = this.onEditProcessor.bind(this);
+    this.onCancelEditProcessor = this.onCancelEditProcessor.bind(this);
+    this.onEditProcessorSave = this.onEditProcessorSave.bind(this);
     this.toggleRule = this.toggleRule.bind(this);
     this.onEditRule = this.onEditRule.bind(this);
     this.onDeleteRule = this.onDeleteRule.bind(this);
@@ -71,8 +71,8 @@ class TriggerDetails extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!isEqual(nextProps.trigger.rules, this.props.trigger.rules)) {
-      this.addRules(nextProps.trigger);
+    if (!isEqual(nextProps.processor.rules, this.props.processor.rules)) {
+      this.addRules(nextProps.processor);
     }
     if (this.props.menu.open !== nextProps.menu.open) {
       // wait for menu to transition
@@ -94,7 +94,7 @@ class TriggerDetails extends Component {
       uploadErr: false,
       uploadedFile: false,
       editingRule: false,
-      editingTrigger: false,
+      editingProcessor: false,
     });
   }
 
@@ -109,7 +109,7 @@ class TriggerDetails extends Component {
     this.map.removeInteraction(this.modify);
     this.map.removeInteraction(this.create);
     this.select.getFeatures().clear();
-    const fcId = `${this.props.trigger.id}.${this.props.trigger.rules.length + 1}`;
+    const fcId = `${this.props.processor.id}.${this.props.processor.rules.length + 1}`;
     const fs = this.newRuleSource.getFeatures().map((f, i) => {
       f.setId(`${fcId}.${i}`);
       return f;
@@ -129,12 +129,12 @@ class TriggerDetails extends Component {
       rhs: gj,
       id: Date.now(),
     };
-    const newTrigger = {
-      ...this.props.trigger,
-      rules: this.props.trigger.rules ? this.props.trigger.rules.concat(newRule) : [newRule],
+    const newProcessor = {
+      ...this.props.processor,
+      rules: this.props.processor.rules ? this.props.processor.rules.concat(newRule) : [newRule],
     };
     this.newRuleSource.clear();
-    this.props.actions.updateTrigger(newTrigger);
+    this.props.actions.updateProcessor(newProcessor);
   }
 
   onDraw() {
@@ -172,7 +172,7 @@ class TriggerDetails extends Component {
   }
 
   onDelete() {
-    this.props.actions.deleteTrigger(this.props.trigger);
+    this.props.actions.deleteProcessor(this.props.processor);
   }
 
   onRuleComparatorChange(e) {
@@ -185,19 +185,19 @@ class TriggerDetails extends Component {
     this.setState({ creating: true });
   }
 
-  onEditTrigger() {
-    this.setState({ editingTrigger: true });
+  onEditProcessor() {
+    this.setState({ editingProcessor: true });
   }
 
-  onCancelEditTrigger() {
-    this.setState({ editingTrigger: false }, () => {
+  onCancelEditProcessor() {
+    this.setState({ editingProcessor: false }, () => {
       this.createMap();
     });
   }
 
-  onEditTriggerSave(trigger) {
-    this.props.actions.updateTrigger(trigger);
-    this.setState({ editingTrigger: false }, () => {
+  onEditProcessorSave(processor) {
+    this.props.actions.updateProcessor(processor);
+    this.setState({ editingProcessor: false }, () => {
       this.createMap();
     });
   }
@@ -218,7 +218,7 @@ class TriggerDetails extends Component {
   }
 
   onSaveRule(rule) {
-    const fcId = `${this.props.trigger.id}.${rule.id}`;
+    const fcId = `${this.props.processor.id}.${rule.id}`;
     const fs = this.newRuleSource.getFeatures().map((f, i) => {
       f.setId(`${fcId}.${i}`);
       return f;
@@ -236,9 +236,9 @@ class TriggerDetails extends Component {
       ...rule,
       rhs: gj,
     };
-    const newTrigger = {
-      ...this.props.trigger,
-      rules: this.props.trigger.rules.map((r) => {
+    const newProcessor = {
+      ...this.props.processor,
+      rules: this.props.processor.rules.map((r) => {
         if (r.id === newRule.id) {
           return newRule;
         }
@@ -250,16 +250,16 @@ class TriggerDetails extends Component {
     });
     this.map.removeInteraction(this.modify);
     this.newRuleSource.clear();
-    this.props.actions.updateTrigger(newTrigger);
+    this.props.actions.updateProcessor(newProcessor);
   }
 
   onDeleteRule(rule) {
-    const newTrigger = {
-      ...this.props.trigger,
-      rules: this.props.trigger.rules.filter(r => r.id !== rule.id),
+    const newProcessor = {
+      ...this.props.processor,
+      rules: this.props.processor.rules.filter(r => r.id !== rule.id),
     };
     this.select.getFeatures().clear();
-    this.props.actions.updateTrigger(newTrigger);
+    this.props.actions.updateProcessor(newProcessor);
   }
 
   onCancelRule(rule) {
@@ -308,15 +308,15 @@ class TriggerDetails extends Component {
       }),
     });
 
-    this.addRules(this.props.trigger);
+    this.addRules(this.props.processor);
   }
 
-  addRules(trigger) {
+  addRules(processor) {
     Object.keys(this.ruleLayers).forEach(layerid =>
       this.map.removeLayer(this.ruleLayers[layerid]));
     this.ruleLayers = {};
-    if (trigger.rules && trigger.rules.length) {
-      trigger.rules.forEach((rule) => {
+    if (processor.rules && processor.rules.length) {
+      processor.rules.forEach((rule) => {
         if (rule.comparator === '$geowithin') {
           this.addRule(rule);
         }
@@ -336,7 +336,7 @@ class TriggerDetails extends Component {
     });
     const layer = new ol.layer.Vector({
       source: ruleSource,
-      style: triggerStyle,
+      style: processorStyle,
     });
     this.ruleLayers[rule.id] = layer;
     this.map.addLayer(layer);
@@ -377,9 +377,9 @@ class TriggerDetails extends Component {
   }
 
   renderRules() {
-    const ruleList = this.props.trigger.rules.length === 0 ?
-      <span className="note">No rules have been added to this trigger.</span> :
-      this.props.trigger.rules.map(rule => (
+    const ruleList = this.props.processor.rules.length === 0 ?
+      <span className="note">No rules have been added to this processor.</span> :
+      this.props.processor.rules.map(rule => (
         <div className="form-item mini">
           <div className="properties">
             <PropertyListItem name={'Type'} value={rule.comparator.replace('$', '')} />
@@ -417,7 +417,7 @@ class TriggerDetails extends Component {
     return (
       <div>
         <div className="btn-toolbar">
-          <button className="btn btn-sc" onClick={this.onEditTrigger}>Edit Trigger</button>
+          <button className="btn btn-sc" onClick={this.onEditProcessor}>Edit Processor</button>
           <button className="btn btn-danger" onClick={this.onDelete}>Delete</button>
         </div>
       </div>);
@@ -475,43 +475,41 @@ class TriggerDetails extends Component {
   }
 
   render() {
-    const { trigger } = this.props;
-    if (this.state.editingTrigger) {
+    const { processor } = this.props;
+    if (this.state.editingProcessor) {
       return (
         <div className="wrapper">
           <section className="main">
-            <TriggerForm
-              trigger={trigger}
-              cancel={this.onCancelEditTrigger}
-              onSave={this.onEditTriggerSave}
+            <ProcessorForm
+              processor={processor}
+              cancel={this.onCancelEditProcessor}
+              onSave={this.onEditProcessorSave}
               errors={this.props.errors}
               actions={this.props.actions}
-              stores={this.props.stores}
             />
           </section>
         </div>
       );
     }
     return (
-      <div className="trigger-details">
-        <div className="trigger-props">
-          <TriggerItem trigger={trigger} stores={this.props.stores} />
+      <div className="processor-details">
+        <div className="processor-props">
+          <ProcessorItem processor={processor} />
           {this.renderEditing()}
           {this.renderRules()}
           {this.renderCreating()}
         </div>
-        <div className="trigger-map" ref={(c) => { this.mapRef = c; }} />
+        <div className="processor-map" ref={(c) => { this.mapRef = c; }} />
       </div>
     );
   }
 }
 
-TriggerDetails.propTypes = {
-  trigger: PropTypes.object.isRequired,
+ProcessorDetails.propTypes = {
+  processor: PropTypes.object.isRequired,
   menu: PropTypes.object.isRequired,
   actions: PropTypes.object.isRequired,
-  stores: PropTypes.object.isRequired,
   errors: PropTypes.object.isRequired,
 };
 
-export default TriggerDetails;
+export default ProcessorDetails;

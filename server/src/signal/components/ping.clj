@@ -16,7 +16,7 @@
   (:require [com.stuartsierra.component :as component]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
-            [signal.components.kafka.kafka :as kafka]
+            [signal.components.kafka :as kafka]
             [clj-time.local :as l])
   (:import [java.util.concurrent Executors TimeUnit]))
 

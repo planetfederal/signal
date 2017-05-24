@@ -18,17 +18,17 @@
    [io.pedestal.http.route :as route]
    [com.stuartsierra.component :as component]
    [signal.components.http.notification :as notif-http]
-   [signal.components.http.trigger :as trigger-http]
+   [signal.components.http.processor :as processor-http]
    [clojure.tools.logging :as log]))
 
-(defrecord HttpService [http-config user team notify trigger store]
+(defrecord HttpService [http-config user team notify processor store]
   component/Lifecycle
   (start [this]
     (log/debug "Starting SignalHttpService")
     (let [routes #(route/expand-routes
                    (clojure.set/union #{}
                                       (notif-http/routes notify)
-                                      (trigger-http/routes trigger)))]
+                                      (processor-http/routes processor)))]
       (assoc this :service-def (merge http-config
                                       {:env                     :prod
                                        ::http/routes            routes

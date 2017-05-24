@@ -3,7 +3,7 @@
   (:require [io.pedestal.http :as server]
             [signal.components.http.core :as http]
             [com.stuartsierra.component :as component]
-            [signal.components.trigger :as trigger]
+            [signal.components.processor :as processor]
             [signal.components.notification :as notification]
             [clojure.tools.logging :as log]))
 
@@ -28,10 +28,10 @@
   (let [{:keys [http-config]} config-options]
     (component/system-map
      :notify (component/using (notification/make-signal-notification-component) [])
-     :trigger (component/using (trigger/make-trigger-component) [:notify])
+     :processor (component/using (processor/make-processor-component) [:notify])
      :http-service (component/using
                     (http/make-http-service-component http-config)
-                    [:trigger :notify])
+                    [:processor :notify])
      :server (component/using (new-signal-server) [:http-service]))))
 
 (defn -main

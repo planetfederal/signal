@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION signal.update_updated_at_column()
     END;
 ' LANGUAGE 'plpgsql';
 
-CREATE TABLE IF NOT EXISTS signal.triggers
+CREATE TABLE IF NOT EXISTS signal.processors
 (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   description TEXT,
@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS signal.triggers
   reducers json,
   filters json,
   predicates json,
-  source json,
-  sink json,
+  input json,
+  output json,
   created_at timestamp DEFAULT NOW(),
   updated_at timestamp DEFAULT NOW(),
   deleted_at timestamp with time zone
@@ -47,12 +47,12 @@ WITH (
   OIDS=FALSE
 );
 
-CREATE TRIGGER update_updated_at_triggers
-    BEFORE UPDATE ON signal.triggers FOR EACH ROW EXECUTE
+CREATE TRIGGER update_updated_at_processors
+    BEFORE UPDATE ON signal.processors FOR EACH ROW EXECUTE
     PROCEDURE signal.update_updated_at_column();
 
 
-CREATE TYPE signal.message_type AS ENUM ('trigger');
+CREATE TYPE signal.message_type AS ENUM ('processor');
 
 CREATE TABLE signal.messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

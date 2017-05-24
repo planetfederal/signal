@@ -12,26 +12,26 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.specs.trigger
+(ns signal.specs.processor
   (:require [clojure.spec :as s]
-            [signal.specs.source]
+            [signal.specs.input]
             [signal.specs.filter]
             [signal.specs.reducer]
             [signal.specs.predicate]
-            [signal.specs.sink]
+            [signal.specs.output]
             [signal.specs.geojson]))
 
-(s/def :trigger/id pos-int?)
-(s/def :trigger/name string?)
-(s/def :trigger/description string?)
-(s/def :trigger/repeated boolean?)
-(s/def :trigger/persistent boolean?)
+(s/def :processor/id pos-int?)
+(s/def :processor/name string?)
+(s/def :processor/description string?)
+(s/def :processor/repeated boolean?)
+(s/def :processor/persistent boolean?)
 
-(s/def ::trigger-spec (s/keys :req-un
-                              [:trigger/id :trigger/name :trigger/description
-                               :trigger/repeated :trigger/persistent
-                               :signal.specs.source/source
+(s/def ::processor-spec (s/keys :req-un
+                              [:processor/id :processor/name :processor/description
+                               :processor/repeated :processor/persistent
+                               :signal.specs.input/input
                                :signal.specs.filter/filters
                                :signal.specs.reducer/reducers
                                :signal.specs.predicate/predicates
-                               :signal.specs.sink/sink]))
+                               :signal.specs.output/output]))

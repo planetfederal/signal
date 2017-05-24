@@ -1,14 +1,14 @@
--- name: trigger-list-query
--- Gets list of all active triggers
-SELECT * FROM signal.triggers WHERE deleted_at IS NULL
+-- name: processor-list-query
+-- Gets list of all active processors
+SELECT * FROM signal.processors WHERE deleted_at IS NULL
 
 -- name: find-by-id-query
--- gets a trigger by its uuid/primary key
-SELECT * FROM signal.triggers WHERE deleted_at IS NULL AND id = :id
+-- gets a processor by its uuid/primary key
+SELECT * FROM signal.processors WHERE deleted_at IS NULL AND id = :id
 
--- name: insert-trigger<!
--- inserts a new trigger definition
-INSERT INTO signal.triggers
+-- name: insert-processor<!
+-- inserts a new processor definition
+INSERT INTO signal.processors
 (name,description,repeated,persistent,filters,
 reducers,predicates,sink,source,created_at,updated_at)
 VALUES
@@ -16,9 +16,9 @@ VALUES
 :filters::json,:reducers::json,:predicates::json,
 :sink::json,:source::json,NOW(),NOW());
 
--- name: update-trigger<!
+-- name: update-processor<!
 -- updates definition and recipients
-UPDATE signal.triggers SET
+UPDATE signal.processors SET
 name = :name,
 description = :description,
 repeated = :repeated,
@@ -32,6 +32,6 @@ source = :source::json,
 updated_at = NOW()
 WHERE id = :id
 
--- name: delete-trigger!
--- disables a trigger
-UPDATE signal.triggers SET deleted_at = NOW() WHERE id = :id
+-- name: delete-processor!
+-- disables a processor
+UPDATE signal.processors SET deleted_at = NOW() WHERE id = :id

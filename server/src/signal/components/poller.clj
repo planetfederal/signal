@@ -15,7 +15,7 @@
 (ns signal.components.poller
   (:require [com.stuartsierra.component :as component]
             [signal.components.store.db :as storemodel]
-            [signal.components.trigger :as triggerapi]
+            [signal.components.processor :as processorapi]
             [clj-http.client :as client]
             [cljts.io :as jtsio]
             [signal.specs.store]
@@ -37,8 +37,8 @@
     []))
 
 (defn fetch-url
-  "Fetches geojson from url and tests each feature for the specified trigger"
-  [trigger url]
+  "Fetches geojson from url and tests each feature for the specified processor"
+  [processor url]
   (log/debug "Fetching" url)
   (let [res (client/get url)
         status (:status res)
@@ -48,27 +48,27 @@
                       jtsio/read-feature-collection
                       feature-collection->geoms)]
         (doall (map (fn [g]
-                      (triggerapi/test-value trigger "STORE" g)) geoms)))
+                      (processorapi/test-value processor "STORE" g)) geoms)))
       (log/error "Error Fetching" url))))
 
 (def polling-stores (ref {}))
 (def sched-pool (mk-pool))
 
-(defn start-polling [trigger store]
+(defn start-polling [processor store]
   (let [seconds (get-in store [:options :polling])]
     (every (* 1000 (Integer/parseInt seconds))
-           #(fetch-url trigger (:uri store)) sched-pool
+           #(fetch-url processor (:uri store)) sched-pool
            :job (keyword (:id store)) :initial-delay 5000)))
 
 (defn stop-polling [store]
   (stop (keyword (:id store))))
 
-(defn add-polling-store [trigger s]
+(defn add-polling-store [processor s]
   (if (not-empty (get-in s [:options :polling]))
     (do
       (dosync
        (commute polling-stores assoc (keyword (:id s)) s))
-      (start-polling trigger s))))
+      (start-polling processor s))))
 
 (defn remove-polling-store [id]
   ; takes a store id string
@@ -76,16 +76,16 @@
    (commute polling-stores dissoc (keyword id)))
   (stop-polling (keyword id)))
 
-(defn load-polling-stores [trigger]
-  (doall (map (partial add-polling-store trigger) (list 1 2 3))))
+(defn load-polling-stores [processor]
+  (doall (map (partial add-polling-store processor) (list 1 2 3))))
 
 (defrecord PollingManagementComponent
-  [trigger]
+  [processor]
   component/Lifecycle
   (start [this]
     (log/debug "Starting Store Component")
-    (load-polling-stores trigger)
-    (assoc this :trigger trigger))
+    (load-polling-stores processor)
+    (assoc this :processor processor))
   (stop [this]
     (log/debug "Stopping Store Component")
     this))

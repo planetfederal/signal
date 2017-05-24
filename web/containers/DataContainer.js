@@ -1,9 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import * as dataActions from '../ducks/data';
-import * as formActions from '../ducks/forms';
-import * as triggerActions from '../ducks/triggers';
+import * as processorActions from '../ducks/processors';
 import { FormList } from '../components/DataMapFormList';
 import DataMap from '../components/DataMap';
 
@@ -11,7 +9,7 @@ class DataContainer extends Component {
 
   componentDidMount() {
     this.props.dataActions.loadDeviceLocations();
-    this.props.triggerActions.loadTriggers();
+    this.props.processorActions.loadProcessors();
     this.props.formActions.loadForms()
       .then(() => {
         this.props.dataActions.loadFormDataAll();
@@ -31,7 +29,7 @@ class DataContainer extends Component {
 DataContainer.propTypes = {
   dataActions: PropTypes.object.isRequired,
   formActions: PropTypes.object.isRequired,
-  triggerActions: PropTypes.object.isRequired,
+  processorActions: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = state => ({
@@ -40,15 +38,13 @@ const mapStateToProps = state => ({
   forms: state.sc.forms.forms,
   device_locations: state.sc.data.device_locations,
   deviceLocationsOn: state.sc.data.deviceLocationsOn,
-  spatialTriggersOn: state.sc.data.spatialTriggersOn,
-  spatial_triggers: state.sc.triggers.spatial_triggers,
+  spatialProcessorsOn: state.sc.data.spatialProcessorsOn,
+  spatial_processors: state.sc.processors.spatial_processors,
   menu: state.sc.menu,
 });
 
 const mapDispatchToProps = dispatch => ({
-  dataActions: bindActionCreators(dataActions, dispatch),
-  formActions: bindActionCreators(formActions, dispatch),
-  triggerActions: bindActionCreators(triggerActions, dispatch),
+  processorActions: bindActionCreators(processorActions, dispatch),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DataContainer);

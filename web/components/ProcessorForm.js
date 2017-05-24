@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import without from 'lodash/without';
 import { isEmail } from '../utils';
 
 export const validate = (values) => {
@@ -18,16 +17,15 @@ export const validate = (values) => {
   return errors;
 };
 
-export class TriggerForm extends Component {
+export class ProcessorForm extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      repeated: props.trigger.repeated,
-      sourceStores: props.trigger.stores || [],
-      email_recipients: props.trigger.recipients.emails || [],
-      name: props.trigger.name,
-      description: props.trigger.description,
+      repeated: props.processor.repeated,
+      email_recipients: props.processor.recipients.emails || [],
+      name: props.processor.name,
+      description: props.processor.description,
     };
 
     this.save = this.save.bind(this);
@@ -46,18 +44,6 @@ export class TriggerForm extends Component {
     this.setState({ name: e.target.value });
   }
 
-  onSourceChange(e) {
-    if (e.target.checked) {
-      this.setState({
-        sourceStores: this.state.sourceStores.concat(e.target.value),
-      });
-    } else {
-      this.setState({
-        sourceStores: without(this.state.sourceStores, e.target.value),
-      });
-    }
-  }
-
   onEmailChange(e) {
     this.setState({
       email_recipients: e.target.value.split('\n'),
@@ -69,61 +55,45 @@ export class TriggerForm extends Component {
   }
 
   save() {
-    const newTrigger = {
-      ...this.props.trigger,
+    const newProcessor = {
+      ...this.props.processor,
       name: this.state.name,
       description: this.state.description,
       repeated: this.state.repeated,
-      stores: this.state.sourceStores,
       recipients: {
         emails: this.state.email_recipients,
         devices: [],
       },
     };
-    const errors = validate(newTrigger);
-    this.props.actions.updateTriggerErrors(errors);
+    const errors = validate(newProcessor);
+    this.props.actions.updateProcessorErrors(errors);
     if (!Object.keys(errors).length) {
-      this.props.onSave(newTrigger);
+      this.props.onSave(newProcessor);
     }
   }
 
   render() {
-    const { errors, cancel, stores } = this.props;
+    const { errors, cancel } = this.props;
     return (
       <div className="side-form">
         <div className="form-group">
-          <label htmlFor="trigger-name">Name:</label>
+          <label htmlFor="processor-name">Name:</label>
           <input
-            id="trigger-name" type="text" className="form-control"
+            id="processor-name" type="text" className="form-control"
             onChange={this.onNameChange}
             value={this.state.name}
           />
           {errors.name ? <p className="text-danger">{errors.name}</p> : ''}
         </div>
         <div className="form-group">
-          <label htmlFor="trigger-description">Description:</label>
+          <label htmlFor="processor-description">Description:</label>
           <textarea
-            id="trigger-description"
+            id="processor-description"
             className="form-control" rows="3"
             onChange={this.onDescriptionChange}
             value={this.state.description}
           />
           {errors.description ? <p className="text-danger">{errors.description}</p> : ''}
-        </div>
-        <div className="form-group">
-          <label htmlFor="trigger-source">Source Store:</label>
-          {Object.keys(stores).map(id => (
-            <div className="checkbox">
-              <label htmlFor={id}>
-                <input
-                  id={id}
-                  type="checkbox" checked={this.state.sourceStores.indexOf(id) >= 0}
-                  value={id}
-                  onChange={this.onSourceChange}
-                /> {stores[id].name}
-              </label>
-            </div>
-            ))}
         </div>
         <div className="form-group">
           <label htmlFor="store-repeated">Repeated:</label>
@@ -169,13 +139,12 @@ export class TriggerForm extends Component {
   }
 }
 
-TriggerForm.propTypes = {
-  trigger: PropTypes.object.isRequired,
+ProcessorForm.propTypes = {
+  processor: PropTypes.object.isRequired,
   errors: PropTypes.object.isRequired,
   cancel: PropTypes.func.isRequired,
-  stores: PropTypes.object.isRequired,
   actions: PropTypes.object.isRequired,
   onSave: PropTypes.func.isRequired,
 };
 
-export default TriggerForm;
+export default ProcessorForm;

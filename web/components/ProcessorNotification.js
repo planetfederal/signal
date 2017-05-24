@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import NotificationItem from './NotificationItem';
-import '../style/Triggers.less';
+import '../style/Processors.less';
 
 const format = new ol.format.GeoJSON();
 
@@ -14,7 +14,7 @@ const iconStyle = new ol.style.Style({
   })),
 });
 
-const triggerStyle = new ol.style.Style({
+const processorStyle = new ol.style.Style({
   fill: new ol.style.Fill({
     color: 'rgba(255, 0, 0, 0.1)',
   }),
@@ -24,7 +24,7 @@ const triggerStyle = new ol.style.Style({
   }),
 });
 
-const triggerStyleSelected = new ol.style.Style({
+const processorStyleSelected = new ol.style.Style({
   fill: new ol.style.Fill({
     color: 'rgba(255, 0, 0, 0.2)',
   }),
@@ -54,7 +54,7 @@ const style = {
   },
 };
 
-class TriggerNotification extends Component {
+class ProcessorNotification extends Component {
 
   static makePopup(geojson) {
     let rows = [];
@@ -104,24 +104,24 @@ class TriggerNotification extends Component {
     }
   }
 
-  addRules(trigger) {
-    if (trigger.rules) {
-      trigger.rules.forEach((rule) => {
+  addRules(processor) {
+    if (processor.rules) {
+      processor.rules.forEach((rule) => {
         if (rule.comparator === '$geowithin') {
-          this.addTrigger(rule);
+          this.addProcessor(rule);
         }
       });
     }
   }
 
-  addTrigger(rule) {
+  addProcessor(rule) {
     if (isEmpty(rule.rhs)) return;
     const features = format.readFeatures(rule.rhs);
     features.forEach((feature) => {
       feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
-      this.triggerSource.addFeature(feature);
+      this.processorSource.addFeature(feature);
     });
-    this.map.getView().fit(this.triggerSource.getExtent(), this.map.getSize());
+    this.map.getView().fit(this.processorSource.getExtent(), this.map.getSize());
   }
 
   addValue(value) {
@@ -135,10 +135,10 @@ class TriggerNotification extends Component {
     while (this.mapRef.firstChild) {
       this.mapRef.removeChild(this.mapRef.firstChild);
     }
-    this.triggerSource = new ol.source.Vector();
-    const triggerLayer = new ol.layer.Vector({
-      source: this.triggerSource,
-      style: triggerStyle,
+    this.processorSource = new ol.source.Vector();
+    const processorLayer = new ol.layer.Vector({
+      source: this.processorSource,
+      style: processorStyle,
     });
     this.valueSource = new ol.source.Vector();
     const valueLayer = new ol.layer.Vector({
@@ -153,8 +153,8 @@ class TriggerNotification extends Component {
     });
     this.select = new ol.interaction.Select({
       wrapX: false,
-      style: triggerStyleSelected,
-      layers: [triggerLayer, valueLayer],
+      style: processorStyleSelected,
+      layers: [processorLayer, valueLayer],
     });
     this.map = new ol.Map({
       target: this.mapRef,
@@ -163,7 +163,7 @@ class TriggerNotification extends Component {
         new ol.layer.Tile({
           source: new ol.source.OSM(),
         }),
-        triggerLayer,
+        processorLayer,
         valueLayer,
       ],
       view: new ol.View({
@@ -189,8 +189,8 @@ class TriggerNotification extends Component {
     });
 
     const info = this.props.notification.info;
-    if (info.trigger) {
-      this.addRules(info.trigger);
+    if (info.processor) {
+      this.addRules(info.processor);
     }
     if (info.value) {
       this.addValue(info.value);
@@ -201,11 +201,11 @@ class TriggerNotification extends Component {
     return (
       <div className="wrapper">
         <section className="main noPad">
-          <div className="trigger-details">
-            <div className="trigger-props">
+          <div className="processor-details">
+            <div className="processor-props">
               <NotificationItem notification={this.props.notification} />
             </div>
-            <div className="trigger-map" ref={(c) => { this.mapRef = c; }} />
+            <div className="processor-map" ref={(c) => { this.mapRef = c; }} />
           </div>
           <div
             className="popup"
@@ -213,7 +213,7 @@ class TriggerNotification extends Component {
             style={{ ...style.popup, display: this.state.activeFeature ? 'block' : 'none' }}
           >
             {!!this.state.activeFeature &&
-              TriggerNotification.makePopup(this.state.activeFeature)}
+              ProcessorNotification.makePopup(this.state.activeFeature)}
           </div>
         </section>
       </div>
@@ -222,9 +222,9 @@ class TriggerNotification extends Component {
 
 }
 
-TriggerNotification.propTypes = {
+ProcessorNotification.propTypes = {
   notification: PropTypes.object.isRequired,
   menu: PropTypes.object.isRequired,
 };
 
-export default TriggerNotification;
+export default ProcessorNotification;

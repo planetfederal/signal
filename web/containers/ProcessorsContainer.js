@@ -1,12 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import * as triggerActions from '../ducks/triggers';
-import * as storeActions from '../ducks/dataStores';
-import { TriggerForm } from '../components/TriggerForm';
-import TriggerList from '../components/TriggerList';
+import * as processorActions from '../ducks/processors';
+import { ProcessorForm } from '../components/ProcessorForm';
+import ProcessorList from '../components/ProcessorList';
 
-const emptyTrigger = {
+const emptyProcessor = {
   name: '',
   description: '',
   repeated: false,
@@ -14,11 +13,10 @@ const emptyTrigger = {
     devices: [],
     emails: [],
   },
-  stores: [],
   rules: [],
 };
 
-class TriggersContainer extends Component {
+class ProcessorsContainer extends Component {
 
   constructor(props) {
     super(props);
@@ -32,8 +30,7 @@ class TriggersContainer extends Component {
   }
 
   componentDidMount() {
-    this.props.actions.loadTriggers();
-    this.props.storeActions.loadDataStores();
+    this.props.actions.loadProcessors();
   }
 
   add() {
@@ -44,9 +41,9 @@ class TriggersContainer extends Component {
     this.setState({ adding: false });
   }
 
-  create(trigger) {
+  create(processor) {
     this.setState({ adding: false });
-    this.props.actions.addTrigger(trigger);
+    this.props.actions.addProcessor(processor);
   }
 
   render() {
@@ -62,41 +59,36 @@ class TriggersContainer extends Component {
       <div className="wrapper">
         <section className="main">
           {this.state.adding ?
-            <TriggerForm
-              trigger={emptyTrigger}
+            <ProcessorForm
+              processor={emptyProcessor}
               cancel={this.cancel}
               onSave={this.create}
               errors={this.props.errors}
               actions={this.props.actions}
-              stores={this.props.stores}
             /> :
             <div className="btn-toolbar">
-              <button className="btn btn-sc" onClick={this.add}>Create Trigger</button>
+              <button className="btn btn-sc" onClick={this.add}>Create Processor</button>
             </div>}
-          <TriggerList {...this.props} />
+          <ProcessorList {...this.props} />
         </section>
       </div>
     );
   }
 }
 
-TriggersContainer.propTypes = {
-  stores: PropTypes.object.isRequired,
+ProcessorsContainer.propTypes = {
   errors: PropTypes.object.isRequired,
   actions: PropTypes.object.isRequired,
-  storeActions: PropTypes.object.isRequired,
   children: PropTypes.object,
 };
 
 const mapStateToProps = state => ({
-  spatial_triggers: state.sc.triggers.spatial_triggers,
-  stores: state.sc.dataStores.stores,
-  errors: state.sc.triggers.errors,
+  spatial_processors: state.sc.processors.spatial_processors,
+  errors: state.sc.processors.errors,
 });
 
 const mapDispatchToProps = dispatch => ({
-  actions: bindActionCreators(triggerActions, dispatch),
-  storeActions: bindActionCreators(storeActions, dispatch),
+  actions: bindActionCreators(processorActions, dispatch),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(TriggersContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(ProcessorsContainer);

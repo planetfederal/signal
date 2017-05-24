@@ -16,7 +16,7 @@
   (:require [clojure.test :refer :all]
             [signal.components.trigger.db :as trigger]
             [signal.test-utils :as utils]
-            [signal.specs.trigger]
+            [signal.specs.processor]
             [clojure.spec :as spec]
             [clojure.spec.gen :as gen]
             [camel-snake-kebab.core :refer :all]
