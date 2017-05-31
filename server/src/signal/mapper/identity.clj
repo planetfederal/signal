@@ -12,10 +12,14 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.specs.filter
-  (:require [clojure.spec :as s]))
+(ns signal.mapper.identity
+  (:require [signal.mapper.protocol :as proto]))
 
-(s/def :identity/type #{"identity"})
-(s/def :identity/filter (s/keys :req-un [:identity/type]))
+(defrecord Identity []
+  proto/IMapper
+  (exec [this v] (identity v)))
 
-(s/def ::filters (s/coll-of (s/or :identity :identity/filter)))
+(defmethod proto/make-mapper :identity
+  []
+  (map->Identity {}))
+

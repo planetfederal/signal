@@ -15,23 +15,19 @@
 (ns signal.components.processor
   (:require [com.stuartsierra.component :as component]
             [yesql.core :refer [defqueries]]
-            [clojure.spec :as s]
             [signal.components.db :as db]
             [signal.components.notification :as notificationapi]
-            [clojure.core.async :as async]
-            [signal.entity.notification
-             :refer [make-mobile-notification, make-email-notification]]
+            [signal.entity.notification :as notification]
             [cljts.io :as jtsio]
             [signal.predicate.protocol :as proto-pred]
+            [signal.predicate.geowithin]
             [clojure.data.json :as json]
-            [signal.processor.definition.geo
-             :refer [make-within-clause]]
             [clojure.tools.logging :as log]))
-
 
 (def falsey-processors
   "processors that don't evaluate to true"
   (ref {}))
+
 (def truthy-processors
   "If it's a valid processor, data has satisified the rules and we need to
   send an alert"
@@ -44,7 +40,7 @@
   ;; builds a compound where clause of (rule AND rule AND ...)
   (let [t (assoc processor :predicates
                  (map proto-pred/make-predicate
-                      (:rules processor)))]
+                      (:predicates processor)))]
     (dosync
      (commute falsey-processors assoc
               (keyword (:id t)) t))))
@@ -80,7 +76,7 @@
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
   [value processor notify]
-  (let [body    (doall (map #(proto-pred/notification % value) (:rules processor)))
+  (let [body    (doall (map #(proto-pred/notification % value) (:predicates processor)))
         emails  (get-in processor [:recipients :emails])
         devices (get-in processor [:recipients :devices])
         processor (db/processor-by-id (:id processor))
@@ -91,7 +87,7 @@
       (if (some? devices)
         (notificationapi/notify
          notify
-         (make-mobile-notification
+         (notification/make-mobile-notification
           {:to       devices
            :priority "alert"
            :title    (str "Alert for processor: " (:name processor))
@@ -102,7 +98,7 @@
       (if (some? emails)
         (notificationapi/notify
          notify
-         (make-email-notification
+         (notification/make-email-notification
           {:to       emails
            :priority "alert"
            :title    (str "Alert for processor: " (:name processor))
@@ -122,61 +118,51 @@
     (set-falsey-processor processor)))
 
 
-(defn check-predicates
+(defn- check-predicates
   "Maps over all invalid processors to check if they evaluate to true based
   on the value to test against all rules for a processor."
-  [value notify]
+  [processor-comp value]
   (doall (map (fn [k]
                 (if-let [processor (k @falsey-processors)]
                   (loop [preds (:predicates processor)]
                     (if (empty? preds)
-                      (handle-success value processor notify)
+                      (handle-success value processor (:notify processor-comp))
                       (if-let [pred (first preds)]
                         (if (proto-pred/check pred value)
                           (recur (rest preds))
-                          (handle-failure processor))))))))))
-
-(defn process-channel
-  "Waits for input on channel to check values against processors"
-  [notify input-channel]
-  (async/go (while true
-              (let [v (async/<! input-channel)
-                    pt (:value v)]  ;; todo: support data types other than points
-                (do (process-value (:store v) pt notify))))))
+                          (handle-failure processor))))))) (keys @falsey-processors))))
 
 (defn test-value
   "Posts a value to be checked on the source channel"
-  [processorcomp store value]
+  [processor-comp value]
   ;; the source-channel is the source of incoming data
     ;; the store it came from
   ;; the value to be checked
-  (if-not (or (nil? store) (nil? value))
-    (async/go (async/>! (:source-channel processorcomp)
-                        {:store store :value value}))
-    (log/error "Store and value must be set")))
+  (if-not (or (nil? value))
+    (check-predicates processor-comp value)))
 
 (defn all
-  [processor-comp]
+  [_]
   (db/processors))
 
 (defn find-by-id
-  [processor-comp id]
+  [_ id]
   (db/processor-by-id id))
 
 (defn create
-  [processor-comp t]
+  [_ t]
   (let [processor (db/create-processor t)]
     (add-processor processor)
     processor))
 
 (defn modify
-  [processor-comp id t]
+  [_ id t]
   (let [processor (db/modify-processor id t)]
     (add-processor processor)
     processor))
 
 (defn delete
-  [processor-comp id]
+  [_ id]
   (db/delete-processor id)
   (evict-processor id))
 
@@ -184,14 +170,10 @@
   component/Lifecycle
   (start [this]
     (log/debug "Starting processor Component")
-    (let [c (async/chan)
-          comp (assoc this :source-channel c :notify notify)]
-      (process-channel (:notify comp) (:source-channel comp))
-      (load-processors)
-      comp))
+    (load-processors)
+    (assoc this :notify notify))
   (stop [this]
     (log/debug "Stopping processor Component")
-    (async/close! (:source-channel this))
     this))
 
 (defn make-processor-component []

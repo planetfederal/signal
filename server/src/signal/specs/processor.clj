@@ -28,7 +28,8 @@
 (s/def :processor/persistent boolean?)
 
 (s/def ::processor-spec (s/keys :req-un
-                              [:processor/id :processor/name :processor/description
+                              [:processor/id :processor/name
+                               :processor/description
                                :processor/repeated :processor/persistent
                                :signal.specs.input/input
                                :signal.specs.filter/filters

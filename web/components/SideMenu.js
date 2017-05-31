@@ -20,7 +20,6 @@ const SideMenu = ({ isAuthenticated, actions, userName,
         <nav>
           <SideMenuItem path={'/processors'} name={'Processors'} onClick={closeMenu} />
           <div className="side-menu-separator" />
-          <SideMenuItem path={'/user'} name={userName} onClick={closeMenu} />
           <SideMenuItem
             path={'/inputs'} name={'Inputs'}
             onClick={closeMenu}
@@ -45,8 +44,9 @@ const SideMenu = ({ isAuthenticated, actions, userName,
             path={'/reducers'} name={'Reducers'}
             onClick={closeMenu}
           />
-
-
+          <div className="side-menu-separator" />
+          <SideMenuItem path={'/user'} name={userName} onClick={closeMenu} />
+          <div className="side-menu-separator" />
           <SideMenuItem
             path={'/login'} name={'Sign Out'} onClick={() => {
               actions.logoutAndRedirect();

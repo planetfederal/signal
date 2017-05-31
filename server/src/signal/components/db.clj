@@ -39,13 +39,7 @@
   (-> t
       (assoc :id (.toString (:id t)))
       (assoc :created_at (.toString (:created_at t)))
-      (assoc :updated_at (.toString (:updated_at t)))
-      (assoc :rules (:rules t))
-      (assoc :recipients (:recipients t))
-      (assoc :stores (if-let [v (:stores t)]
-                       (cond (string? v) (json/read-str (.getValue v))
-                             (instance? org.postgresql.util.PGobject v) (json/read-str (.getValue v))
-                             :else v)))))
+      (assoc :updated_at (.toString (:updated_at t)))))
 
 (defn- row-fn
   "Modifies the row result while the ResultSet is open. This method
@@ -150,34 +144,20 @@
   "Returns all the active processors"
   []
   (log/debug "Fetching all active processors from db")
-  (map (fn [t]
-         (processor-entity->map t)) (processor-list-query {} result->map)))
+  (map processor-entity->map (processor-list-query)))
 
 (defn processor-by-id
   "Find processor by identifier"
   [id]
   (log/debugf "Finding processors with id %s from db" id)
-  (some-> (find-by-id-query {:id (java.util.UUID/fromString id)} result->map)
+  (some-> (find-by-id-query {:id (java.util.UUID/fromString id)})
           (first)
           processor-entity->map))
-
-;(defn map->processor-entity
-;  "Converts input map to prepare for database insertion"
-;  [t]
-;  (cond-> t
-;          (some? (:source t))
-;          (assoc :source (json/write-str (:source t)))
-;          (some? (:filters t))
-;          (assoc :filters (json/write-str (:filters t)))
-;          (some? (:reducers t))
-;          (assoc :reducers (json/write-str (:reducers t)))
-;          (some? (:predicates t))
-;          (assoc :predicates (json/write-str (:predicates t)))))
 
 (defn map->processor-entity
   [trg]
   (into trg
-        (let [json-keys (list :source :filters :reducers :predicates :sink)]
+        (let [json-keys (list :input :filters :reducers :predicates :output)]
              (map (fn [ky]
                      (if-let [value (get trg ky)]
                        {ky (json/write-str value)}
@@ -195,16 +175,16 @@
                                       :created_at (:created_at new-processor)
                                       :updated_at (:updated_at new-processor)))))
     (log/error (str "Failed to create new processor b/c"
-                    (s/explain-str :signal.specs.processor/rule-spec t)))))
+                    (s/explain-str :signal.specs.processor/processor-spec t)))))
 
 (defn modify-processor
   "Update processor"
   [id t]
   (let [entity (map->processor-entity (assoc t :id (java.util.UUID/fromString id)))
-        updated-processor (update-processor<!)
-                          (assoc entity
-                            :stores
-                            (->StringArray (:stores t)))]
+        updated-processor (update-processor<!
+                            (assoc entity
+                              :stores
+                              (->StringArray (:stores t))))]
     (processor-entity->map (assoc t :id (:id updated-processor)
                                   :created_at (:created_at updated-processor)
                                   :updated_at (:updated_at updated-processor)))))

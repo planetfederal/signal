@@ -22,7 +22,6 @@
                  [com.stuartsierra/component "0.3.1"]
                  [clojurewerkz/machine_head "1.0.0-beta9"]
                  [com.boundlessgeo.spatialconnect/schema "0.7"]
-                 ; todo: the protobuf dependency should be packaged into the schema artifact
                  [com.google.protobuf/protobuf-java "3.1.0"]
                  [buddy "1.1.0"]
                  [camel-snake-kebab "0.4.0"]

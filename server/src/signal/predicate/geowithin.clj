@@ -19,10 +19,8 @@
             [cljts.relation :as spatial-relation]
             [clojure.data.json :as json]))
 
-(defrecord WithinClause [processor-id clause]
+(defrecord WithinClause [clause]
   proto/IPredicate
-  (field-path [this] (:clause this))
-  (predicate [this] :$geowithin)
   (check [this value]
     (if-let [f (geo-util/clause-case-map (type (:clause this)))]
       (apply f [value (:clause this) spatial-relation/within?])
@@ -30,8 +28,6 @@
   (notification [this test-value]
     (str (cljts.io/write-geojson test-value) " was within.")))
 
-(defmethod proto/make-predicate "$geowithin"
-  "Takes a right hand side clause of a rule and returns a jts geometry"
-  [id clause]
-  (->WithinClause id (geo-util/geojsonmap->jtsgeom clause)))
-
+(defmethod proto/make-predicate "geowithin"
+  [predicate]
+  (->WithinClause (geo-util/geojsonmap->jtsgeom predicate)))
