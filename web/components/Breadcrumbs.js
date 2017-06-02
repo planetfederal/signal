@@ -8,22 +8,16 @@ class Breadcrumbs extends Component {
   render() {
     const { sc, params } = this.props;
     const routes = this.props.routes.map((route) => {
-      if (route.path === '/stores/:id') {
-        const store = find(sc.dataStores.stores, { id: params.id });
-        if (store) {
-          route.name = store.name;
-        }
-      }
       if (route.path === '/forms/:form_key') {
         const form = sc.forms.forms[params.form_key];
         if (form) {
           route.name = form.form_label;
         }
       }
-      if (route.path === '/triggers/:id') {
-        const trigger = find(sc.triggers.spatial_triggers, { id: params.id });
-        if (trigger) {
-          route.name = trigger.name;
+      if (route.path === '/processors/:id') {
+        const processor = find(sc.processors.spatial_processors, { id: params.id });
+        if (processor) {
+          route.name = processor.name;
         }
       }
       if (route.path === '/teams/:id') {

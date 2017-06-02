@@ -14,10 +14,8 @@ import { loadState, saveState, requireAuthentication } from './utils';
 import HomeContainer from './containers/HomeContainer';
 import SignUpContainer from './containers/SignUpContainer';
 import SignInContainer from './containers/SignInContainer';
-import DataStoresContainer from './containers/DataStoresContainer';
-import DataStoresDetailsContainer from './containers/DataStoresDetailsContainer';
-import TriggersContainer from './containers/TriggersContainer';
-import TriggerDetailsContainer from './containers/TriggerDetailsContainer';
+import ProcessorsContainer from './containers/ProcessorsContainer';
+import ProcessorDetailsContainer from './containers/ProcessorDetailsContainer';
 import NotificationContainer from './containers/NotificationContainer';
 
 import './style/Globals.less';
@@ -63,18 +61,13 @@ render(
         <IndexRoute component={requireAuthentication(HomeContainer)} />
         <Route path="/login" name="Login" component={SignInContainer} />
         <Route path="/signup" name="Sign Up" component={SignUpContainer} />
-        <Route path="/stores" name="Stores" component={requireAuthentication(DataStoresContainer)}>
-          <Route
-            path="/stores/:id" staticName
-            component={requireAuthentication(DataStoresDetailsContainer)}
-          />
-        </Route>
         <Route
-          path="/triggers" name="Triggers" component={requireAuthentication(TriggersContainer)}
+          path="/processors" name="Processors"
+          component={requireAuthentication(ProcessorsContainer)}
         >
           <Route
-            path="/triggers/:id" staticName
-            component={requireAuthentication(TriggerDetailsContainer)}
+            path="/processors/:id" staticName
+            component={requireAuthentication(ProcessorDetailsContainer)}
           />
         </Route>
         <Route

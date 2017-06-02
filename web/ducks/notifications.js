@@ -1,7 +1,7 @@
 import * as request from 'superagent-bluebird-promise';
 import { API_URL } from 'config';
 
-export const LOAD_NOTIFICATION = 'sc/triggers/LOAD_NOTIFICATION';
+export const LOAD_NOTIFICATION = 'sc/processors/LOAD_NOTIFICATION';
 
 const initialState = {
   notifications: {},

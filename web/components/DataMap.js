@@ -37,7 +37,7 @@ const deviceStyle = new ol.style.Style({
   })),
 });
 
-const triggerStyle = new ol.style.Style({
+const processorStyle = new ol.style.Style({
   fill: new ol.style.Fill({
     color: 'rgba(255, 0, 0, 0.1)',
   }),
@@ -116,16 +116,16 @@ class DataMap extends Component {
     }
     this.vectorSource = new ol.source.Vector();
     this.deviceLocationsSource = new ol.source.Vector();
-    this.spatialTriggersSource = new ol.source.Vector();
+    this.spatialProcessorsSource = new ol.source.Vector();
     const vectorLayer = new ol.layer.Vector({
       source: this.vectorSource,
     });
     const deviceLocationsLayer = new ol.layer.Vector({
       source: this.deviceLocationsSource,
     });
-    const spatialTriggersLayer = new ol.layer.Vector({
-      source: this.spatialTriggersSource,
-      style: triggerStyle,
+    const spatialProcessorsLayer = new ol.layer.Vector({
+      source: this.spatialProcessorsSource,
+      style: processorStyle,
     });
     this.map = new ol.Map({
       target: this.mapRef,
@@ -135,7 +135,7 @@ class DataMap extends Component {
         }),
         vectorLayer,
         deviceLocationsLayer,
-        spatialTriggersLayer,
+        spatialProcessorsLayer,
       ],
       view: new ol.View({
         center: ol.proj.fromLonLat([-100, 30]),
@@ -226,10 +226,10 @@ class DataMap extends Component {
       this.deviceLocationsSource.addFeatures(deviceLocationFeatures);
     }
 
-    this.spatialTriggersSource.clear();
-    if (props.spatialTriggersOn) {
-      Object.keys(props.spatial_triggers)
-        .map(k => props.spatial_triggers[k])
+    this.spatialProcessorsSource.clear();
+    if (props.spatialProcessorsOn) {
+      Object.keys(props.spatial_processors)
+        .map(k => props.spatial_processors[k])
         .filter(t => t.rules.length)
         .forEach((t, i) => {
           t.rules
@@ -237,11 +237,11 @@ class DataMap extends Component {
           .forEach((r, j) => {
             const gj = r.rhs;
             gj.id = `${t.id}.${i}.${j}`;
-            const triggerFeatures = format.readFeatures(gj);
-            triggerFeatures.forEach((feature) => {
+            const processorFeatures = format.readFeatures(gj);
+            processorFeatures.forEach((feature) => {
               feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
             });
-            this.spatialTriggersSource.addFeatures(triggerFeatures);
+            this.spatialProcessorsSource.addFeatures(processorFeatures);
           });
         });
     }

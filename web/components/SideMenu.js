@@ -18,10 +18,35 @@ const SideMenu = ({ isAuthenticated, actions, userName,
     <div className={`side-menu ${menuOpen ? 'open' : 'closed'}`}>
       {isAuthenticated ?
         <nav>
-          <SideMenuItem path={'/stores'} name={'Stores'} onClick={closeMenu} />
-          <SideMenuItem path={'/triggers'} name={'Triggers'} onClick={closeMenu} />
+          <SideMenuItem path={'/processors'} name={'Processors'} onClick={closeMenu} />
+          <div className="side-menu-separator" />
+          <SideMenuItem
+            path={'/inputs'} name={'Inputs'}
+            onClick={closeMenu}
+          />
+          <div className="side-menu-separator" />
+          <SideMenuItem
+            path={'/outputs'} name={'Outputs'}
+            onClick={closeMenu}
+          />
+          <div className="side-menu-separator" />
+          <SideMenuItem
+            path={'/mappings'} name={'Maps'}
+            onClick={closeMenu}
+          />
+          <div className="side-menu-separator" />
+          <SideMenuItem
+            path={'/filters'} name={'Filters'}
+            onClick={closeMenu}
+          />
+          <div className="side-menu-separator" />
+          <SideMenuItem
+            path={'/reducers'} name={'Reducers'}
+            onClick={closeMenu}
+          />
           <div className="side-menu-separator" />
           <SideMenuItem path={'/user'} name={userName} onClick={closeMenu} />
+          <div className="side-menu-separator" />
           <SideMenuItem
             path={'/login'} name={'Sign Out'} onClick={() => {
               actions.logoutAndRedirect();

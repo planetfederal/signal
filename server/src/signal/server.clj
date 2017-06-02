@@ -1,12 +1,24 @@
+;; Copyright 2016-2017 Boundless, http://boundlessgeo.com
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;; http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
+
 (ns signal.server
   (:gen-class)                                              ; for -main method in uberjar
   (:require [io.pedestal.http :as server]
             [signal.components.http.core :as http]
             [com.stuartsierra.component :as component]
-            [signal.components.user.core :as user]
-            [signal.components.store.core :as store]
-            [signal.components.trigger.core :as trigger]
-            [signal.components.notification.core :as notification]
+            [signal.components.processor :as processor]
+            [signal.components.notification :as notification]
             [clojure.tools.logging :as log]))
 
 (defrecord SignalServer [http-service]
@@ -29,14 +41,11 @@
   (log/debug "Making server config with these options" config-options)
   (let [{:keys [http-config]} config-options]
     (component/system-map
-     :user (user/make-user-component)
      :notify (component/using (notification/make-signal-notification-component) [])
-     :trigger (component/using (trigger/make-trigger-component) [:notify])
-     :store (component/using (store/make-store-component) [:trigger])
+     :processor (component/using (processor/make-processor-component) [:notify])
      :http-service (component/using
                     (http/make-http-service-component http-config)
-                    [:user :trigger
-                     :store :notify])
+                    [:processor :notify])
      :server (component/using (new-signal-server) [:http-service]))))
 
 (defn -main

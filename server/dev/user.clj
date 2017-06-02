@@ -18,6 +18,7 @@
             [com.stuartsierra.component :as component]
             [io.pedestal.http :as server]
             [signal.server :refer [make-signal-server]]
+            [clojure.tools.namespace.repl :refer (refresh refresh-all)]
             [clojure.tools.logging :as log]))
 
 (def system-val nil)
@@ -64,8 +65,5 @@
 
 (defn reset []
   (stop)
-  (go))
+  (refresh :after 'user/go))
 
-(defn reset-signal []
-  (stop)
-  (go))

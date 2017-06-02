@@ -1,15 +1,13 @@
 import { combineReducers } from 'redux';
-import dataStores from './dataStores';
 import auth from './auth';
-import triggers from './triggers';
+import processors from './processors';
 import menu from './menu';
 import notifications from './notifications';
 
 // http://redux.js.org/docs/api/combineReducers.html
 const appReducer = combineReducers({
-  dataStores,
   auth,
-  triggers,
+  processors,
   menu,
   notifications,
 });

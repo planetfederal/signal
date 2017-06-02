@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import find from 'lodash/find';
-import TriggerNotification from '../components/TriggerNotification';
+import ProcessorNotification from '../components/ProcessorNotification';
 import * as notificationActions from '../ducks/notifications';
 
 class NotificationContainer extends Component {
@@ -13,7 +13,7 @@ class NotificationContainer extends Component {
 
   render() {
     if (this.props.notification) {
-      return <TriggerNotification {...this.props} />;
+      return <ProcessorNotification {...this.props} />;
     }
     return (
       <div className="wrapper">
