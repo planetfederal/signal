@@ -67,6 +67,3 @@
   (stop)
   (refresh :after 'user/go))
 
-(defn reset-signal []
-  (stop)
-  (go))

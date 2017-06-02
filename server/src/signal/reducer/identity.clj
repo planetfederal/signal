@@ -1,10 +1,12 @@
 (ns signal.reducer.identity
   (:require [signal.reducer.protocol :as proto]))
 
-(defrecord IdentityReducer [trigger-id cfg]
+(def identifier "identity")
+
+(defrecord IdentityReducer [cfg]
   proto/IReducer
   (exec [this v] (identity v)))
 
-(defmethod proto/make-reducer :identity
-  [trigger-id cfg]
-  (->IdentityReducer))
+(defmethod proto/make-reducer identifier
+  [cfg]
+  (->IdentityReducer cfg))

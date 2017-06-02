@@ -15,11 +15,13 @@
 (ns signal.mapper.identity
   (:require [signal.mapper.protocol :as proto]))
 
+(def identitifer "identity")
+
 (defrecord Identity []
   proto/IMapper
   (exec [this v] (identity v)))
 
-(defmethod proto/make-mapper :identity
-  []
+(defmethod proto/make-mapper "identity"
+  [cfg]
   (map->Identity {}))
 

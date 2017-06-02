@@ -1,1 +1,0 @@
-(ns signal.sink.http)

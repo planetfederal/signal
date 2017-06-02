@@ -19,6 +19,8 @@
    [com.stuartsierra.component :as component]
    [signal.components.http.notification :as notif-http]
    [signal.components.http.processor :as processor-http]
+   [signal.components.http.capabilities :as capability-http]
+   [signal.components.http.ping :as ping-http]
    [clojure.tools.logging :as log]))
 
 (defrecord HttpService [http-config user team notify processor store]
@@ -28,7 +30,9 @@
     (let [routes #(route/expand-routes
                    (clojure.set/union #{}
                                       (notif-http/routes notify)
-                                      (processor-http/routes processor)))]
+                                      (processor-http/routes processor)
+                                      (capability-http/routes)
+                                      (ping-http/routes)))]
       (assoc this :service-def (merge http-config
                                       {:env                     :prod
                                        ::http/routes            routes

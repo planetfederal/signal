@@ -17,11 +17,13 @@
             [yesql.core :refer [defqueries]]
             [signal.components.db :as db]
             [signal.components.notification :as notificationapi]
-            [signal.entity.notification :as notification]
             [cljts.io :as jtsio]
             [signal.predicate.protocol :as proto-pred]
+            [signal.input.protocol :as proto-input]
+            [signal.output.protocol :as proto-output]
             [signal.predicate.geowithin]
             [clojure.data.json :as json]
+            [signal.entity.notification :as notification]
             [clojure.tools.logging :as log]))
 
 (def falsey-processors
@@ -38,74 +40,55 @@
   [processor]
   (log/trace "Adding processor" processor)
   ;; builds a compound where clause of (rule AND rule AND ...)
-  (let [t (assoc processor :predicates
-                 (map proto-pred/make-predicate
-                      (:predicates processor)))]
+  (let [t (assoc processor
+            :predicates (map proto-pred/make-predicate (:predicates processor))
+            :input (proto-input/make-input (:input processor))
+            :output (proto-output/make-output (:output processor)))]
+
     (dosync
-     (commute falsey-processors assoc
-              (keyword (:id t)) t))))
+      (commute falsey-processors assoc
+               (keyword (:id t)) t))))
 
 (defn- evict-processor
   "Removes processor from both valid-processors and invalid-processors ref"
   [processor]
   (log/trace "Removing processor" processor)
   (dosync
-   (commute falsey-processors dissoc (keyword (:id processor)))
-   (commute truthy-processors dissoc (keyword (:id processor)))))
+    (commute falsey-processors dissoc (keyword (:id processor)))
+    (commute truthy-processors dissoc (keyword (:id processor)))))
 
 (defn- set-truthy-processor
   "Puts processor in valid-processors ref and removes it from invalid-processors ref"
   [processor]
   (dosync
-   (commute falsey-processors dissoc (keyword (:id processor)))
-   (commute truthy-processors assoc (keyword (:id processor)) processor)))
+    (commute falsey-processors dissoc (keyword (:id processor)))
+    (commute truthy-processors assoc (keyword (:id processor)) processor)))
 
 (defn- set-falsey-processor
   "Puts processor in invalid-processors ref and removes it from valid-processors ref"
   [processor]
   (dosync
-   (commute falsey-processors assoc (keyword (:id processor)) processor)
-   (commute truthy-processors dissoc (keyword (:id processor)))))
+    (commute falsey-processors assoc (keyword (:id processor)) processor)
+    (commute truthy-processors dissoc (keyword (:id processor)))))
 
 (defn- load-processors
   "Fetches all processors from db and loads them into memory"
   []
-  (let [processors (doall (db/processors))]
-    (doall (map add-processor processors))))
+  (let [processors (db/processors)]
+    (map add-processor processors)))
 
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
   [value processor notify]
-  (let [body    (doall (map #(proto-pred/notification % value) (:predicates processor)))
-        emails  (get-in processor [:recipients :emails])
-        devices (get-in processor [:recipients :devices])
-        processor (db/processor-by-id (:id processor))
-        payload {:time    (str (new java.util.Date))
-                 :value   (json/read-str (jtsio/write-geojson value))
-                 :processor processor}]
+  (let [body (doall (map #(proto-pred/notification % value) (:predicates processor)))
+        payload {:time  (str (new java.util.Date))
+                 :value (json/read-str (jtsio/write-geojson value))
+                 :body  body}]
     (do
-      (if (some? devices)
-        (notificationapi/notify
-         notify
-         (notification/make-mobile-notification
-          {:to       devices
-           :priority "alert"
-           :title    (str "Alert for processor: " (:name processor))
-           :body     body
-           :payload  payload})
-         "processor"
-         payload))
-      (if (some? emails)
-        (notificationapi/notify
-         notify
-         (notification/make-email-notification
-          {:to       emails
-           :priority "alert"
-           :title    (str "Alert for processor: " (:name processor))
-           :body     body
-           :payload  payload})
-         "processor"
-         payload))
+      (notificationapi/notify
+        notify
+        processor
+        payload)
       (if-not (:repeated processor)
         (do
           (log/info "Removing processor " (:name processor) " with id:" (:id processor))
@@ -136,7 +119,7 @@
   "Posts a value to be checked on the source channel"
   [processor-comp value]
   ;; the source-channel is the source of incoming data
-    ;; the store it came from
+  ;; the store it came from
   ;; the value to be checked
   (if-not (or (nil? value))
     (check-predicates processor-comp value)))
@@ -170,7 +153,7 @@
   component/Lifecycle
   (start [this]
     (log/debug "Starting processor Component")
-    (load-processors)
+    (doall (load-processors))
     (assoc this :notify notify))
   (stop [this]
     (log/debug "Stopping processor Component")

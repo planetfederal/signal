@@ -1,4 +1,4 @@
-(ns signal.protocols.protocol)
+(ns signal.input.protocol)
 
 (defprotocol IInput
   (recv [this v]))

@@ -151,7 +151,7 @@
   [id]
   (log/debugf "Finding processors with id %s from db" id)
   (some-> (find-by-id-query {:id (java.util.UUID/fromString id)})
-          (first)
+          first
           processor-entity->map))
 
 (defn map->processor-entity

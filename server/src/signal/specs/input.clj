@@ -32,6 +32,4 @@
 (s/def :geojson/type #{"geojson"})
 (s/def :input/geojson (s/keys :req-un [:geojson/url :geojson/type]))
 
-(s/def ::input (s/or :http :input/http
-                      :geojson :input/geojson
-                      :wfs :input/wfs))
+(s/def ::input (s/or :http :input/http))

@@ -19,6 +19,8 @@
             [cljts.relation :as spatial-relation]
             [clojure.data.json :as json]))
 
+(def identifier "geowithin")
+
 (defrecord WithinClause [clause]
   proto/IPredicate
   (check [this value]
@@ -28,6 +30,6 @@
   (notification [this test-value]
     (str (cljts.io/write-geojson test-value) " was within.")))
 
-(defmethod proto/make-predicate "geowithin"
+(defmethod proto/make-predicate identifier
   [predicate]
   (->WithinClause (geo-util/geojsonmap->jtsgeom predicate)))

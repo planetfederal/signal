@@ -17,47 +17,14 @@
             [clojure.core.async :refer [chan <!! >!! close! go alt!]]
             [postal.core :refer [send-message]]
             [signal.components.db :as db]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [signal.output.protocol :as proto]))
 
-(def conn {:host (or (System/getenv "SMTP_HOST")
-                     "email-smtp.us-east-1.amazonaws.com")
-           :ssl  true
-           :user (System/getenv "SMTP_USERNAME")
-           :pass (System/getenv "SMTP_PASSWORD")})
-
-(defn- build-notification-link
-  [id]
-  (let [hostname (or (System/getenv "HOSTNAME")
-                     (.getHostName (java.net.InetAddress/getLocalHost)))]
-    (str "http://" hostname "/notifications/" id)))
-
-(defn- email-recipient
-  [id recipient message]
-  (let [body (str (build-notification-link id))]
-    (send-message conn {:from    "mobile@boundlessgeo.com"
-                        :to      (str recipient)
-                        :subject (str (:title message))
-                        :body    body})))
-
-(defn- send->email
-  [message]
-  (let [recipients (do (zipmap (:notif-ids message) (:to message)))]
-    (doall (map (fn [[id recipient]]
-                  (email-recipient id recipient message)
-                  (db/mark-as-sent id))
-                recipients))))
-
-(defn- process-channel [input-channel]
-  (go (while true
-        (let [v (<!! input-channel)]
-          (case (:output_type v)
-            :email (send->email v)
-            "default")))))
-
-(defn notify [notifcomp message message-type info]
-  (let [ids (map :id (db/create-notifications (:to message) message-type info))]
-    (go (>!! (:send-channel notifcomp)
-             (assoc message :notif-ids ids)))))
+(defn notify [_ processor payload]
+  (let [recipients (proto/recipients (:output processor))
+        ids (map :id
+                 (db/create-notifications recipients "processor" payload))]
+    (proto/send! (:output processor) (assoc payload :notif-ids ids))))
 
 (defn find-notif-by-id
   [notif-comp id]
@@ -67,23 +34,10 @@
   component/Lifecycle
   (start [this]
     (log/debug "Starting Notification Component")
-    (let [c (chan)]
-      (process-channel c)
-      (assoc this :send-channel c)))
+    this)
   (stop [this]
     (log/debug "Stopping Notification Component")
-    (close! (:send-channel this))
-    this))
-
-(defrecord SignalNotificationComponent []
-  component/Lifecycle
-  (start [this]
-    (log/debug "Starting Signal")
-    (let [c (chan)]
-      (process-channel c)
-      (assoc this :send-channel c)))
-  (stop [this]
     this))
 
 (defn make-signal-notification-component []
-  (->SignalNotificationComponent))
+  (->NotificationComponent))
