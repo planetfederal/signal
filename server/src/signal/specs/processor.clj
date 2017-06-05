@@ -18,6 +18,7 @@
             [signal.specs.filter]
             [signal.specs.reducer]
             [signal.specs.predicate]
+            [signal.specs.mapper]
             [signal.specs.output]
             [signal.specs.geojson]))
 
@@ -32,6 +33,7 @@
                                :processor/description
                                :processor/repeated :processor/persistent
                                :signal.specs.input/input
+                               :signal.specs.mapper/mappers
                                :signal.specs.filter/filters
                                :signal.specs.reducer/reducers
                                :signal.specs.predicate/predicates

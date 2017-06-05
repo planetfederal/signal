@@ -9,7 +9,11 @@ const emptyProcessor = {
   name: '',
   description: '',
   repeated: false,
-  predicates: [],
+  recipients: {
+    devices: [],
+    emails: [],
+  },
+  rules: [],
 };
 
 class ProcessorsContainer extends Component {

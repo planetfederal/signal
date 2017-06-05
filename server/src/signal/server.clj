@@ -18,6 +18,7 @@
             [signal.components.http.core :as http]
             [com.stuartsierra.component :as component]
             [signal.components.processor :as processor]
+            [signal.components.poller :as poller]
             [signal.components.notification :as notification]
             [clojure.tools.logging :as log]))
 
@@ -42,7 +43,8 @@
   (let [{:keys [http-config]} config-options]
     (component/system-map
      :notify (component/using (notification/make-signal-notification-component) [])
-     :processor (component/using (processor/make-processor-component) [:notify])
+     :poller (component/using (poller/make-store-component))
+     :processor (component/using (processor/make-processor-component) [:notify :poller])
      :http-service (component/using
                     (http/make-http-service-component http-config)
                     [:processor :notify])

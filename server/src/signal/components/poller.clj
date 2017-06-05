@@ -14,14 +14,12 @@
 
 (ns signal.components.poller
   (:require [com.stuartsierra.component :as component]
-            [signal.components.store.db :as storemodel]
             [signal.components.processor :as processorapi]
             [clj-http.client :as client]
             [cljts.io :as jtsio]
             [signal.specs.store]
             [overtone.at-at :refer [every, mk-pool, stop, stop-and-reset-pool!]]
-            [clojure.tools.logging :as log])
-  (:import (com.boundlessgeo.spatialconnect.schema SCCommand)))
+            [clojure.tools.logging :as log]))
 
 (defn feature-collection->geoms
   "Given a geojson feature collection, return a list of the features' geometries"
@@ -32,63 +30,54 @@
              result []]
         (if (.hasNext features)
           (recur (-> features .next .getDefaultGeometry) (conj result feature))
-          result))
-      [])
-    []))
+          result)) []) []))
 
 (defn fetch-url
-  "Fetches geojson from url and tests each feature for the specified processor"
-  [processor url]
-  (log/debug "Fetching" url)
-  (let [res (client/get url)
-        status (:status res)
-        body (:body res)]
-    (if (= status 200)
-      (let [geoms (-> body
-                      jtsio/read-feature-collection
-                      feature-collection->geoms)]
-        (doall (map (fn [g]
-                      (processorapi/test-value processor "STORE" g)) geoms)))
-      (log/error "Error Fetching" url))))
+  [processor func]
+  (let [url (:url processor)]
+    (if-let [res (client/get url)]
+      (if (= (:status res) 200)
+        (let [geoms (-> (:body res)
+                        jtsio/read-feature-collection
+                        feature-collection->geoms)]
+          (doall (map #(processorapi/test-value processor %))))
+        (log/error "Error fetching " url)))))
+
 
 (def polling-stores (ref {}))
 (def sched-pool (mk-pool))
 
-(defn start-polling [processor store]
-  (let [seconds (get-in store [:options :polling])]
+(defn start-polling [processor]
+  (let [seconds (get-in processor [:options :polling])]
     (every (* 1000 (Integer/parseInt seconds))
            #(fetch-url processor (:uri store)) sched-pool
            :job (keyword (:id store)) :initial-delay 5000)))
 
-(defn stop-polling [store]
-  (stop (keyword (:id store))))
+(defn stop-polling [processor]
+  (stop (keyword (:id processor))))
 
-(defn add-polling-store [processor s]
+(defn add-polling [polling-comp processor func]
   (if (not-empty (get-in s [:options :polling]))
     (do
       (dosync
        (commute polling-stores assoc (keyword (:id s)) s))
       (start-polling processor s))))
 
-(defn remove-polling-store [id]
+(defn remove-polling-store [polling-comp id]
   ; takes a store id string
   (dosync
    (commute polling-stores dissoc (keyword id)))
   (stop-polling (keyword id)))
 
-(defn load-polling-stores [processor]
-  (doall (map (partial add-polling-store processor) (list 1 2 3))))
-
 (defrecord PollingManagementComponent
-  [processor]
+  []
   component/Lifecycle
   (start [this]
     (log/debug "Starting Store Component")
-    (load-polling-stores processor)
-    (assoc this :processor processor))
+    this)
   (stop [this]
     (log/debug "Stopping Store Component")
     this))
 
-(defn make-store-component []
+(defn make-polling-component []
   (map->PollingManagementComponent {}))

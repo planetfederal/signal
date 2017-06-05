@@ -25,8 +25,10 @@
 (s/def :input/wfs (s/keys :req-un [:wfs/type :wfs/url]))
 
 (s/def :http/url :wfs/url)
+(s/def :http/interval pos-int?)
 (s/def :http/type #{"http"})
-(s/def :input/http (s/keys :req-un [:http/url :http/type]))
+(s/def :input/http (s/keys :req-un [:http/url :http/type]
+                           :opt-un [:http/interval]))
 
 (s/def :geojson/url :wfs/url)
 (s/def :geojson/type #{"geojson"})

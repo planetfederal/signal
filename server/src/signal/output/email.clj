@@ -24,7 +24,7 @@
                              :subject (str (:title message))
                              :body    (str (:body message))}))
 
-(defn send!
+(defn- send!
   [email-output message]
   (let [recipients (do (zipmap (:notif-ids message) (:addresses (:cfg email-output))))]
     (doall (map (fn [[id recipient]]

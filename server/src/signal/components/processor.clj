@@ -24,6 +24,7 @@
             [signal.predicate.geowithin]
             [clojure.data.json :as json]
             [signal.entity.notification :as notification]
+            [signal.components.poller :as pollerapi]
             [clojure.tools.logging :as log]))
 
 (def falsey-processors
@@ -37,23 +38,23 @@
 
 (defn- add-processor
   "Adds a processor to the invalid-processors ref"
-  [processor]
+  [processor-comp processor]
   (log/trace "Adding processor" processor)
   ;; builds a compound where clause of (rule AND rule AND ...)
   (let [t (assoc processor
             :predicates (map proto-pred/make-predicate (:predicates processor))
             :input (proto-input/make-input (:input processor))
             :output (proto-output/make-output (:output processor)))]
-
     (dosync
       (commute falsey-processors assoc
                (keyword (:id t)) t))))
 
 (defn- evict-processor
   "Removes processor from both valid-processors and invalid-processors ref"
-  [processor]
+  [processor-comp processor]
   (log/trace "Removing processor" processor)
   (dosync
+    (pollerapi/remove-polling-store (:poller processor-comp) (:id processor))
     (commute falsey-processors dissoc (keyword (:id processor)))
     (commute truthy-processors dissoc (keyword (:id processor)))))
 
@@ -73,9 +74,9 @@
 
 (defn- load-processors
   "Fetches all processors from db and loads them into memory"
-  []
+  [processor-comp]
   (let [processors (db/processors)]
-    (map add-processor processors)))
+    (map add-processor processor-comp processors)))
 
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
@@ -133,28 +134,29 @@
   (db/processor-by-id id))
 
 (defn create
-  [_ t]
+  [processor-comp t]
   (let [processor (db/create-processor t)]
-    (add-processor processor)
+    (add-processor processor-comp processor)
     processor))
 
 (defn modify
-  [_ id t]
+  [processor-comp id t]
   (let [processor (db/modify-processor id t)]
-    (add-processor processor)
+    (add-processor processor-comp processor)
     processor))
 
 (defn delete
-  [_ id]
+  [processor-comp id]
   (db/delete-processor id)
   (evict-processor id))
 
-(defrecord ProcessorComponent [notify]
+(defrecord ProcessorComponent [notify poller]
   component/Lifecycle
   (start [this]
     (log/debug "Starting processor Component")
-    (doall (load-processors))
-    (assoc this :notify notify))
+    (let [comp (assoc this :notify notify :poller poller)]
+      (doall (load-processors comp))
+      comp))
   (stop [this]
     (log/debug "Stopping processor Component")
     this))

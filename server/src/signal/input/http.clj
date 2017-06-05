@@ -6,6 +6,9 @@
 
 (defrecord Http [url interval]
   proto/IInput
+  (interval [this] (if (some? (:interval this))
+                     (:interval this)
+                     0))
   (recv [this value]))
 
 (defmethod proto/make-input identifier
