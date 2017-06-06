@@ -14,10 +14,8 @@
 
 (ns signal.components.poller
   (:require [com.stuartsierra.component :as component]
-            [signal.components.processor :as processorapi]
             [clj-http.client :as client]
             [cljts.io :as jtsio]
-            [signal.specs.store]
             [overtone.at-at :refer [every, mk-pool, stop, stop-and-reset-pool!]]
             [clojure.tools.logging :as log]))
 
@@ -33,40 +31,42 @@
           result)) []) []))
 
 (defn fetch-url
-  [processor func]
-  (let [url (:url processor)]
+  [input]
+  (let [url (:url input)]
     (if-let [res (client/get url)]
       (if (= (:status res) 200)
         (let [geoms (-> (:body res)
                         jtsio/read-feature-collection
                         feature-collection->geoms)]
-          (doall (map #(processorapi/test-value processor %))))
+          (doall (map #((:fn input) %))) geoms)
         (log/error "Error fetching " url)))))
 
-
-(def polling-stores (ref {}))
+(def polling-inputs (ref {}))
 (def sched-pool (mk-pool))
 
-(defn start-polling [processor]
-  (let [seconds (get-in processor [:options :polling])]
-    (every (* 1000 (Integer/parseInt seconds))
-           #(fetch-url processor (:uri store)) sched-pool
-           :job (keyword (:id store)) :initial-delay 5000)))
+(defn start-polling [input]
+  (let [seconds (:interval input)]
+    (every (* 1000 seconds)
+           #(fetch-url input) sched-pool
+           :job (keyword (:processor-id input)) :initial-delay 5000)))
 
 (defn stop-polling [processor]
   (stop (keyword (:id processor))))
 
-(defn add-polling [polling-comp processor func]
-  (if (not-empty (get-in s [:options :polling]))
-    (do
-      (dosync
-       (commute polling-stores assoc (keyword (:id s)) s))
-      (start-polling processor s))))
+(defn add-polling-input [poller-comp processor func]
+  (let [input (:input processor)]
+    (if (< 0 (:interval input))
+      (do
+        (let [input-fn (assoc input :fn func :processor-id (:id processor))]
+          (dosync
+            (commute polling-inputs assoc
+                     (keyword (:id processor)) input-fn))
+          (start-polling input-fn))))))
 
-(defn remove-polling-store [polling-comp id]
+(defn remove-polling-input [_ id]
   ; takes a store id string
   (dosync
-   (commute polling-stores dissoc (keyword id)))
+   (commute polling-inputs dissoc (keyword id)))
   (stop-polling (keyword id)))
 
 (defrecord PollingManagementComponent

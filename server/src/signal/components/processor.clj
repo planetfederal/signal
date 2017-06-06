@@ -23,9 +23,9 @@
             [signal.output.protocol :as proto-output]
             [signal.predicate.geowithin]
             [clojure.data.json :as json]
-            [signal.entity.notification :as notification]
             [signal.components.poller :as pollerapi]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log])
+  (:import [java.util Date]))
 
 (def falsey-processors
   "processors that don't evaluate to true"
@@ -35,28 +35,6 @@
   "If it's a valid processor, data has satisified the rules and we need to
   send an alert"
   (ref {}))
-
-(defn- add-processor
-  "Adds a processor to the invalid-processors ref"
-  [processor-comp processor]
-  (log/trace "Adding processor" processor)
-  ;; builds a compound where clause of (rule AND rule AND ...)
-  (let [t (assoc processor
-            :predicates (map proto-pred/make-predicate (:predicates processor))
-            :input (proto-input/make-input (:input processor))
-            :output (proto-output/make-output (:output processor)))]
-    (dosync
-      (commute falsey-processors assoc
-               (keyword (:id t)) t))))
-
-(defn- evict-processor
-  "Removes processor from both valid-processors and invalid-processors ref"
-  [processor-comp processor]
-  (log/trace "Removing processor" processor)
-  (dosync
-    (pollerapi/remove-polling-store (:poller processor-comp) (:id processor))
-    (commute falsey-processors dissoc (keyword (:id processor)))
-    (commute truthy-processors dissoc (keyword (:id processor)))))
 
 (defn- set-truthy-processor
   "Puts processor in valid-processors ref and removes it from invalid-processors ref"
@@ -72,17 +50,11 @@
     (commute falsey-processors assoc (keyword (:id processor)) processor)
     (commute truthy-processors dissoc (keyword (:id processor)))))
 
-(defn- load-processors
-  "Fetches all processors from db and loads them into memory"
-  [processor-comp]
-  (let [processors (db/processors)]
-    (map add-processor processor-comp processors)))
-
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
   [value processor notify]
   (let [body (doall (map #(proto-pred/notification % value) (:predicates processor)))
-        payload {:time  (str (new java.util.Date))
+        payload {:time  (str (Date.))
                  :value (json/read-str (jtsio/write-geojson value))
                  :body  body}]
     (do
@@ -93,14 +65,14 @@
       (if-not (:repeated processor)
         (do
           (log/info "Removing processor " (:name processor) " with id:" (:id processor))
-          (db/delete-processor (:id processor)))))))
+          (db/delete-processor (:id processor)))
+        (set-truthy-processor processor)))))
 
 (defn- handle-failure
   "Makes the processor invalid b/c it failed the test value."
   [processor]
   (if (nil? ((keyword (:id processor)) @truthy-processors))
     (set-falsey-processor processor)))
-
 
 (defn- check-predicates
   "Maps over all invalid processors to check if they evaluate to true based
@@ -125,6 +97,34 @@
   (if-not (or (nil? value))
     (check-predicates processor-comp value)))
 
+(defn- add-processor
+  "Adds a processor to the invalid-processors ref"
+  [processor-comp processor]
+  (log/trace "Adding processor" processor)
+  ;; builds a compound where clause of (rule AND rule AND ...)
+  (let [t (assoc processor
+            :predicates (map proto-pred/make-predicate (:predicates processor))
+            :input (proto-input/make-input (:input processor))
+            :output (proto-output/make-output (:output processor)))]
+    (dosync
+      (pollerapi/add-polling-input (:poller processor-comp) processor (partial test-value processor-comp))
+      (commute falsey-processors assoc (keyword (:id t)) t))))
+
+(defn- evict-processor
+  "Removes processor from both valid-processors and invalid-processors ref"
+  [processor-comp processor]
+  (log/trace "Removing processor" processor)
+  (dosync
+    (pollerapi/remove-polling-input (:poller processor-comp) (:id processor))
+    (commute falsey-processors dissoc (keyword (:id processor)))
+    (commute truthy-processors dissoc (keyword (:id processor)))))
+
+(defn- load-processors
+  "Fetches all processors from db and loads them into memory"
+  [processor-comp]
+  (let [processors (db/processors)]
+    (map add-processor processor-comp processors)))
+
 (defn all
   [_]
   (db/processors))
@@ -148,7 +148,7 @@
 (defn delete
   [processor-comp id]
   (db/delete-processor id)
-  (evict-processor id))
+  (evict-processor processor-comp id))
 
 (defrecord ProcessorComponent [notify poller]
   component/Lifecycle

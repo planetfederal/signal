@@ -43,7 +43,7 @@
   (let [{:keys [http-config]} config-options]
     (component/system-map
      :notify (component/using (notification/make-signal-notification-component) [])
-     :poller (component/using (poller/make-store-component))
+     :poller (poller/make-polling-component)
      :processor (component/using (processor/make-processor-component) [:notify :poller])
      :http-service (component/using
                     (http/make-http-service-component http-config)
