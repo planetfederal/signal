@@ -20,12 +20,12 @@
 (def url-regex #"((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?")
 
 (s/def :wfs/url (s/with-gen #(re-matches url-regex %)
-                            #(genc/string-from-regex url-regex)))
+                  #(genc/string-from-regex url-regex)))
 (s/def :wfs/type #{"wfs"})
 (s/def :input/wfs (s/keys :req-un [:wfs/type :wfs/url]))
 
 (s/def :http/url (s/with-gen :wfs/url
-                             #(s/gen #{"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"})))
+                   #(s/gen #{"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"})))
 (s/def :http/interval pos-int?)
 (s/def :http/type #{"http"})
 (s/def :input/http (s/keys :req-un [:http/url :http/type]

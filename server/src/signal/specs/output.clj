@@ -18,7 +18,7 @@
 
 (def email-regex #"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}")
 (spec/def :email/email (spec/with-gen #(re-matches email-regex %)
-                                      #(genc/string-from-regex email-regex)))
+                         #(genc/string-from-regex email-regex)))
 (spec/def :email/type #{"email"})
 (spec/def :email/addresses (spec/coll-of :email/email))
 (spec/def :output/email (spec/keys :req-un [:email/type :email/addresses]))

@@ -15,7 +15,6 @@
   (log/debug "Getting all processors")
   (response/ok (processorapi/all processor-comp)))
 
-
 (defn http-get-processor
   "Gets a processor by id"
   [processor-comp request]
@@ -40,7 +39,6 @@
         (log/error "Failed to update processor b/c" reason)
         (response/error (str "Failed to update processor b/c" reason))))))
 
-
 (defn http-post-processor
   "Creates a new processor using the json body"
   [processor-comp request]
@@ -54,7 +52,6 @@
         (log/error "Failed to create processor b/c" reason)
         (response/error (str "Failed to create processor b/c" reason))))))
 
-
 (defn http-delete-processor
   "Deletes a processor"
   [processor-comp request]
@@ -63,16 +60,15 @@
     (processorapi/delete processor-comp id)
     (response/ok "success")))
 
-
 (defn http-test-processor
   "HTTP endpoint used to test processors.  Takes a geojson feature
   in the json body as the feature to test"
   [processor-comp request]
   (processorapi/test-value processor-comp
-                         (-> (:json-params request)
-                             json/write-str
-                             jtsio/read-feature
-                             .getDefaultGeometry))
+                           (-> (:json-params request)
+                               json/write-str
+                               jtsio/read-feature
+                               .getDefaultGeometry))
   (response/ok "success"))
 
 (defn routes [processor-comp]

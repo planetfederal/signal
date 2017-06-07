@@ -22,7 +22,7 @@
   a JTS default feature collection"
   [c]
   (jtsio/read-feature-collection
-    (json/write-str c)))
+   (json/write-str c)))
 
 (defn check-simple-feature
   "Returns true if point is in feature"

@@ -9,7 +9,6 @@
             [signal.input.http :as input-http]
             [signal.output.email :as output-email]))
 
-
 (def mappers
   #{{:type mapper-identity/identitifer}})
 
@@ -61,5 +60,4 @@
      (conj intercept/common-interceptors `http-get-inputs)]
     ["/api/capabilities/outputs" :get
      (conj intercept/common-interceptors `http-get-outputs)]})
-
 

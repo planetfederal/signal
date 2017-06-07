@@ -93,7 +93,7 @@
 ;;;;;;;;;;;;NOTIFICATION;;;;;;;;;;;
 (defn- create-message [message-type info]
   (insert-message<!
-    {:type message-type :info (json/write-str info)}))
+   {:type message-type :info (json/write-str info)}))
 
 (defn find-message-by-id [id]
   (find-message-by-id-query {:id id}))
@@ -105,15 +105,15 @@
         id (:id message)]
     (map #(sanitize-timestamps
            (insert-notification<!
-             {:recipient  %
-              :message_id id})) recipients)))
+            {:recipient  %
+             :message_id id})) recipients)))
 
 (defn create-notification
   [recipient message-type info]
   (sanitize-timestamps
-    (insert-notification<!
-      {:recipient  recipient
-       :message_id (:id (create-message message-type info))})))
+   (insert-notification<!
+    {:recipient  recipient
+     :message_id (:id (create-message message-type info))})))
 
 (defn unsent
   "List of all the unsent notifications"
@@ -158,10 +158,10 @@
   [trg]
   (into trg
         (let [json-keys (list :input :filters :reducers :predicates :output)]
-             (map (fn [ky]
-                     (if-let [value (get trg ky)]
-                       {ky (json/write-str value)}
-                       {})) json-keys))))
+          (map (fn [ky]
+                 (if-let [value (get trg ky)]
+                   {ky (json/write-str value)}
+                   {})) json-keys))))
 
 (defn create-processor
   "Creates a processor definition"
@@ -182,9 +182,9 @@
   [id t]
   (let [entity (map->processor-entity (assoc t :id (java.util.UUID/fromString id)))
         updated-processor (update-processor<!
-                            (assoc entity
-                              :stores
-                              (->StringArray (:stores t))))]
+                           (assoc entity
+                                  :stores
+                                  (->StringArray (:stores t))))]
     (processor-entity->map (assoc t :id (:id updated-processor)
                                   :created_at (:created_at updated-processor)
                                   :updated_at (:updated_at updated-processor)))))

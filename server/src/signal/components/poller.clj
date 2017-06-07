@@ -59,8 +59,8 @@
       (do
         (let [input-fn (assoc input :fn func :processor-id (:id processor))]
           (dosync
-            (commute polling-inputs assoc
-                     (keyword (:id processor)) input-fn))
+           (commute polling-inputs assoc
+                    (keyword (:id processor)) input-fn))
           (start-polling input-fn))))))
 
 (defn remove-polling-input [_ id]
@@ -70,7 +70,7 @@
   (stop-polling (keyword id)))
 
 (defrecord PollingManagementComponent
-  []
+           []
   component/Lifecycle
   (start [this]
     (log/debug "Starting Store Component")
