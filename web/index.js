@@ -12,8 +12,6 @@ import { loginPersistedUser } from './ducks/auth';
 import AppContainer from './containers/AppContainer';
 import { loadState, saveState, requireAuthentication } from './utils';
 import HomeContainer from './containers/HomeContainer';
-import SignUpContainer from './containers/SignUpContainer';
-import SignInContainer from './containers/SignInContainer';
 import ProcessorsContainer from './containers/ProcessorsContainer';
 import ProcessorDetailsContainer from './containers/ProcessorDetailsContainer';
 import NotificationContainer from './containers/NotificationContainer';
@@ -58,9 +56,7 @@ render(
   <Provider store={store}>
     <Router history={history}>
       <Route path="/" name="Home" component={AppContainer}>
-        <IndexRoute component={requireAuthentication(HomeContainer)} />
-        <Route path="/login" name="Login" component={SignInContainer} />
-        <Route path="/signup" name="Sign Up" component={SignUpContainer} />
+        <IndexRoute component={HomeContainer} />
         <Route
           path="/processors" name="Processors"
           component={requireAuthentication(ProcessorsContainer)}
