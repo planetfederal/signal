@@ -21,7 +21,7 @@
                  [org.slf4j/log4j-over-slf4j "1.7.21"]
                  [com.stuartsierra/component "0.3.1"]
                  [clojurewerkz/machine_head "1.0.0-beta9"]
-                 [com.boundlessgeo.spatialconnect/schema "0.7"]
+                 [com.boundlessgeo/schema "0.12"]
                  [com.google.protobuf/protobuf-java "3.1.0"]
                  [buddy "1.1.0"]
                  [camel-snake-kebab "0.4.0"]

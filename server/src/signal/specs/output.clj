@@ -14,13 +14,27 @@
 
 (ns signal.specs.output
   (:require [clojure.spec :as spec]
-            [com.gfredericks.test.chuck.generators :as genc]))
+            [com.gfredericks.test.chuck.generators :as genc]
+            [signal.specs.regex :refer [email-regex,url-regex]]))
 
-(def email-regex #"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}")
 (spec/def :email/email (spec/with-gen #(re-matches email-regex %)
                          #(genc/string-from-regex email-regex)))
 (spec/def :email/type #{"email"})
 (spec/def :email/addresses (spec/coll-of :email/email))
 (spec/def :output/email (spec/keys :req-un [:email/type :email/addresses]))
 
-(spec/def ::output (spec/or :email :output/email))
+(spec/def :webhook/type #{"webhook"})
+(spec/def :webhook/url #(re-matches url-regex %))
+(spec/def :webhook/verb #{:get :put :post :delete})
+(spec/def :output/webhook (spec/keys :req-un [:webhook/type :webhook/verb :webhook/url]))
+
+(spec/def :wfs-t/url (spec/with-gen #(re-matches url-regex %)
+                            #(genc/string-from-regex url-regex)))
+(spec/def :wfs-t/type #{"wfs-t"})
+(spec/def :wfs-t/geometry :signal.specs.geojson/feature-spec)
+
+(spec/def :output/wfs-t (spec/keys :req-un [:wfs-t/type :wfs-t/url :wfs-t/geojson]))
+
+(spec/def ::output (spec/or :email :output/email
+                            :webhook :output/webhook
+                            :wfs-t :output/wfs-t))

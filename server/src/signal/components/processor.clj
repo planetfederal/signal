@@ -24,7 +24,9 @@
             [signal.predicate.geowithin]
             [clojure.data.json :as json]
             [signal.components.poller :as pollerapi]
-            [clojure.tools.logging :as log])
+            [signal.specs.geojson]
+            [clojure.tools.logging :as log]
+            [clojure.spec :as spec])
   (:import [java.util Date]))
 
 (def falsey-processors
@@ -97,18 +99,20 @@
   (if-not (or (nil? value))
     (check-predicates processor-comp value)))
 
-(defn- add-processor
+(defn add-processor
   "Adds a processor to the invalid-processors ref"
   [processor-comp processor]
   (log/trace "Adding processor" processor)
   ;; builds a compound where clause of (rule AND rule AND ...)
-  (let [t (assoc processor
-                 :predicates (map proto-pred/make-predicate (:predicates processor))
-                 :input (proto-input/make-input (:input processor))
-                 :output (proto-output/make-output (:output processor)))]
-    (dosync
-     (pollerapi/add-polling-input (:poller processor-comp) processor (partial test-value processor-comp))
-     (commute falsey-processors assoc (keyword (:id t)) t))))
+  (if (spec/conform :signal.specs.processor/processor-spec processor)
+    (let [proc (assoc processor
+                   :predicates (map proto-pred/make-predicate (:predicates processor))
+                   :input (proto-input/make-input (:input processor))
+                   :output (proto-output/make-output (:output processor)))]
+      (dosync
+       (pollerapi/add-polling-input (:poller processor-comp) processor (partial test-value processor-comp))
+       (commute falsey-processors assoc (keyword (:id proc)) proc)))
+    (log/error (spec/explain :signal.specs.processor/processor-spec processor))))
 
 (defn- evict-processor
   "Removes processor from both valid-processors and invalid-processors ref"

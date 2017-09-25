@@ -13,26 +13,26 @@
 ;; limitations under the License.
 
 (ns signal.specs.input
-  (:require [clojure.spec :as s]
+  (:require [clojure.spec :as spec]
             [signal.specs.output]
-            [com.gfredericks.test.chuck.generators :as genc]))
+            [com.gfredericks.test.chuck.generators :as genc]
+            [signal.specs.regex :refer [url-regex]]))
 
-(def url-regex #"((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?")
 
-(s/def :wfs/url (s/with-gen #(re-matches url-regex %)
-                  #(genc/string-from-regex url-regex)))
-(s/def :wfs/type #{"wfs"})
-(s/def :input/wfs (s/keys :req-un [:wfs/type :wfs/url]))
+(spec/def :wfs/url (spec/with-gen #(re-matches url-regex %)
+                     #(genc/string-from-regex url-regex)))
+(spec/def :wfs/type #{"wfs"})
+(spec/def :input/wfs (spec/keys :req-un [:wfs/type :wfs/url]))
 
-(s/def :http/url (s/with-gen :wfs/url
-                   #(s/gen #{"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"})))
-(s/def :http/interval pos-int?)
-(s/def :http/type #{"http"})
-(s/def :input/http (s/keys :req-un [:http/url :http/type]
+(spec/def :http/url (spec/with-gen :wfs/url
+                      #(spec/gen #{"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"})))
+(spec/def :http/interval pos-int?)
+(spec/def :http/type #{"http"})
+(spec/def :input/http (spec/keys :req-un [:http/url :http/type]
                            :opt-un [:http/interval]))
 
-(s/def :geojson/url :wfs/url)
-(s/def :geojson/type #{"geojson"})
-(s/def :input/geojson (s/keys :req-un [:geojson/url :geojson/type]))
+(spec/def :geojson/url :wfs/url)
+(spec/def :geojson/type #{"geojson"})
+(spec/def :input/geojson (spec/keys :req-un [:geojson/url :geojson/type]))
 
-(s/def ::input (s/or :http :input/http))
+(spec/def ::input (spec/or :geojson :input/geojson))
