@@ -18,10 +18,10 @@
    :repeated false
    :persistent false
    :input-ids [input-id]
-   :mappers [{:type "identity"}]
-   :filters [{:type "identity"}]
-   :reducers [{:type "identity"}]
-   :predicates [{:type "identity"}]
+   :mappers [{:type :identity}]
+   :filters [{:type :identity}]
+   :reducers [{:type :identity}]
+   :predicates [{:type :identity}]
    :output {:type :webhook
             :url "http://localhost:8085/api/test/webhook"
             :verb :post}})
