@@ -3,7 +3,7 @@
             [postal.core :as postal]
             [signal.components.db :as db]))
 
-(def identifier "email")
+(def identifier :email)
 
 (def conn {:host (or (System/getenv "SMTP_HOST")
                      "email-smtp.us-east-1.amazonaws.com")
@@ -32,9 +32,9 @@
                   (db/mark-as-sent id))
                 recipients))))
 
-(defrecord Email [cfg]
+(defrecord Email [addresses]
   proto/IOutput
-  (recipients [this] (:addresses (:cfg this)))
+  (recipients [this] (:addresses this))
   (send! [this message]
     (send! this message)))
 

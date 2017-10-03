@@ -17,4 +17,4 @@
 (defn routes
   []
   #{["/api/test/webhook" :get (conj intercept/common-interceptors `webhook-sample-get)]
-    ["/api/tets/webhook" :post (conj intercept/common-interceptors `webhook-sample-accept)]})
+    ["/api/test/webhook" :post (conj intercept/common-interceptors `webhook-sample-accept)]})

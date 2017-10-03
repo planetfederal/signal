@@ -14,19 +14,20 @@
 
 (ns signal.components.processor
   (:require [com.stuartsierra.component :as component]
-            [yesql.core :refer [defqueries]]
+            [cljts.io :as jtsio]
+            [clojure.data.json :as json]
+            [clojure.tools.logging :as log]
+            [clojure.spec :as spec]
             [signal.components.db :as db]
             [signal.components.notification :as notificationapi]
-            [cljts.io :as jtsio]
-            [signal.predicate.protocol :as proto-pred]
-            [signal.input.protocol :as proto-input]
+            [signal.output.email]
             [signal.output.protocol :as proto-output]
+            [signal.output.webhook]
             [signal.predicate.geowithin]
-            [clojure.data.json :as json]
-            [signal.components.poller :as pollerapi]
+            [signal.predicate.protocol :as proto-pred]
             [signal.specs.geojson]
-            [clojure.tools.logging :as log]
-            [clojure.spec :as spec])
+            [xy.geojson :as geojson]
+            [yesql.core :refer [defqueries]])
   (:import [java.util Date]))
 
 (def falsey-processors
@@ -57,7 +58,7 @@
   [value processor notify]
   (let [body (doall (map #(proto-pred/notification % value) (:predicates processor)))
         payload {:time  (str (Date.))
-                 :value (json/read-str (jtsio/write-geojson value))
+                 :value value
                  :body  body}]
     (do
       (notificationapi/notify
@@ -107,10 +108,8 @@
   (if (spec/conform :signal.specs.processor/processor-spec processor)
     (let [proc (assoc processor
                    :predicates (map proto-pred/make-predicate (:predicates processor))
-                   :input (proto-input/make-input (:input processor))
                    :output (proto-output/make-output (:output processor)))]
       (dosync
-       (pollerapi/add-polling-input (:poller processor-comp) processor (partial test-value processor-comp))
        (commute falsey-processors assoc (keyword (:id proc)) proc)))
     (log/error (spec/explain :signal.specs.processor/processor-spec processor))))
 
@@ -119,7 +118,6 @@
   [processor-comp processor]
   (log/trace "Removing processor" processor)
   (dosync
-   (pollerapi/remove-polling-input (:poller processor-comp) (:id processor))
    (commute falsey-processors dissoc (keyword (:id processor)))
    (commute truthy-processors dissoc (keyword (:id processor)))))
 
@@ -154,11 +152,11 @@
   (db/delete-processor id)
   (evict-processor processor-comp id))
 
-(defrecord ProcessorComponent [notify poller]
+(defrecord ProcessorComponent [notify]
   component/Lifecycle
   (start [this]
     (log/debug "Starting processor Component")
-    (let [comp (assoc this :notify notify :poller poller)]
+    (let [comp (assoc this :notify notify)]
       (doall (load-processors comp))
       comp))
   (stop [this]

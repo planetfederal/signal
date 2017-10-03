@@ -37,6 +37,7 @@
                  [org.apache.kafka/kafka-streams "0.10.0.0-cp1"
                   :exclusions [org.slf4j/slf4j-log4j12]]
                  [clj-time "0.13.0"]
+                 [xy "0.4.1"]
                  [ymilky/franzy "0.0.1"]
                  [funcool/beicon "3.5.0"]]
 

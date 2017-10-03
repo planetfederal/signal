@@ -18,21 +18,19 @@
             [com.gfredericks.test.chuck.generators :as genc]
             [signal.specs.regex :refer [url-regex]]))
 
-
+(spec/def ::id uuid?)
 (spec/def :wfs/url (spec/with-gen #(re-matches url-regex %)
                      #(genc/string-from-regex url-regex)))
 (spec/def :wfs/type #{"wfs"})
-(spec/def :input/wfs (spec/keys :req-un [:wfs/type :wfs/url]))
+(spec/def ::input-wfs (spec/keys :req-un [::id :wfs/type :wfs/url]))
 
 (spec/def :http/url (spec/with-gen :wfs/url
                       #(spec/gen #{"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"})))
 (spec/def :http/interval pos-int?)
 (spec/def :http/type #{"http"})
-(spec/def :input/http (spec/keys :req-un [:http/url :http/type]
+(spec/def ::input-http (spec/keys :req-un [::id :http/url :http/type]
                            :opt-un [:http/interval]))
 
-(spec/def :geojson/url :wfs/url)
-(spec/def :geojson/type #{"geojson"})
-(spec/def :input/geojson (spec/keys :req-un [:geojson/url :geojson/type]))
-
-(spec/def ::input (spec/or :geojson :input/geojson))
+(spec/def ::input (spec/or ::input-http ::input-wfs))
+(spec/def ::inputs (spec/coll-of ::input))
+(spec/def ::input-ids (spec/or :all empty? :filtered (spec/coll-of ::id)))

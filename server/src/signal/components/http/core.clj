@@ -21,6 +21,7 @@
    [signal.components.http.processor :as processor-http]
    [signal.components.http.capabilities :as capability-http]
    [signal.components.http.ping :as ping-http]
+   [signal.components.http.test :as test-http]
    [clojure.tools.logging :as log]))
 
 (defrecord HttpService [http-config user team notify processor store]
@@ -31,6 +32,7 @@
                    (clojure.set/union #{}
                                       (notif-http/routes notify)
                                       (processor-http/routes processor)
+                                      (test-http/routes)
                                       (capability-http/routes)
                                       (ping-http/routes)))]
       (assoc this :service-def (merge http-config

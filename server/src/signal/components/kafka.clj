@@ -38,7 +38,7 @@
             "bootstrap.servers" servers
             "client.id" client-id
             "acks" "all")
-                    ^Serializer key-serializer
+     ^Serializer key-serializer
                     ^Serializer value-serializer)))
 
 (defn construct-consumer
@@ -53,7 +53,7 @@
             ConsumerConfig/CLIENT_ID_CONFIG client-id
             ConsumerConfig/GROUP_ID_CONFIG client-id
             ConsumerConfig/BOOTSTRAP_SERVERS_CONFIG servers)
-                    ^Deserializer key-deserializer
+     ^Deserializer key-deserializer
                     ^Deserializer value-deserializer)))
 
 (defrecord KafkaComponent [producer-config consumer-config]

@@ -64,7 +64,5 @@
 
 (defn setup-fixtures [f]
   (user/go)
-  (let [ah (authenticate "admin@something.com" "admin")]
-    (reset! auth-header ah))
   (f)
   (user/stop))
