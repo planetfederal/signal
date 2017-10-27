@@ -26,6 +26,20 @@
             :url "http://localhost:8085/api/test/webhook"
             :verb :post}})
 
+(def geowithin-processor
+  {:id (str (java.util.UUID/randomUUID))
+   :name "geowithin-test-processor"
+   :repeated false
+   :persistent false
+   :input-ids [input-id]
+   :mappers [{:type :identity}]
+   :filters [{:type :identity}]
+   :reducers [{:type :identity}]
+   :predicates [{:type :geowithin}]
+
+   :output {:type :webhook}
+         :url "http://localhost:8085/api/test/webhook"})
+
 (use-fixtures :once utils/setup-fixtures)
 
 (def test-value {:id 1 :type "Feature"

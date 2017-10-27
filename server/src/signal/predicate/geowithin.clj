@@ -19,7 +19,7 @@
             [cljts.relation :as spatial-relation]
             [clojure.data.json :as json]))
 
-(def identifier "geowithin")
+(def identifier :geowithin)
 
 (defrecord WithinClause [clause]
   proto/IPredicate

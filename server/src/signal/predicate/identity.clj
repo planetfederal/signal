@@ -2,7 +2,7 @@
 (ns signal.predicate.identity
   (:require [signal.predicate.protocol :as proto]))
 
-(def identifier "identity")
+(def identifier :identity)
 
 (defrecord IdentityClause [clause]
   proto/IPredicate
