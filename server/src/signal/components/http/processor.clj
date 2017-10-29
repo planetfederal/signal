@@ -1,13 +1,11 @@
 (ns signal.components.http.processor
-  (:require [signal.components.http.response :as response]
-            [signal.components.http.intercept :as intercept]
-            [cljts.io :as jtsio]
-            [signal.components.processor :as processorapi]
-            [signal.specs.processor]
-            [clojure.data.json :as json]
-            [clojure.tools.logging :as log]
-            [clojure.spec :as s]
-            [signal.components.processor :as processorapi]))
+  (:require
+    [cljts.io :as jtsio]
+    [signal.components.http.intercept :as intercept]
+    [signal.components.http.response :as response]
+    [clojure.data.json :as json]
+    [clojure.tools.logging :as log]
+    [signal.components.processor :as processorapi]))
 
 (defn http-get-all-processors
   "Returns http response of all processors"
@@ -32,12 +30,8 @@
   (log/debug "Updating processor")
   (let [t (:json-params request)]
     (log/debug "Validating processor")
-    (if (s/valid? :signal.specs.processor/processor-spec t)
-      (let [processor (processorapi/modify processor-comp (get-in request [:path-params :id]) t)]
-        (response/ok processor))
-      (let [reason (s/explain-str :signal.specs.processor/processor-spec t)]
-        (log/error "Failed to update processor b/c" reason)
-        (response/error (str "Failed to update processor b/c" reason))))))
+    (let [processor (processorapi/modify processor-comp (get-in request [:path-params :id]) t)]
+      (response/ok processor))))
 
 (defn http-post-processor
   "Creates a new processor using the json body"
@@ -45,12 +39,8 @@
   (log/debug "Adding new processor")
   (let [t (:json-params request)]
     (log/debug "Validating processor")
-    (if (s/valid? :signal.specs.processor/processor-spec t)
-      (let [processor (processorapi/create processor-comp t)]
-        (response/ok processor))
-      (let [reason (s/explain-str :signal.specs.processor/processor-spec t)]
-        (log/error "Failed to create processor b/c" reason)
-        (response/error (str "Failed to create processor b/c" reason))))))
+    (let [processor (processorapi/create processor-comp t)]
+      (response/ok processor))))
 
 (defn http-delete-processor
   "Deletes a processor"

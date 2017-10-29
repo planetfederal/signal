@@ -12,29 +12,30 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.specs.processor
-  (:require [clojure.spec :as s]
-            [signal.specs.input]
-            [signal.specs.filter]
-            [signal.specs.reducer]
-            [signal.specs.predicate]
-            [signal.specs.mapper]
-            [signal.specs.output]
-            [signal.specs.geojson]))
+(ns signal.specs.processor)
+  ;(:require [clojure.spec.alpha :as s]))
+            ;[signal.specs.input]
+            ;[signal.specs.filter]
+            ;[signal.specs.reducer]
+            ;[signal.specs.predicate]
+            ;[signal.specs.mapper]
+            ;[signal.specs.output]
+            ;[signal.specs.geojson]))
 
-(s/def :processor/id pos-int?)
-(s/def :processor/name string?)
-(s/def :processor/description string?)
-(s/def :processor/repeated boolean?)
-(s/def :processor/persistent boolean?)
 
-(s/def ::processor-spec (s/keys :req-un
-                                [:processor/id :processor/name
-                                 :processor/description
-                                 :processor/repeated :processor/persistent
-                                 :signal.specs.input/input-ids
-                                 :signal.specs.mapper/mappers
-                                 :signal.specs.filter/filters
-                                 :signal.specs.reducer/reducers
-                                 :signal.specs.predicate/predicates
-                                 :signal.specs.output/output]))
+;(s/def :processor/id pos-int?)
+;(s/def :processor/name string?)
+;(s/def :processor/description string?)
+;(s/def :processor/repeated boolean?)
+;(s/def :processor/persistent boolean?)
+;
+;(s/def ::processor-spec (s/keys :req-un
+;                                [:processor/id :processor/name
+;                                 :processor/description
+;                                 :processor/repeated :processor/persistent]))
+;                                 ;:signal.specs.input/input-ids]))
+;                                 ;:signal.specs.mapper/mappers]))
+;                                 ;:signal.specs.filter/filters]))
+;                                 ;:signal.specs.reducer/reducers]))
+;                                 ;:signal.specs.predicate/predicates]))
+;                                 ;:signal.specs.output/output]))

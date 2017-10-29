@@ -1,7 +1,7 @@
 (ns signal.output.email
   (:require [signal.output.protocol :as proto]
             [postal.core :as postal]
-            [signal.components.db :as db]))
+            [signal.components.database :as db]))
 
 (def identifier :email)
 

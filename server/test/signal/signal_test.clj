@@ -1,9 +1,10 @@
 (ns signal.signal-test
   (:require [clojure.test :refer :all]
-            [clojure.spec :as s]
+            [clojure.spec.alpha :as s]
             [signal.test-utils :as utils]
             [signal.components.input-manager :as input-api]
-            [signal.components.processor :as processor-api]))
+            [signal.components.processor :as processor-api]
+            [signal.test-user :as user]))
 
 (def input-id (java.util.UUID/randomUUID))
 (def input {:type :http
@@ -38,7 +39,7 @@
    :predicates [{:type :geowithin}]
 
    :output {:type :webhook}
-         :url "http://localhost:8085/api/test/webhook"})
+   :url "http://localhost:8085/api/test/webhook"})
 
 (use-fixtures :once utils/setup-fixtures)
 
@@ -47,10 +48,10 @@
                  :properties {}})
 
 (deftest ^:integration processor
-         (let [proc-comp (:processor user/system-val)
-               input-comp (:input user/system-val)]
-             (processor-api/add-processor proc-comp identity-processor)
-             (input-api/add-input input-comp
-                                  input
-                                  (partial processor-api/test-value proc-comp))
-             (processor-api/test-value proc-comp test-value)))
+  (let [proc-comp (:processor user/system-val)
+        input-comp (:input user/system-val)]
+    (processor-api/add-processor proc-comp identity-processor)
+    (input-api/add-input input-comp
+                         input
+                         (partial processor-api/test-value proc-comp))
+    (processor-api/test-value proc-comp test-value)))

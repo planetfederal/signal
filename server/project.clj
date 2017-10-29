@@ -3,10 +3,13 @@
   :url "http://github.com/boundlessgeo/signal"
   :license {:name "Apache License, Version 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0"}
-  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
+  :dependencies [[org.clojure/clojure "1.9.0-beta3"]
+                 [org.clojure/spec.alpha "0.1.134"]
                  [org.clojure/data.json "0.2.6"]
-                 [io.pedestal/pedestal.service "0.5.1"]
+                 [io.pedestal/pedestal.service "0.5.1"
+                  :exclusions [org.clojure/core.async]]
                  [io.pedestal/pedestal.jetty "0.5.1"]
+                 [org.clojure/core.async "0.3.443"]
                  [ragtime "0.5.3"]
                  [yesql "0.5.2"]
                  [cljfmt "0.5.1"]
@@ -37,47 +40,32 @@
                  [org.apache.kafka/kafka-streams "0.10.0.0-cp1"
                   :exclusions [org.slf4j/slf4j-log4j12]]
                  [clj-time "0.13.0"]
-                 [xy "0.4.1"]
-                 [ymilky/franzy "0.0.1"]
-                 [funcool/beicon "3.5.0"]]
-
+                 [tetriscode/xy "0.5.0"]]
   :repositories  [["osgeo" "http://download.osgeo.org/webdav/geotools/"]
                   ["boundlessgeo-releases" "https://repo.boundlessgeo.com/artifactory/release/"]
                   ["clojars" {:sign-releases false}]
                   ["confluent" {:url "http://packages.confluent.io/maven/"}]
                   ["project" "file:repo"]]
-  :dev-dependencies [[lein-reload "1.0.0"]]
-
+  :dev-dependencies [[lein-reload "1.0.0"]
+                     [pjstadig/humane-test-output "0.8.3"]
+                     [com.jakemccrary/lein-test-refresh "0.21.1"]]
   :plugins [[lein-environ "1.0.3"]
             [lein-cljfmt "0.5.6"]
             [ragtime/ragtime.lein "0.3.6"]
             [jonase/eastwood "0.2.3"]
             [lein-codox "0.10.2"]
-            [lein-cloverage "1.0.9"]
-            [cider/cider-nrepl "0.13.0"]]
+            [lein-cloverage "1.0.9"]]
 
   :aliases {"migrate" ["run" "-m" "signal.db.conn/migrate"]
             "rollback" ["run" "-m" "signal.db.conn/rollback"]
             "sampledata" ["run" "-m" "signal.generate-data"]}
   :monkeypatch-clojure-test false
-  :min-lein-version "2.0.0"
   :resource-paths ["config", "resources"]
-  ;; If you use HTTP/2 or ALPN, use the java-agent to pull in the correct alpn-boot dependency
-  ;:java-agents [[org.mortbay.jetty.alpn/jetty-alpn-agent "2.0.3"]]
   :profiles {:dev {:source-paths ["dev"]
                    :resource-paths ["config", "resources"]
-                   :dependencies [[io.pedestal/pedestal.service-tools "0.5.1"]
-                                  [org.clojure/tools.namespace "0.2.3"]
-                                  [org.clojure/java.classpath "0.2.0"]
-                                  [org.clojure/test.check "0.9.0"]]
+                   :dependencies [[io.pedestal/pedestal.service-tools "0.5.1"]]
                    :plugins [[test2junit "1.2.2"]]}
              :uberjar {:aot :all
-                       :dependencies [[org.clojure/test.check "0.9.0"]]}
-             :user {
-                    :plugins  [[cider/cider-nrepl "0.13.0"]
-                               [refactor-nrepl "1.1.0"]]
-                    :dependencies [[org.clojure/tools.nrepl "0.2.12"]]}}
-  :test2junit-output-dir "target/test-results"
-  :test2junit-run-ant true
+                       :dependencies [[org.clojure/test.check "0.9.0"]]}}
   :uberjar-name "signal-server.jar"
   :main ^{:skip-aot true} signal.server)

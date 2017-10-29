@@ -14,9 +14,7 @@
 
 (ns signal.components.notification
   (:require [com.stuartsierra.component :as component]
-            [clojure.core.async :refer [chan <!! >!! close! go alt!]]
-            [postal.core :refer [send-message]]
-            [signal.components.db :as db]
+            [signal.components.database :as db]
             [clojure.tools.logging :as log]
             [signal.output.protocol :as proto]))
 
@@ -27,7 +25,7 @@
     (proto/send! (:output processor) (assoc payload :notif-ids ids))))
 
 (defn find-notif-by-id
-  [notif-comp id]
+  [_ id]
   (db/find-notif-by-id id))
 
 (defrecord NotificationComponent []

@@ -12,18 +12,16 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.components.db
+(ns signal.components.database
   (:require [signal.db.conn :as db]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
-            [yesql.core :refer [defqueries]]
-            [buddy.hashers :as hashers]
-            [clojure.java.jdbc :as jdbc]
-            [clojure.spec :as s]))
+            [yesql.core :as ysql]
+            [clojure.java.jdbc :as clj-jdbc]))
 
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
-(defqueries "sql/notification.sql" {:connection db/db-spec})
-(defqueries "sql/processor.sql" {:connection db/db-spec})
+(ysql/defqueries "sql/notification.sql" {:connection db/db-spec})
+(ysql/defqueries "sql/processor.sql" {:connection db/db-spec})
 
 ;;;;;;;;;;;SANITIZERS;;;;;;;;
 (defn sanitize-timestamps [v]
@@ -56,7 +54,7 @@
 
 ;;;;;;;;;;;;UTILS;;;;;;;;;;;;;;;;;;
 (deftype StringArray [items]
-  clojure.java.jdbc/ISQLParameter
+  clj-jdbc/ISQLParameter
   (set-parameter [_ stmt ix]
     (let [as-array (into-array Object items)
           jdbc-array (.createArrayOf (.getConnection stmt) "text" as-array)]
@@ -83,7 +81,7 @@
     (clojure.data.json/-write (str uuid) out)))
 
 (extend-type org.postgresql.util.PGobject
-  jdbc/IResultSetReadColumn
+  clj-jdbc/IResultSetReadColumn
   (result-set-read-column [val rsmeta idx]
     (let [colType (.getColumnTypeName rsmeta idx)]
       (if (contains? #{"json" "jsonb"} colType)
@@ -166,16 +164,13 @@
 (defn create-processor
   "Creates a processor definition"
   [t]
-  (log/debug "Validating processor against spec")
-  (if (s/valid? :signal.specs.processor/processor-spec t)
+  (log/debug "Validating processor against spec"
     (do
       (let [entity (map->processor-entity t)
             new-processor (insert-processor<! entity)]
         (processor-entity->map (assoc t :id (:id new-processor)
                                       :created_at (:created_at new-processor)
-                                      :updated_at (:updated_at new-processor)))))
-    (log/error (str "Failed to create new processor b/c"
-                    (s/explain-str :signal.specs.processor/processor-spec t)))))
+                                      :updated_at (:updated_at new-processor)))))))
 
 (defn modify-processor
   "Update processor"

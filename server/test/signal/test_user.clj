@@ -12,13 +12,12 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns user
-  (:require [clojure.pprint :refer (pprint)]
+(ns signal.test-user
+  (:require [clojure.pprint :refer [pprint]]
             [clojure.repl :refer :all]
             [com.stuartsierra.component :as component]
             [io.pedestal.http :as server]
             [signal.server :refer [make-signal-server]]
-            [clojure.tools.namespace.repl :refer (refresh refresh-all)]
             [clojure.tools.logging :as log]))
 
 (def system-val nil)
@@ -62,8 +61,4 @@
 (defn go []
   (init)
   (start))
-
-(defn reset []
-  (stop)
-  (refresh :after 'user/go))
 

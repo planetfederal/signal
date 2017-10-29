@@ -6,8 +6,7 @@
 (defrecord KafkaConsumer [id]
   proto/IStreamingInput
   (start [this])
-  (stop [this])
-  (recv [this value]))
+  (stop [this]))
 
 (defmethod proto/make-streaming-input identifier
   [cfg]

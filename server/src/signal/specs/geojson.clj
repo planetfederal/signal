@@ -13,7 +13,7 @@
 ;; limitations under the License.
 
 (ns signal.specs.geojson
-  (:require [clojure.spec :as s]
+  (:require [clojure.spec.alpha :as s]
             [clojure.test.check.generators :as gen]))
 
 (defn circle-gen [x y]

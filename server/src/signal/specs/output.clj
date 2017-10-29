@@ -13,7 +13,8 @@
 ;; limitations under the License.
 
 (ns signal.specs.output
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
+            [signal.specs.geojson]
             [com.gfredericks.test.chuck.generators :as genc]
             [signal.specs.regex :refer [email-regex,url-regex]]))
 
@@ -29,7 +30,7 @@
 (spec/def :output/webhook (spec/keys :req-un [:webhook/type :webhook/verb :webhook/url]))
 
 (spec/def :wfs-t/url (spec/with-gen #(re-matches url-regex %)
-                            #(genc/string-from-regex url-regex)))
+                       #(genc/string-from-regex url-regex)))
 (spec/def :wfs-t/type #{"wfs-t"})
 (spec/def :wfs-t/geometry :signal.specs.geojson/feature-spec)
 

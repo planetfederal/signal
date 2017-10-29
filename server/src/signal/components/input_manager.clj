@@ -53,7 +53,7 @@
   (if (< 0 (:interval polling-input))
     (let [input-fn (assoc polling-input :fn func)]
       (dosync
-        (commute inputs assoc (keyword (:id polling-input)) input-fn))
+       (commute inputs assoc (keyword (:id polling-input)) input-fn))
       (start-polling input-fn))))
 
 (defn remove-streaming-input [streaming-input]
@@ -63,7 +63,7 @@
 (defn remove-polling-input [_ polling-input]
   ; takes a store id string
   (dosync
-    (commute inputs dissoc (keyword (:id polling-input))))
+   (commute inputs dissoc (keyword (:id polling-input))))
   (stop-polling (keyword (:id polling-input))))
 
 (defn add-input [poller-comp input func]

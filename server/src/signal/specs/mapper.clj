@@ -13,7 +13,7 @@
 ;; limitations under the License.
 
 (ns signal.specs.mapper
-  (:require [clojure.spec :as s]))
+  (:require [clojure.spec.alpha :as s]))
 
 (s/def :identity/type #{:identity})
 (s/def :identity/mapper (s/keys :req-un [:identity/type]))

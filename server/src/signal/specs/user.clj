@@ -13,7 +13,8 @@
 ;; limitations under the License.
 
 (ns signal.specs.user
-  (:require [clojure.spec :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [signal.specs.regex :refer [email-regex]]))
 
 ;;; specs about user account data
 (s/def :user/email (s/and string? #(re-matches email-regex %)))

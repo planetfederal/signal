@@ -13,7 +13,7 @@
 ;; limitations under the License.
 
 (ns signal.specs.input
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [signal.specs.output]
             [com.gfredericks.test.chuck.generators :as genc]
             [signal.specs.regex :refer [url-regex]]))
@@ -29,7 +29,7 @@
 (spec/def :http/interval pos-int?)
 (spec/def :http/type #{"http"})
 (spec/def ::input-http (spec/keys :req-un [::id :http/url :http/type]
-                           :opt-un [:http/interval]))
+                                  :opt-un [:http/interval]))
 
 (spec/def ::input (spec/or ::input-http ::input-wfs))
 (spec/def ::inputs (spec/coll-of ::input))

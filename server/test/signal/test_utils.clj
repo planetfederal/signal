@@ -13,12 +13,11 @@
 ;; limitations under the License.
 
 (ns signal.test-utils
-  (:require [clojure.spec.test :as stest]
-            [signal.server :as signal]
+  (:require [clojure.spec.test.alpha :as stest]
             [clojure.walk :refer [keywordize-keys]]
             [io.pedestal.test :refer [response-for]]
             [clojure.data.json :as json]
-            [clojure.string :as cstr]))
+            [signal.test-user :as user]))
 
 (defn spec-passed? [s] (-> (stest/check s
                                         {:clojure.spec.test.check/opts

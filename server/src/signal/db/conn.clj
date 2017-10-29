@@ -13,10 +13,9 @@
 ;; limitations under the License.
 
 (ns signal.db.conn
-  (:import com.mchange.v2.c3p0.ComboPooledDataSource)
   (:require [yesql.core :refer [defqueries]]
-            [ragtime.jdbc :as jdbc]
             [ragtime.repl :as repl]
+            [ragtime.jdbc :as rjdbc]
             [clojure.data.json :as json]
             [jdbc.pool.c3p0 :as pool]
             [clojure.tools.logging :as log]))
@@ -46,8 +45,8 @@
 
 (defn loadconfig []
   (log/debug "Loading database migration config")
-  {:datastore  (jdbc/sql-database db-spec {:migrations-table "signal.migrations"})
-   :migrations (jdbc/load-resources "migrations")})
+  {:datastore  (rjdbc/sql-database db-spec {:migrations-table "signal.migrations"})
+   :migrations (rjdbc/load-resources "migrations")})
 
 (defn migrate []
   (log/debug "Running database migration")

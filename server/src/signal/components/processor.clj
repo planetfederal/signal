@@ -14,19 +14,14 @@
 
 (ns signal.components.processor
   (:require [com.stuartsierra.component :as component]
-            [cljts.io :as jtsio]
-            [clojure.data.json :as json]
             [clojure.tools.logging :as log]
-            [clojure.spec :as spec]
-            [signal.components.db :as db]
+            [signal.components.database :as db]
             [signal.components.notification :as notificationapi]
             [signal.output.email]
             [signal.output.protocol :as proto-output]
             [signal.output.webhook]
             [signal.predicate.geowithin]
             [signal.predicate.protocol :as proto-pred]
-            [signal.specs.geojson]
-            [xy.geojson :as geojson]
             [yesql.core :refer [defqueries]])
   (:import [java.util Date]))
 
@@ -43,15 +38,15 @@
   "Puts processor in valid-processors ref and removes it from invalid-processors ref"
   [processor]
   (dosync
-   (commute falsey-processors dissoc (keyword (:id processor)))
-   (commute truthy-processors assoc (keyword (:id processor)) processor)))
+    (commute falsey-processors dissoc (keyword (:id processor)))
+    (commute truthy-processors assoc (keyword (:id processor)) processor)))
 
 (defn- set-falsey-processor
   "Puts processor in invalid-processors ref and removes it from valid-processors ref"
   [processor]
   (dosync
-   (commute falsey-processors assoc (keyword (:id processor)) processor)
-   (commute truthy-processors dissoc (keyword (:id processor)))))
+    (commute falsey-processors assoc (keyword (:id processor)) processor)
+    (commute truthy-processors dissoc (keyword (:id processor)))))
 
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
@@ -62,9 +57,9 @@
                  :body  body}]
     (do
       (notificationapi/notify
-       notify
-       processor
-       payload)
+        notify
+        processor
+        payload)
       (if-not (:repeated processor)
         (do
           (log/info "Removing processor " (:name processor) " with id:" (:id processor))
@@ -105,21 +100,19 @@
   [processor-comp processor]
   (log/trace "Adding processor" processor)
   ;; builds a compound where clause of (rule AND rule AND ...)
-  (if (spec/conform :signal.specs.processor/processor-spec processor)
-    (let [proc (assoc processor
-                   :predicates (map proto-pred/make-predicate (:predicates processor))
-                   :output (proto-output/make-output (:output processor)))]
-      (dosync
-       (commute falsey-processors assoc (keyword (:id proc)) proc)))
-    (log/error (spec/explain :signal.specs.processor/processor-spec processor))))
+  (let [proc (assoc processor
+               :predicates (map proto-pred/make-predicate (:predicates processor))
+               :output (proto-output/make-output (:output processor)))]
+    (dosync
+      (commute falsey-processors assoc (keyword (:id proc)) proc))))
 
 (defn- evict-processor
   "Removes processor from both valid-processors and invalid-processors ref"
   [processor-comp processor]
   (log/trace "Removing processor" processor)
   (dosync
-   (commute falsey-processors dissoc (keyword (:id processor)))
-   (commute truthy-processors dissoc (keyword (:id processor)))))
+    (commute falsey-processors dissoc (keyword (:id processor)))
+    (commute truthy-processors dissoc (keyword (:id processor)))))
 
 (defn- load-processors
   "Fetches all processors from db and loads them into memory"

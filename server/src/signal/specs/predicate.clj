@@ -13,7 +13,7 @@
 ;; limitations under the License.
 
 (ns signal.specs.predicate
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [signal.specs.geojson]))
 
 (spec/def :geowithin/def :signal.specs.geojson/featurecollectionpolygon-spec)

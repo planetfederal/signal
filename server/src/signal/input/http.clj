@@ -16,7 +16,6 @@
         (func json))
       (catch Exception e (.getLocalizedMessage e)))))
 
-
 (defmethod proto/make-polling-input identifier
   [cfg]
   (map->Http cfg))
