@@ -108,7 +108,7 @@
 (defn add-processor
   "Adds a processor to the invalid-processors ref"
   [processor-comp processor]
-  (log/trace "Adding processor" processor)
+  (log/debug "Adding processor" processor)
   ;; builds a compound where clause of (rule AND rule AND ...)
   (let [proc (assoc processor
                :predicates (map proto-pred/make-predicate (:predicates processor))

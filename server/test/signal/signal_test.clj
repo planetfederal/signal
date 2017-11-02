@@ -5,7 +5,8 @@
             [signal.test-utils :as utils]
             [signal.components.input-manager :as input-api]
             [signal.components.processor :as processor-api]
-            [signal.test-user :as user]))
+            [signal.test-user :as user]
+            [clojure.data.json :as json]))
 
 (def input-id (java.util.UUID/randomUUID))
 (def input {:type :http
@@ -37,7 +38,15 @@
    :mappers [{:type :identity}]
    :filters [{:type :identity}]
    :reducers [{:type :identity}]
-   :predicates [{:type :geowithin}]
+   :predicates [{:type :geowithin
+                 :def {:id 2 :type "Feature"
+                       :geometry {:type "Polygon"
+                                  :coordinates [[[0.0 0.0]
+                                                 [0.0 20.0]
+                                                 [20.0 20.0]
+                                                 [20.0 0.0]
+                                                 [0.0 0.0]]]}
+                       :properties {}}}]
    :output {:type :webhook
             :url "http://localhost:8085/api/test/webhook"
             :verb :post}})
@@ -48,7 +57,7 @@
                  :geometry {:type "Point" :coordinates [10.0 10.0]}
                  :properties {}})
 
-(deftest ^:integration processor
+(deftest ^:integration identity-processor-test
   (testing "Identity Processor"
     (let [proc-comp (:processor user/system-val)
           input-comp (:input user/system-val)]
@@ -56,6 +65,14 @@
       (input-api/add-input input-comp
                           input
                           (partial processor-api/test-value proc-comp))
-      (processor-api/test-value proc-comp test-value)
-      (is (= (utils/request-post "/api/test" test-value))))))
+      (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))
 
+(deftest ^:integration geowithin-processor-test
+  (testing "Identity Processor"
+    (let [proc-comp (:processor user/system-val)
+          input-comp (:input user/system-val)]
+      (processor-api/add-processor proc-comp geowithin-processor)
+      (input-api/add-input input-comp
+                           input
+                           (partial processor-api/test-value proc-comp))
+      (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))

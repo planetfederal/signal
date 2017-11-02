@@ -16,20 +16,24 @@
   (:require [signal.predicate.protocol :as proto]
             [signal.utils.geo :as geo-util]
             [cljts.io :as jtsio]
+            [xy.relations :as relations]
+            [xy.geojson :as geojson]
             [cljts.relation :as spatial-relation]
             [clojure.data.json :as json]))
 
 (def identifier :geowithin)
 
+(defn notify [f]
+  (json/write-str f))
+
 (defrecord WithinClause [clause]
   proto/IPredicate
-  (check [this value]
-    (if-let [f (geo-util/clause-case-map (type (:clause this)))]
-      (apply f [value (:clause this) spatial-relation/within?])
-      false))
-  (notification [this test-value]
-    (str (cljts.io/write-geojson test-value) " was within.")))
+  (check [this geojson-feature]
+    (relations/within? (:geometry geojson-feature)
+                       (get-in this [:clause :geometry])))
+  (notification [_ geojson-feature]
+    (str (notify geojson-feature) " was within.")))
 
 (defmethod proto/make-predicate identifier
   [predicate]
-  (->WithinClause (geo-util/geojsonmap->jtsgeom predicate)))
+  (->WithinClause (geojson/parse (:def predicate))))

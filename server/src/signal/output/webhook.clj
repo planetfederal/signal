@@ -6,7 +6,7 @@
 
 (def identifier :webhook)
 
-(defrecord Webhook [url]
+(defrecord Webhook [url verb]
   proto/IOutput
   (recipients [this] [(:url this)])
   (send! [this v]
