@@ -26,7 +26,7 @@
 
 (defn- send!
   [email-output message]
-  (let [recipients (do (zipmap (:notif-ids message) (:addresses (:cfg email-output))))]
+  (let [recipients (do (zipmap (:notif-ids message) (:addresses email-output)))]
     (doall (map (fn [[id recipient]]
                   (email-recipient recipient (assoc message :body (build-notification-link id)))
                   (db/mark-as-sent id))
@@ -34,11 +34,12 @@
 
 (defrecord Email [addresses]
   proto/IOutput
-  (recipients [this] (:addresses this))
+  (recipients [this]
+    (:addresses this))
   (send! [this message]
     (send! this message)))
 
 (defmethod proto/make-output identifier
   [cfg]
-  (->Email cfg))
+  (map->Email cfg))
 

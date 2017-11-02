@@ -64,6 +64,7 @@
         body (doall (map #(proto-pred/notification % geom-map) (:predicates processor)))
         payload {:time  (str (Date.))
                  :value geom-map
+                 :title (str "Alert from " (:name processor))
                  :body  body}]
     (do
       (notificationapi/notify

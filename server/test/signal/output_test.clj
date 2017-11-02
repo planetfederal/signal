@@ -12,23 +12,44 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.webhook-test
+(ns signal.output-test
   (:require [clojure.test :refer :all]
             [clojure.spec.alpha :as s]
-            [clojure.tools.logging :as log]
             [clojure.spec.gen.alpha :as gen]
             [signal.test-utils :as utils]
-            [signal.components.processor :as processor-api]
             [signal.components.input-manager :as input-api]
+            [signal.components.processor :as processor-api]
             [signal.test-user :as user]
             [clojure.data.json :as json]))
 
-(use-fixtures :once utils/setup-fixtures)
-
 (def input-id (java.util.UUID/randomUUID))
 (def input {:type :http
-            :interval 0
-            :url "http://localhost:8085/api/test/webhook"})
+            :interval 20
+            :url "http://localhost:8085/api/test/webhook"
+            :id input-id})
+
+(def email-test-processor
+  {:id (str (java.util.UUID/randomUUID))
+   :name "email-test-processor"
+   :description "An email test processor"
+   :repeated false
+   :persistent false
+   :input-ids [input-id]
+   :predicates [{:type :identity}]
+   :output {:type :email
+            :addresses ["wrichardet@boundlessgeo.com"]}})
+
+(use-fixtures :once utils/setup-fixtures)
+
+(def test-value {:id 1 :type "Feature"
+                 :geometry {:type "Point" :coordinates [10.0 10.0]}
+                 :properties {}})
+
+(deftest email-processor-test
+  (testing "Email Processor"
+    (let [proc-comp (:processor user/system-val)]
+      (processor-api/add-processor proc-comp email-test-processor)
+      (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))
 
 (def webhook-processor
   {:id (str (java.util.UUID/randomUUID))
@@ -40,10 +61,6 @@
             :url "http://localhost:8085/api/test/webhook"
             :verb :post}})
 
-(def test-value {:id 1 :type "Feature"
-                 :geometry {:type "Point" :coordinates [10.0 10.0]}
-                 :properties {}})
-
 (deftest webhook-output
   (testing "Webhook calls"
     (let [proc-comp (:processor user/system-val)
@@ -52,4 +69,3 @@
       (input-api/add-input input-comp input (partial processor-api/test-value proc-comp))
       (let [resp (utils/request-post "/api/check" (json/write-str test-value))]
         (is (= "success" (:result resp)))))))
-
