@@ -1,6 +1,7 @@
 (ns signal.signal-test
   (:require [clojure.test :refer :all]
             [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [signal.test-utils :as utils]
             [signal.components.input-manager :as input-api]
             [signal.components.processor :as processor-api]
@@ -37,9 +38,9 @@
    :filters [{:type :identity}]
    :reducers [{:type :identity}]
    :predicates [{:type :geowithin}]
-
-   :output {:type :webhook}
-   :url "http://localhost:8085/api/test/webhook"})
+   :output {:type :webhook
+            :url "http://localhost:8085/api/test/webhook"
+            :verb :post}})
 
 (use-fixtures :once utils/setup-fixtures)
 
@@ -48,10 +49,13 @@
                  :properties {}})
 
 (deftest ^:integration processor
-  (let [proc-comp (:processor user/system-val)
-        input-comp (:input user/system-val)]
-    (processor-api/add-processor proc-comp identity-processor)
-    (input-api/add-input input-comp
-                         input
-                         (partial processor-api/test-value proc-comp))
-    (processor-api/test-value proc-comp test-value)))
+  (testing "Identity Processor"
+    (let [proc-comp (:processor user/system-val)
+          input-comp (:input user/system-val)]
+      (processor-api/add-processor proc-comp identity-processor)
+      (input-api/add-input input-comp
+                          input
+                          (partial processor-api/test-value proc-comp))
+      (processor-api/test-value proc-comp test-value)
+      (is (= (utils/request-post "/api/test" test-value))))))
+

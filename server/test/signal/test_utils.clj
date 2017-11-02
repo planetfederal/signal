@@ -32,10 +32,10 @@
 (def auth-header (atom {}))
 
 (defn get-response-for
-  [method url body & [headers]]
+  [method url json-body & [headers]]
   (response-for (service-def)
                 method url
-                :body (json/write-str body)
+                :body json-body
                 :headers (merge {"Content-Type" "application/json"}
                                 @auth-header
                                 headers)))
@@ -65,3 +65,4 @@
   (user/go)
   (f)
   (user/stop))
+

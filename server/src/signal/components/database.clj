@@ -90,8 +90,9 @@
 
 ;;;;;;;;;;;;NOTIFICATION;;;;;;;;;;;
 (defn- create-message [message-type info]
-  (insert-message<!
-   {:type message-type :info (json/write-str info)}))
+  (let [info-str (json/write-str info)]
+    (insert-message<!
+      {:type message-type :info info-str})))
 
 (defn find-message-by-id [id]
   (find-message-by-id-query {:id id}))

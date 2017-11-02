@@ -22,8 +22,17 @@
             [signal.output.webhook]
             [signal.predicate.geowithin]
             [signal.predicate.protocol :as proto-pred]
+            [clojure.spec.alpha :as spec]
             [yesql.core :refer [defqueries]])
   (:import [java.util Date]))
+
+;;;;;;;;;;;; SPEC ;;;;;;;;;;;;
+(spec/def ::id uuid?)
+(spec/def ::name string?)
+(spec/def ::description string?)
+(spec/def ::repeated boolean?)
+(spec/def ::processor (spec/keys :req-un [::id ::name ::description ::repeated]))
+;;;;;;;;;;; END SPEC ;;;;;;;;;
 
 (def falsey-processors
   "processors that don't evaluate to true"
@@ -51,9 +60,10 @@
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
   [value processor notify]
-  (let [body (doall (map #(proto-pred/notification % value) (:predicates processor)))
+  (let [geom-map (xy.geojson/write value)
+        body (doall (map #(proto-pred/notification % geom-map) (:predicates processor)))
         payload {:time  (str (Date.))
-                 :value value
+                 :value geom-map
                  :body  body}]
     (do
       (notificationapi/notify
@@ -91,8 +101,8 @@
   [processor-comp value]
   ;; the source-channel is the source of incoming data
   ;; the store it came from
-  ;; the value to be checked
-  (if-not (or (nil? value))
+  ;; the value to be checked must be a geojson map with JTS :geometry
+  (if-not (nil? value)
     (check-predicates processor-comp value)))
 
 (defn add-processor

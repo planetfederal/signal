@@ -81,3 +81,45 @@
                           "somepass"))
   (component/start-system
    (make-signal-server {:http-config {}})))
+
+(def system-val nil)
+
+(defn init-dev []
+  (log/info "Initializing dev system for repl")
+  (signal.db.conn/migrate)
+  (System/setProperty "javax.net.ssl.trustStore"
+                      (or (System/getenv "TRUST_STORE")
+                          "tls/test-cacerts.jks"))
+  (System/setProperty "javax.net.ssl.trustStoreType"
+                      (or (System/getenv "TRUST_STORE_TYPE")
+                          "JKS"))
+  (System/setProperty "javax.net.ssl.trustStorePassword"
+                      (or (System/getenv "TRUST_STORE_PASSWORD")
+                          "changeit"))
+  (System/setProperty "javax.net.ssl.keyStore"
+                      (or (System/getenv "KEY_STORE")
+                          "tls/test-keystore.p12"))
+  (System/setProperty "javax.net.ssl.keyStoreType"
+                      (or (System/getenv "KEY_STORE_TYPE")
+                          "pkcs12"))
+  (System/setProperty "javax.net.ssl.keyStorePassword"
+                      (or (System/getenv "KEY_STORE_PASSWORD")
+                          "somepass"))
+  (make-signal-server {:http-config {:env                     :dev
+                                     ::server/join?           false
+                                     ::server/allowed-origins {:creds true
+                                                               :allowed-origins (constantly true)}}}))
+
+(defn init []
+  (alter-var-root #'system-val (constantly (init-dev))))
+
+(defn start []
+  (alter-var-root #'system-val component/start-system))
+
+(defn stop []
+  (alter-var-root #'system-val
+                  (fn [s] (when s (component/stop-system s)))))
+
+(defn go []
+  (init)
+  (start))

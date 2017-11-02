@@ -1,9 +1,9 @@
 (ns signal.components.http.processor
   (:require
-    [cljts.io :as jtsio]
     [signal.components.http.intercept :as intercept]
     [signal.components.http.response :as response]
     [clojure.data.json :as json]
+    [xy.geojson :as geojson]
     [clojure.tools.logging :as log]
     [signal.components.processor :as processorapi]))
 
@@ -30,7 +30,8 @@
   (log/debug "Updating processor")
   (let [t (:json-params request)]
     (log/debug "Validating processor")
-    (let [processor (processorapi/modify processor-comp (get-in request [:path-params :id]) t)]
+    (let [processor (processorapi/modify processor-comp
+                                         (get-in request [:path-params :id]) t)]
       (response/ok processor))))
 
 (defn http-post-processor
@@ -48,18 +49,17 @@
   (log/debug "Deleting processor")
   (let [id (get-in request [:path-params :id])]
     (processorapi/delete processor-comp id)
-    (response/ok "success")))
+    (response/ok (str "Deleted processor " id))))
 
 (defn http-test-processor
   "HTTP endpoint used to test processors.  Takes a geojson feature
   in the json body as the feature to test"
   [processor-comp request]
-  (processorapi/test-value processor-comp
-                           (-> (:json-params request)
-                               json/write-str
-                               jtsio/read-feature
-                               .getDefaultGeometry))
-  (response/ok "success"))
+  (if-let [params (:json-params request)]
+    (do
+      (processorapi/test-value processor-comp (geojson/parse params))
+      (response/ok "success"))
+    (response/bad-request "Request was empty")))
 
 (defn routes [processor-comp]
   #{["/api/processors" :get
