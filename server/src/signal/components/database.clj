@@ -92,7 +92,7 @@
 (defn- create-message [message-type info]
   (let [info-str (json/write-str info)]
     (insert-message<!
-      {:type message-type :info info-str})))
+     {:type message-type :info info-str})))
 
 (defn find-message-by-id [id]
   (find-message-by-id-query {:id id}))
@@ -166,12 +166,12 @@
   "Creates a processor definition"
   [t]
   (log/debug "Validating processor against spec"
-    (do
-      (let [entity (map->processor-entity t)
-            new-processor (insert-processor<! entity)]
-        (processor-entity->map (assoc t :id (:id new-processor)
-                                      :created_at (:created_at new-processor)
-                                      :updated_at (:updated_at new-processor)))))))
+             (do
+               (let [entity (map->processor-entity t)
+                     new-processor (insert-processor<! entity)]
+                 (processor-entity->map (assoc t :id (:id new-processor)
+                                               :created_at (:created_at new-processor)
+                                               :updated_at (:updated_at new-processor)))))))
 
 (defn modify-processor
   "Update processor"

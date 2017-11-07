@@ -30,7 +30,7 @@
   proto/IPredicate
   (check [this geojson-feature]
     (relations/intersects? (:geometry geojson-feature)
-                       (get-in this [:clause :geometry])))
+                           (get-in this [:clause :geometry])))
   (notification [_ geojson-feature]
     (str (notify geojson-feature) " was intersecting.")))
 

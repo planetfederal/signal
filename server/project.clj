@@ -3,7 +3,7 @@
   :url "http://github.com/boundlessgeo/signal"
   :license {:name "Apache License, Version 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0"}
-  :dependencies [[org.clojure/clojure "1.9.0-beta4"]
+  :dependencies [[org.clojure/clojure "1.9.0-beta3"]
                  [org.clojure/spec.alpha "0.1.134"]
                  [org.clojure/test.check "0.9.0"]
                  [io.pedestal/pedestal.service "0.5.1"

@@ -1,11 +1,11 @@
 (ns signal.components.http.processor
   (:require
-    [signal.components.http.intercept :as intercept]
-    [signal.components.http.response :as response]
-    [clojure.data.json :as json]
-    [xy.geojson :as geojson]
-    [clojure.tools.logging :as log]
-    [signal.components.processor :as processorapi]))
+   [signal.components.http.intercept :as intercept]
+   [signal.components.http.response :as response]
+   [clojure.data.json :as json]
+   [xy.geojson :as geojson]
+   [clojure.tools.logging :as log]
+   [signal.components.processor :as processorapi]))
 
 (defn http-get-all-processors
   "Returns http response of all processors"

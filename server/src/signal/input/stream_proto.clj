@@ -2,7 +2,6 @@
 
 (defprotocol IStreamingInput
   (start [this])
-  (stop [this])
-  (recv [this]))
+  (stop [this]))
 
 (defmulti make-streaming-input :type)

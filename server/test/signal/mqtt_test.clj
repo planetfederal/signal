@@ -12,7 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.output-test
+(ns signal.mqtt-test
   (:require [clojure.test :refer :all]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
@@ -20,24 +20,30 @@
             [signal.components.input-manager :as input-api]
             [signal.components.processor :as processor-api]
             [signal.test-user :as user]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clojurewerkz.machine-head.client :as mh]))
 
-(def input-id (java.util.UUID/randomUUID))
-(def input {:type :http
-            :interval 20
-            :url "http://localhost:8085/api/test/webhook"
-            :id input-id})
+(def input-id (.toString (java.util.UUID/randomUUID)))
+(def input {:type :mqtt
+            :url "tcp://localhost"
+            :port 1883
+            :topic "/foo"
+            :id "TestIdMQTTConsumer"})
 
-(def email-test-processor
+(defn output-fn
+  [value]
+  (is (some? value)))
+
+(def mqtt-test-processor
   {:id (str (java.util.UUID/randomUUID))
-   :name "email-test-processor"
-   :description "An email test processor"
+   :name "mqtt-test-processor"
+   :description "An mqtt test processor"
    :repeated false
    :persistent false
    :input-ids [input-id]
    :predicates [{:type :identity}]
-   :output {:type :email
-            :addresses ["wrichardet@boundlessgeo.com"]}})
+   :output {:type :test
+            :output-fn output-fn}})
 
 (use-fixtures :once utils/setup-fixtures)
 
@@ -45,27 +51,18 @@
                  :geometry {:type "Point" :coordinates [10.0 10.0]}
                  :properties {}})
 
-(deftest email-processor-test
-  (testing "Email Processor"
-    (let [proc-comp (:processor user/system-val)]
-      (processor-api/add-processor proc-comp email-test-processor)
-      (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))
+(defn send-test-mqtt []
+  (let [client (mh/connect (str (:url input) ":" (:port input))
+                           "TestMQTTProducer")
+        payload (-> test-value json/write-str .getBytes)]
+    (mh/publish client (:topic input) payload)))
 
-(def webhook-processor
-  {:id (str (java.util.UUID/randomUUID))
-   :name "test-webhook-processor"
-   :description "test-webhook-processor description"
-   :repeated false
-   :input-ids [input-id]
-   :output {:type :webhook
-            :url "http://localhost:8085/api/test/webhook"
-            :verb :post}})
-
-(deftest webhook-output
-  (testing "Webhook calls"
+(deftest mqtt-test
+  (testing "MQTT Input"
     (let [proc-comp (:processor user/system-val)
           input-comp (:input user/system-val)]
-      (processor-api/add-processor proc-comp webhook-processor)
-      (input-api/add-polling-input input-comp input)
-      (let [resp (utils/request-post "/api/check" (json/write-str test-value))]
-        (is (= "success" (:result resp)))))))
+      (processor-api/add-processor proc-comp mqtt-test-processor)
+      (input-api/add-streaming-input input-comp input)
+      (send-test-mqtt)
+      (Thread/sleep 1000))))
+

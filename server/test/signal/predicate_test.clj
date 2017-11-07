@@ -52,9 +52,8 @@
     (let [proc-comp (:processor user/system-val)
           input-comp (:input user/system-val)]
       (processor-api/add-processor proc-comp identity-processor)
-      (input-api/add-input input-comp
-                           input
-                           (partial processor-api/test-value proc-comp))
+      (input-api/add-polling-input input-comp
+                           input)
       (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))
 
 (def geowithin-processor
@@ -81,9 +80,8 @@
     (let [proc-comp (:processor user/system-val)
           input-comp (:input user/system-val)]
       (processor-api/add-processor proc-comp geowithin-processor)
-      (input-api/add-input input-comp
-                           input
-                           (partial processor-api/test-value proc-comp))
+      (input-api/add-polling-input input-comp
+                           input)
       (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))
 
 (def geodisjoint-processor
@@ -110,7 +108,6 @@
     (let [proc-comp (:processor user/system-val)
           input-comp (:input user/system-val)]
       (processor-api/add-processor proc-comp geodisjoint-processor)
-      (input-api/add-input input-comp
-                           input
-                           (partial processor-api/test-value proc-comp))
+      (input-api/add-polling-input input-comp
+                           input)
       (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))

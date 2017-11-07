@@ -15,9 +15,10 @@
 (ns signal.components.input-manager
   (:require [com.stuartsierra.component :as component]
             [clj-http.client :as client]
+            [signal.components.processor :as processor-api]
             [signal.input.poll-proto :as poll-proto]
             [signal.input.stream-proto :as stream-proto]
-            [cljts.io :as jtsio]
+            [signal.input.mqtt]
             [overtone.at-at :refer [every, mk-pool, stop, stop-and-reset-pool!]]
             [clojure.tools.logging :as log]))
 
@@ -28,48 +29,39 @@
   [polling-input]
   (poll-proto/poll polling-input (:fn polling-input)))
 
-(defn start-polling [polling-input]
+(defn- start-polling [polling-input]
   (let [seconds (:interval polling-input)]
     (every (* 1000 seconds)
            #(fetch-url polling-input) sched-polling-pool
            :job (keyword (:id polling-input)) :initial-delay 5000)))
 
-(defn start-streaming
-  [streaming-input func]
-  (stream-proto/start streaming-input))
+(defn add-streaming-input [input-comp streaming-input]
+  (let [proc (:processor input-comp)
+        func (partial processor-api/test-value proc)
+        input (stream-proto/make-streaming-input streaming-input func)]
+    (dosync
+     (stream-proto/start input)
+     (commute inputs assoc (keyword (:id streaming-input)) (assoc streaming-input :fn func)))))
 
-(defn stop-polling [processor]
-  (stop (keyword (:id processor))))
-
-(defn stop-streaming
-  [streaming-input]
-  (stream-proto/stop streaming-input))
-
-(defn add-streaming-input [streaming-input func]
-  (start-streaming streaming-input func)
-  (commute inputs assoc (keyword (:id streaming-input)) (assoc streaming-input :fn func)))
-
-(defn add-polling-input [polling-input func]
-  (if (< 0 (:interval polling-input))
-    (let [input-fn (assoc polling-input :fn func)]
-      (dosync
-       (commute inputs assoc (keyword (:id polling-input)) input-fn))
-      (start-polling input-fn))))
+(defn add-polling-input [input-comp input]
+  (let [proc (:processor input-comp)
+        func (partial processor-api/test-value proc)
+        polling-input (poll-proto/make-polling-input input)]
+    (if (< 0 (:interval polling-input))
+      (let [input-fn (assoc polling-input :fn func)]
+        (dosync
+         (commute inputs assoc (keyword (:id polling-input)) input-fn)
+         (start-polling input-fn))))))
 
 (defn remove-streaming-input [streaming-input]
-  (stop-streaming streaming-input)
+  (stream-proto/stop streaming-input)
   (commute inputs dissoc (keyword (:id streaming-input))))
 
 (defn remove-polling-input [_ polling-input]
   ; takes a store id string
   (dosync
-   (commute inputs dissoc (keyword (:id polling-input))))
-  (stop-polling (keyword (:id polling-input))))
-
-(defn add-input [poller-comp input func]
-  (if (satisfies? stream-proto/IStreamingInput input)
-    (add-streaming-input input func)
-    (add-polling-input input func)))
+   (commute inputs dissoc (keyword (:id polling-input)))
+   (stop (keyword (:id polling-input)) sched-polling-pool)))
 
 (defrecord InputManagerComponent [processor]
   component/Lifecycle
