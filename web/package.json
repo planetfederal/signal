@@ -1,6 +1,6 @@
 {
   "name": "signal-server-dashboard",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Dashboard for signal",
   "scripts": {
     "test": "./node_modules/.bin/karma start",
