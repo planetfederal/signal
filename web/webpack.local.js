@@ -42,11 +42,7 @@ module.exports = {
         loaders: ['babel'],
         exclude: /node_modules/,
         include: __dirname,
-      }, {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'eslint-loader',
-      }, {
+      },{
         test: /\.less$/,
         loader: 'style-loader!css-loader!less-loader',
       },

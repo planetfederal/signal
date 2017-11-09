@@ -17,7 +17,6 @@ const emptyProcessor = {
 };
 
 class ProcessorsContainer extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -49,26 +48,26 @@ class ProcessorsContainer extends Component {
   render() {
     const { children } = this.props;
     if (children) {
-      return (
-        <div className="wrapper">
-          {children}
-        </div>
-      );
+      return <div className="wrapper">{children}</div>;
     }
     return (
       <div className="wrapper">
         <section className="main">
-          {this.state.adding ?
+          {this.state.adding ? (
             <ProcessorForm
               processor={emptyProcessor}
               cancel={this.cancel}
               onSave={this.create}
               errors={this.props.errors}
               actions={this.props.actions}
-            /> :
+            />
+          ) : (
             <div className="btn-toolbar">
-              <button className="btn btn-sc" onClick={this.add}>Create Processor</button>
-            </div>}
+              <button className="btn btn-sc" onClick={this.add}>
+                Create Processor
+              </button>
+            </div>
+          )}
           <ProcessorList {...this.props} />
         </section>
       </div>
@@ -91,4 +90,6 @@ const mapDispatchToProps = dispatch => ({
   actions: bindActionCreators(processorActions, dispatch),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ProcessorsContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(
+  ProcessorsContainer
+);

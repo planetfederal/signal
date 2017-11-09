@@ -123,6 +123,9 @@
   []
   (map sanitize-timestamps (undelivered-notifications-list)))
 
+(defn notifications []
+  (map sanitize-timestamps (notifications-list)))
+
 (defn find-notif-by-id [id]
   (some-> (find-notification-by-id-query {:id id})
           first

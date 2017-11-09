@@ -5,7 +5,11 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { Router, Route, IndexRoute, browserHistory } from 'react-router';
-import { syncHistoryWithStore, routerReducer, routerMiddleware } from 'react-router-redux';
+import {
+  syncHistoryWithStore,
+  routerReducer,
+  routerMiddleware,
+} from 'react-router-redux';
 import throttle from 'lodash/throttle';
 import appReducer from './ducks';
 import { loginPersistedUser } from './ducks/auth';
@@ -29,7 +33,7 @@ const rootReducer = combineReducers({
 const middleware = routerMiddleware(browserHistory);
 const store = createStore(
   rootReducer,
-  applyMiddleware(middleware, thunk, createLogger()), // logger must be the last in the chain
+  applyMiddleware(middleware, thunk, createLogger()) // logger must be the last in the chain
 );
 
 const persistedUser = loadState();
@@ -39,12 +43,14 @@ if (token !== null && user !== null) {
   store.dispatch(loginPersistedUser(token, user));
 }
 
-store.subscribe(throttle(() => {
-  saveState({
-    user: store.getState().sc.auth.user,
-    token: store.getState().sc.auth.token,
-  });
-}, 1000));
+store.subscribe(
+  throttle(() => {
+    saveState({
+      user: store.getState().sc.auth.user,
+      token: store.getState().sc.auth.token,
+    });
+  }, 1000)
+);
 
 // create an enhanced history that syncs navigation events with the store
 const history = syncHistoryWithStore(browserHistory, store);
@@ -58,21 +64,29 @@ render(
       <Route path="/" name="Home" component={AppContainer}>
         <IndexRoute component={HomeContainer} />
         <Route
-          path="/processors" name="Processors"
+          path="/processors"
+          name="Processors"
           component={requireAuthentication(ProcessorsContainer)}
         >
           <Route
-            path="/processors/:id" staticName
+            path="/processors/:id"
+            staticName
             component={requireAuthentication(ProcessorDetailsContainer)}
           />
         </Route>
         <Route
-          path="/notifications/:id"
-          staticName
+          path="/notifications"
+          name="Notifications"
           component={requireAuthentication(NotificationContainer)}
-        />
+        >
+          <Route
+            path="/notifications/:id"
+            staticName
+            component={requireAuthentication(NotificationContainer)}
+          />
+        </Route>
       </Route>
     </Router>
   </Provider>,
-  document.getElementById('root'),
+  document.getElementById('root')
 );

@@ -9,6 +9,12 @@ SELECT n.id,n.recipient,n.delivered,n.sent,m.type,m.info
 FROM signal.notifications AS n JOIN signal.messages AS m
 ON m.id = n.message_id WHERE n.sent IS NULL;
 
+-- name: notifications-list
+-- all notifications
+SELECT n.id,n.recipient,n.delivered,n.sent,m.type,m.info
+FROM signal.notifications AS n JOIN signal.messages AS m
+ON m.id = n.message_id;
+
 -- name: undelivered-notifications-list
 SELECT n.id,n.recipient,n.delivered,n.sent,m.type,m.info
 FROM signal.notifications AS n JOIN signal.messages AS m

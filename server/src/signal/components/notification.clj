@@ -28,6 +28,10 @@
   [_ id]
   (db/find-notif-by-id id))
 
+(defn all-notifs
+  [_]
+  (db/notifications))
+
 (defrecord NotificationComponent []
   component/Lifecycle
   (start [this]
