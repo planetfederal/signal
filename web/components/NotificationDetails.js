@@ -54,7 +54,7 @@ const style = {
   },
 };
 
-class ProcessorNotification extends Component {
+class NotificationDetails extends Component {
 
   static makePopup(geojson) {
     let rows = [];
@@ -213,7 +213,7 @@ class ProcessorNotification extends Component {
             style={{ ...style.popup, display: this.state.activeFeature ? 'block' : 'none' }}
           >
             {!!this.state.activeFeature &&
-              ProcessorNotification.makePopup(this.state.activeFeature)}
+              NotificationDetails.makePopup(this.state.activeFeature)}
           </div>
         </section>
       </div>
@@ -222,9 +222,9 @@ class ProcessorNotification extends Component {
 
 }
 
-ProcessorNotification.propTypes = {
+NotificationDetails.propTypes = {
   notification: PropTypes.object.isRequired,
   menu: PropTypes.object.isRequired,
 };
 
-export default ProcessorNotification;
+export default NotificationDetails;

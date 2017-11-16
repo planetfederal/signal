@@ -1,31 +1,32 @@
-import React from 'react';
-import { render } from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware, combineReducers } from 'redux';
-import thunk from 'redux-thunk';
-import createLogger from 'redux-logger';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import React from "react";
+import { render } from "react-dom";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware, combineReducers } from "redux";
+import thunk from "redux-thunk";
+import createLogger from "redux-logger";
+import { Router, Route, IndexRoute, browserHistory } from "react-router";
 import {
   syncHistoryWithStore,
   routerReducer,
-  routerMiddleware,
-} from 'react-router-redux';
-import throttle from 'lodash/throttle';
-import appReducer from './ducks';
-import { loginPersistedUser } from './ducks/auth';
-import AppContainer from './containers/AppContainer';
-import { loadState, saveState, requireAuthentication } from './utils';
-import HomeContainer from './containers/HomeContainer';
-import ProcessorsContainer from './containers/ProcessorsContainer';
-import ProcessorDetailsContainer from './containers/ProcessorDetailsContainer';
-import NotificationContainer from './containers/NotificationContainer';
+  routerMiddleware
+} from "react-router-redux";
+import throttle from "lodash/throttle";
+import appReducer from "./ducks";
+import { loginPersistedUser } from "./ducks/auth";
+import AppContainer from "./containers/AppContainer";
+import { loadState, saveState, requireAuthentication } from "./utils";
+import HomeContainer from "./containers/HomeContainer";
+import ProcessorsContainer from "./containers/ProcessorsContainer";
+import ProcessorDetailsContainer from "./containers/ProcessorDetailsContainer";
+import NotificationContainer from "./containers/NotificationContainer";
+import NotificationDetailsContainer from "./containers/NotificationDetailsContainer";
 
-import './style/Globals.less';
+import "./style/Globals.less";
 
 // combine all the reducers into a single reducing function
 const rootReducer = combineReducers({
   sc: appReducer,
-  routing: routerReducer,
+  routing: routerReducer
 });
 
 // create the redux store that holds the state for this app
@@ -47,7 +48,7 @@ store.subscribe(
   throttle(() => {
     saveState({
       user: store.getState().sc.auth.user,
-      token: store.getState().sc.auth.token,
+      token: store.getState().sc.auth.token
     });
   }, 1000)
 );
@@ -66,27 +67,27 @@ render(
         <Route
           path="/processors"
           name="Processors"
-          component={requireAuthentication(ProcessorsContainer)}
+          component={ProcessorsContainer}
         >
           <Route
             path="/processors/:id"
             staticName
-            component={requireAuthentication(ProcessorDetailsContainer)}
+            component={ProcessorDetailsContainer}
           />
         </Route>
         <Route
           path="/notifications"
           name="Notifications"
-          component={requireAuthentication(NotificationContainer)}
+          component={NotificationContainer}
         >
           <Route
             path="/notifications/:id"
             staticName
-            component={requireAuthentication(NotificationContainer)}
+            component={NotificationDetailsContainer}
           />
         </Route>
       </Route>
     </Router>
   </Provider>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
