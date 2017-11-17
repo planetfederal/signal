@@ -1,4 +1,7 @@
 language: clojure
+addons:
+  postgresql:"9.5"
+
 services:
   - postgresql
 
