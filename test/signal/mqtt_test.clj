@@ -57,7 +57,7 @@
         payload (-> test-value json/write-str .getBytes)]
     (mh/publish client (:topic input) payload)))
 
-(deftest mqtt-test
+(deftest ^:integration mqtt-test
   (testing "MQTT Input"
     (let [proc-comp (:processor user/system-val)
           input-comp (:input user/system-val)]
