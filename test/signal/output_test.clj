@@ -45,7 +45,7 @@
                  :geometry {:type "Point" :coordinates [10.0 10.0]}
                  :properties {}})
 
-(deftest email-processor-test
+(deftest ^:integration email-processor-test
   (testing "Email Processor"
     (let [proc-comp (:processor user/system-val)]
       (processor-api/add-processor proc-comp email-test-processor)
