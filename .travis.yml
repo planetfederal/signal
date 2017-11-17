@@ -1,9 +1,17 @@
 language: clojure
-addons:
-  postgresql:"9.5"
 
 services:
   - postgresql
 
-before_script:
+addons:
+  postgresql: "9.6"
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+
+before_install:
+  - echo "host all all 0.0.0.0/0 md5" | sudo tee -a /etc/postgresql/9.6/main/pg_hba.conf
+  - echo "listen_addresses = '*'" | sudo tee -a /etc/postgresql/9.6/main/postgresql.conf
+  - sudo service postgresql stop
+  - sudo service postgresql start 9.6
   - sh ./db.sh
