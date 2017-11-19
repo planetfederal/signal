@@ -17,7 +17,11 @@
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
             [yesql.core :as ysql]
-            [clojure.java.jdbc :as clj-jdbc]))
+            [clojure.java.jdbc :as clj-jdbc]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as st]
+            [signal.specs.processor]))
+
 
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
 (ysql/defqueries "sql/notification.sql" {:connection db/db-spec})
@@ -45,7 +49,7 @@
   PG ResultSet is open"
   [row]
   (-> row
-      (assoc :stores (vec (.getArray (:stores row))))))
+      (assoc :input-ids (vec (.getArray (:input_ids row))))))
 
 (def result->map
   {:result-set-fn doall
@@ -159,7 +163,7 @@
 (defn map->processor-entity
   [trg]
   (into trg
-        (let [json-keys (list :input :filters :reducers :predicates :output)]
+      (let [json-keys (list :definition)]
           (map (fn [ky]
                  (if-let [value (get trg ky)]
                    {ky (json/write-str value)}
@@ -176,6 +180,12 @@
                                                :created_at (:created_at new-processor)
                                                :updated_at (:updated_at new-processor)))))))
 
+(s/fdef create-processor
+        :args (s/cat :t :signal.specs.processor/processor-spec)
+        :ret :signal.specs.processor/processor-spec)
+
+(st/instrument)
+
 (defn modify-processor
   "Update processor"
   [id t]
@@ -187,6 +197,7 @@
     (processor-entity->map (assoc t :id (:id updated-processor)
                                   :created_at (:created_at updated-processor)
                                   :updated_at (:updated_at updated-processor)))))
+
 (defn delete-processor
   "Delete processor"
   [id]

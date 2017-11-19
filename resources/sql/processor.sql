@@ -9,18 +9,15 @@ SELECT * FROM signal.processors WHERE deleted_at IS NULL AND id = :id
 -- name: insert-processor<!
 -- inserts a new processor definition
 INSERT INTO signal.processors
-(name,description,repeated,persistent,filters,
-reducers,predicates,output,input,created_at,updated_at)
+(name,description,repeated,persistent,
+definition,input_ids,created_at,updated_at)
 VALUES
 (:name,
 :description,
 :repeated,
 :persistent,
-:filters::json,
-:reducers::json,
-:predicates::json,
-:output::json,
-:input::json,
+:definition::json,
+:input_ids,
 NOW(),NOW());
 
 -- name: update-processor<!
@@ -30,11 +27,8 @@ name = :name,
 description = :description,
 repeated = :repeated,
 persistent = :persistent,
-input = :input::json,
-filters = :filters::json,
-reducers = :reducers::json,
-predicates = :predicates::json,
-output = :output::json,
+input_ids = :input_ids,
+definition = :definition::json,
 updated_at = NOW()
 WHERE id = :id
 

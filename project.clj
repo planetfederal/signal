@@ -50,7 +50,7 @@
                      [pjstadig/humane-test-output "0.8.3"]
                      [com.jakemccrary/lein-test-refresh "0.21.1"]]
   :test-selectors {:default (complement :integration)}
-                   :integration :integration
+                  :integration :integration
   :plugins [[lein-environ "1.0.3"]
             [lein-cljfmt "0.5.6"]
             [ragtime/ragtime.lein "0.3.6"]

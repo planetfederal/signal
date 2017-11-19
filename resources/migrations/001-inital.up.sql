@@ -34,11 +34,8 @@ CREATE TABLE IF NOT EXISTS signal.processors
   name TEXT,
   persistent BOOL,
   repeated BOOL,
-  reducers json,
-  filters json,
-  predicates json,
-  input json,
-  output json,
+  input_ids UUID[],
+  definition json,
   created_at timestamp DEFAULT NOW(),
   updated_at timestamp DEFAULT NOW(),
   deleted_at timestamp with time zone
