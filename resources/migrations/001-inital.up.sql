@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS signal.processors
   name TEXT,
   persistent BOOL,
   repeated BOOL,
-  input_ids UUID[],
+  input_ids TEXT[],
   definition json,
   created_at timestamp DEFAULT NOW(),
   updated_at timestamp DEFAULT NOW(),

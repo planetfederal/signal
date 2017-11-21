@@ -64,7 +64,8 @@
   :resource-paths ["config", "resources"]
   :profiles {:dev {:source-paths ["dev"]
                    :resource-paths ["config", "resources"]
-                   :dependencies [[io.pedestal/pedestal.service-tools "0.5.1"]]
+                   :dependencies [[io.pedestal/pedestal.service-tools "0.5.1"]
+                                  [org.clojure/test.check "0.9.0"]]
                    :plugins [[test2junit "1.2.2"]]}
              :uberjar {:aot :all
                        :dependencies [[org.clojure/test.check "0.9.0"]]}}

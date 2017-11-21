@@ -16,6 +16,7 @@
   (:require [signal.db.conn :as db]
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
+            [clojure.set :refer [rename-keys]]
             [yesql.core :as ysql]
             [clojure.java.jdbc :as clj-jdbc]
             [clojure.spec.alpha :as s]
@@ -63,6 +64,16 @@
     (let [as-array (into-array Object items)
           jdbc-array (.createArrayOf (.getConnection stmt) "text" as-array)]
       (.setArray stmt ix jdbc-array))))
+
+(deftype UUIDArray [items]
+  clj-jdbc/ISQLParameter
+  (set-parameter [_ stmt ix]
+    (let [as-array (into-array Object items)
+          jdbc-array (.createArrayOf (.getConnection stmt) "UUID" as-array)]
+      (.setArray stmt ix jdbc-array))))
+
+(deftype UUIDArray [items]
+  clj-jdbc/ISQLParameter)
 
 (defn sqluuid->str [row col-name]
   (if-let [r (col-name row)]
@@ -162,12 +173,8 @@
 
 (defn map->processor-entity
   [trg]
-  (into trg
-      (let [json-keys (list :definition)]
-          (map (fn [ky]
-                 (if-let [value (get trg ky)]
-                   {ky (json/write-str value)}
-                   {})) json-keys))))
+  (-> (assoc trg :definition (json/write-str (:definition trg)))
+      (rename-keys {:input-ids :input_ids})))
 
 (defn create-processor
   "Creates a processor definition"
@@ -175,7 +182,8 @@
   (log/debug "Validating processor against spec"
              (do
                (let [entity (map->processor-entity t)
-                     new-processor (insert-processor<! entity)]
+                     new-processor (insert-processor<!
+                                     (assoc entity :input_ids (->StringArray (:input_ids entity))))]
                  (processor-entity->map (assoc t :id (:id new-processor)
                                                :created_at (:created_at new-processor)
                                                :updated_at (:updated_at new-processor)))))))
