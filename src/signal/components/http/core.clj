@@ -22,9 +22,10 @@
    [signal.components.http.capabilities :as capability-http]
    [signal.components.http.ping :as ping-http]
    [signal.components.http.test :as test-http]
+   [signal.components.http.input :as input-http]
    [clojure.tools.logging :as log]))
 
-(defrecord HttpService [http-config user team notify processor store]
+(defrecord HttpService [http-config notify processor input]
   component/Lifecycle
   (start [this]
     (log/debug "Starting SignalHttpService")
@@ -33,6 +34,7 @@
                                       (notif-http/routes notify)
                                       (processor-http/routes processor)
                                       (test-http/routes)
+                                      (input-http/routes input)
                                       (capability-http/routes)
                                       (ping-http/routes)))]
       (assoc this :service-def (merge http-config

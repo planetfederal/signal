@@ -14,9 +14,9 @@
 
 (ns signal.specs.predicate
   (:require [clojure.spec.alpha :as spec]
-            [signal.specs.geojson]))
+            [xy.geojson :as geojson]))
 
-(spec/def :geowithin/def :signal.specs.geojson/featurecollectionpolygon-spec)
+(spec/def :geowithin/def :xy.geojson/featurecollectionpolygon-spec)
 (spec/def :geowithin/type #{"geowithin"})
 (spec/def :predicate/geowithin (spec/keys :req-un [:geowithin/def :geowithin/type]))
 (spec/def :idenity/type #{"identity"})

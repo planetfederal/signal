@@ -29,6 +29,8 @@
   [polling-input]
   (poll-proto/poll polling-input (:fn polling-input)))
 
+(defn all [_] inputs)
+
 (defn- start-polling [polling-input]
   (let [seconds (:interval polling-input)]
     (every (* 1000 seconds)

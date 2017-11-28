@@ -20,7 +20,6 @@
             [signal.output.email]
             [signal.output.protocol :as proto-output]
             [signal.output.webhook]
-            [signal.output.test]
             [signal.predicate.geowithin]
             [signal.predicate.protocol :as proto-pred]
             [clojure.spec.alpha :as spec]

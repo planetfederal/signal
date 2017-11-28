@@ -47,7 +47,7 @@
      :input (component/using (input/make-input-manager-component) [:processor])
      :http-service (component/using
                     (http/make-http-service-component http-config)
-                    [:processor :notify])
+                    [:processor :notify :input])
      :server (component/using (new-signal-server) [:http-service]))))
 
 (defn -main
@@ -123,3 +123,8 @@
 (defn go []
   (init)
   (start))
+
+(defn reset []
+  (stop)
+  (go))
+
