@@ -13,13 +13,13 @@
 ;; limitations under the License.
 
 (ns signal.specs.processor
- (:require [clojure.spec.alpha :as s]
-           [signal.specs.input :as input]
-           [signal.specs.filter :as filter]
-           [signal.specs.reducer :as reducer]
-           [signal.specs.predicate :as predicate]
-           [signal.specs.mapper :as mapper]
-           [signal.specs.output :as output]))
+  (:require [clojure.spec.alpha :as s]
+            [signal.specs.input :as input]
+            [signal.specs.filter :as filter]
+            [signal.specs.reducer :as reducer]
+            [signal.specs.predicate :as predicate]
+            [signal.specs.mapper :as mapper]
+            [signal.specs.output :as output]))
 
 (s/def :processor/id pos-int?)
 (s/def :processor/name string?)
@@ -27,19 +27,21 @@
 (s/def :processor/repeated boolean?)
 (s/def :processor/persistent boolean?)
 
-(s/def :processor/definition (s/keys :req-un
-                                     [:signal.specs.mapper/mappers
-                                      :signal.specs.filter/filters
-                                      :signal.specs.reducer/reducers
-                                      :signal.specs.predicate/predicates
-                                      :signal.specs.output/output]))
+(s/def :processor/definition (s/keys
+                               :req-un [:signal.specs.predicate/predicates]
+                               :opt-un
+                               [:signal.specs.mapper/mappers
+                                :signal.specs.filter/filters
+                                :signal.specs.reducer/reducers
+                                :signal.specs.output/output]))
 
 (s/def ::processor-spec (s/keys :req-un
-                                [:processor/id :processor/name
+                                [:processor/name
                                  :processor/description
                                  :processor/repeated
-                                 :processor/persistent
-                                 :signal.specs.input/input-ids
-                                 :processor/definition]))
+                                 :processor/definition]
+                                :opt-un [:processor/id
+                                         :signal.specs.input/input-ids
+                                         :processor/persistent]))
 
 

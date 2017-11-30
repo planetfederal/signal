@@ -26,14 +26,6 @@
             [yesql.core :refer [defqueries]])
   (:import [java.util Date]))
 
-;;;;;;;;;;;; SPEC ;;;;;;;;;;;;
-(spec/def ::id uuid?)
-(spec/def ::name string?)
-(spec/def ::description string?)
-(spec/def ::repeated boolean?)
-(spec/def ::processor (spec/keys :req-un [::id ::name ::description ::repeated]))
-;;;;;;;;;;; END SPEC ;;;;;;;;;
-
 (def falsey-processors
   "processors that don't evaluate to true"
   (ref {}))
@@ -61,7 +53,8 @@
   "Sets processor as valid, then sends a noification"
   [value processor notify]
   (let [geom-map (xy.geojson/write value)
-        body (doall (map #(proto-pred/notification % geom-map) (:predicates processor)))
+        body (doall (map #(proto-pred/notification % geom-map)
+                         (get-in processor [:definition :predicates])))
         payload {:time  (str (Date.))
                  :value geom-map
                  :title (str "Alert from " (:name processor))
@@ -89,7 +82,7 @@
   [processor-comp value]
   (doall (map (fn [k]
                 (if-let [processor (k @falsey-processors)]
-                  (loop [preds (:predicates processor)]
+                  (loop [preds (get-in processor [:definition :predicates])]
                     (if (empty? preds)
                       (handle-success value processor (:notify processor-comp))
                       (if-let [pred (first preds)]
@@ -111,9 +104,10 @@
   [processor-comp processor]
   (log/debug "Adding processor" processor)
   ;; builds a compound where clause of (rule AND rule AND ...)
-  (let [proc (assoc processor
-                    :predicates (map proto-pred/make-predicate (:predicates processor))
-                    :output (proto-output/make-output (:output processor)))]
+  (let [output (proto-output/make-output (get-in processor [:definition :output]))
+        predicates (map proto-pred/make-predicate (get-in processor [:definition :predicates]))
+        proc (-> (assoc-in processor [:definition :output] output)
+                 (assoc-in [:definition :predicates] predicates))]
     (dosync
      (commute falsey-processors assoc (keyword (:id proc)) proc))))
 

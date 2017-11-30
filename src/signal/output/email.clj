@@ -3,7 +3,7 @@
             [postal.core :as postal]
             [signal.components.database :as db]))
 
-(def identifier :email)
+(def identifier "email")
 
 (def conn {:host (or (System/getenv "SMTP_HOST")
                      "email-smtp.us-east-1.amazonaws.com")

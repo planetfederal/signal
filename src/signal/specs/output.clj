@@ -21,8 +21,8 @@
 (spec/def :email/email (spec/with-gen #(re-matches email-regex %)
                          #(genc/string-from-regex email-regex)))
 (spec/def :email/type #{"email"})
-(spec/def :email/addresses (spec/coll-of :email/email))
-(spec/def :output/email (spec/keys :req-un [:email/type :email/addresses]))
+(spec/def :email/recipients (spec/coll-of :email/email))
+(spec/def :output/email (spec/keys :req-un [:email/type :email/recipients]))
 
 (spec/def :webhook/type #{"webhook"})
 (spec/def :webhook/url (spec/with-gen #(re-matches url-regex %)

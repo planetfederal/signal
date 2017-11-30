@@ -42,7 +42,10 @@
   (-> t
       (assoc :id (.toString (:id t)))
       (assoc :created_at (.toString (:created_at t)))
-      (assoc :updated_at (.toString (:updated_at t)))))
+      (assoc :updated_at (.toString (:updated_at t)))
+      (rename-keys {:input_ids  :input-ids,
+                    :created_at :created-at,
+                    :updated_at :updated-at})))
 
 (defn- row-fn
   "Modifies the row result while the ResultSet is open. This method
@@ -50,7 +53,7 @@
   PG ResultSet is open"
   [row]
   (-> row
-      (assoc :input-ids (vec (.getArray (:input_ids row))))))
+      (assoc :input_ids (vec (.getArray (:input_ids row))))))
 
 (def result->map
   {:result-set-fn doall
@@ -107,7 +110,7 @@
 (defn- create-message [message-type info]
   (let [info-str (json/write-str info)]
     (insert-message<!
-     {:type message-type :info info-str})))
+      {:type message-type :info info-str})))
 
 (defn find-message-by-id [id]
   (find-message-by-id-query {:id id}))
@@ -119,15 +122,15 @@
         id (:id message)]
     (map #(sanitize-timestamps
            (insert-notification<!
-            {:recipient  %
-             :message_id id})) recipients)))
+             {:recipient  %
+              :message_id id})) recipients)))
 
 (defn create-notification
   [recipient message-type info]
   (sanitize-timestamps
-   (insert-notification<!
-    {:recipient  recipient
-     :message_id (:id (create-message message-type info))})))
+    (insert-notification<!
+      {:recipient  recipient
+       :message_id (:id (create-message message-type info))})))
 
 (defn unsent
   "List of all the unsent notifications"
@@ -161,32 +164,34 @@
   "Returns all the active processors"
   []
   (log/debug "Fetching all active processors from db")
-  (map processor-entity->map (processor-list-query)))
+  (map processor-entity->map (processor-list-query {} result->map)))
 
 (defn processor-by-id
   "Find processor by identifier"
   [id]
   (log/debugf "Finding processors with id %s from db" id)
-  (some-> (find-by-id-query {:id (java.util.UUID/fromString id)})
+  (some-> (find-by-id-query {:id (java.util.UUID/fromString id)} result->map)
           first
           processor-entity->map))
 
 (defn map->processor-entity
   [trg]
   (-> (assoc trg :definition (json/write-str (:definition trg)))
-      (rename-keys {:input-ids :input_ids})))
+      (rename-keys {:input-ids  :input_ids,
+                    :created-at :created_at,
+                    :updated-at :updated_at})))
 
 (defn create-processor
   "Creates a processor definition"
   [t]
-  (log/debug "Validating processor against spec"
-             (do
-               (let [entity (map->processor-entity t)
-                     new-processor (insert-processor<!
-                                     (assoc entity :input_ids (->StringArray (:input_ids entity))))]
-                 (processor-entity->map (assoc t :id (:id new-processor)
-                                               :created_at (:created_at new-processor)
-                                               :updated_at (:updated_at new-processor)))))))
+  (log/debug "Validating processor against spec")
+  (do
+    (let [entity (map->processor-entity t)
+          new-processor (insert-processor<!
+                          (assoc entity :input_ids (->StringArray (:input_ids entity))))]
+      (processor-entity->map (assoc t :id (:id new-processor)
+                                      :created_at (:created_at new-processor)
+                                      :updated_at (:updated_at new-processor))))))
 
 (s/fdef create-processor
         :args (s/cat :t :signal.specs.processor/processor-spec)
@@ -199,12 +204,12 @@
   [id t]
   (let [entity (map->processor-entity (assoc t :id (java.util.UUID/fromString id)))
         updated-processor (update-processor<!
-                           (assoc entity
-                                  :stores
-                                  (->StringArray (:stores t))))]
+                            (assoc entity
+                              :stores
+                              (->StringArray (:stores t))))]
     (processor-entity->map (assoc t :id (:id updated-processor)
-                                  :created_at (:created_at updated-processor)
-                                  :updated_at (:updated_at updated-processor)))))
+                                    :created_at (:created_at updated-processor)
+                                    :updated_at (:updated_at updated-processor)))))
 
 (defn delete-processor
   "Delete processor"

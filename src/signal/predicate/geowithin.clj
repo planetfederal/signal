@@ -21,7 +21,7 @@
             [cljts.relation :as spatial-relation]
             [clojure.data.json :as json]))
 
-(def identifier :geowithin)
+(def identifier "geowithin")
 
 (defn notify [f]
   (json/write-str f))

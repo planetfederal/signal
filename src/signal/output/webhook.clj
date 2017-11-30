@@ -4,7 +4,7 @@
             [cheshire.core :as json]
             [clojure.tools.logging :as log]))
 
-(def identifier :webhook)
+(def identifier "webhook")
 
 (defrecord Webhook [url verb]
   proto/IOutput

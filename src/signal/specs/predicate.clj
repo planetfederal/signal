@@ -19,7 +19,9 @@
 (spec/def :geowithin/def :xy.geojson/featurecollectionpolygon-spec)
 (spec/def :geowithin/type #{"geowithin"})
 (spec/def :predicate/geowithin (spec/keys :req-un [:geowithin/def :geowithin/type]))
-(spec/def :idenity/type #{"identity"})
+
+(spec/def :identity/type #{"identity"})
 (spec/def :predicate/identity (spec/keys :req-un [:identity/type]))
+
 (spec/def ::predicates (spec/coll-of (spec/or :geowithin :predicate/geowithin
                                               :identity :predicate/identity)))
