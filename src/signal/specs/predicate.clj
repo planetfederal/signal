@@ -14,14 +14,21 @@
 
 (ns signal.specs.predicate
   (:require [clojure.spec.alpha :as spec]
-            [xy.geojson :as geojson]))
+            [clojure.spec.gen.alpha :as gen]
+            [xy.geojson :as geojson]
+            [signal.specs.regex :refer [uuid-regex]]
+            [com.gfredericks.test.chuck.generators :as genc]))
+
+(spec/def :predicate/id (spec/with-gen #(re-matches uuid-regex %)
+                                       #(gen/fmap (fn [u] (str u))
+                                                  (gen/uuid))))
 
 (spec/def :geowithin/def :xy.geojson/featurecollectionpolygon-spec)
 (spec/def :geowithin/type #{"geowithin"})
-(spec/def :predicate/geowithin (spec/keys :req-un [:geowithin/def :geowithin/type]))
+(spec/def :predicate/geowithin (spec/keys :req-un [:predicate/id :geowithin/def :geowithin/type]))
 
 (spec/def :identity/type #{"identity"})
-(spec/def :predicate/identity (spec/keys :req-un [:identity/type]))
+(spec/def :predicate/identity (spec/keys :req-un [:predicate/id :identity/type]))
 
 (spec/def ::predicates (spec/coll-of (spec/or :geowithin :predicate/geowithin
                                               :identity :predicate/identity)))

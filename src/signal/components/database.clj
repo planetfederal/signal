@@ -23,7 +23,6 @@
             [clojure.spec.test.alpha :as st]
             [signal.specs.processor]))
 
-
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
 (ysql/defqueries "sql/notification.sql" {:connection db/db-spec})
 (ysql/defqueries "sql/processor.sql" {:connection db/db-spec})
@@ -45,7 +44,8 @@
       (assoc :updated_at (.toString (:updated_at t)))
       (rename-keys {:input_ids  :input-ids,
                     :created_at :created-at,
-                    :updated_at :updated-at})))
+                    :updated_at :updated-at
+                    :deleted_at :deleted-at})))
 
 (defn- row-fn
   "Modifies the row result while the ResultSet is open. This method
@@ -179,6 +179,7 @@
   (-> (assoc trg :definition (json/write-str (:definition trg)))
       (rename-keys {:input-ids  :input_ids,
                     :created-at :created_at,
+                    :deleted-at :deleted_at,
                     :updated-at :updated_at})))
 
 (defn create-processor
@@ -205,8 +206,8 @@
   (let [entity (map->processor-entity (assoc t :id (java.util.UUID/fromString id)))
         updated-processor (update-processor<!
                             (assoc entity
-                              :stores
-                              (->StringArray (:stores t))))]
+                              :input_ids
+                              (->StringArray (:input_ids t))))]
     (processor-entity->map (assoc t :id (:id updated-processor)
                                     :created_at (:created_at updated-processor)
                                     :updated_at (:updated_at updated-processor)))))
