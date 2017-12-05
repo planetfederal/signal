@@ -26,6 +26,7 @@
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
 (ysql/defqueries "sql/notification.sql" {:connection db/db-spec})
 (ysql/defqueries "sql/processor.sql" {:connection db/db-spec})
+(ysql/defqueries "sql/input.sql" {:connection db/db-spec})
 
 ;;;;;;;;;;;SANITIZERS;;;;;;;;
 (defn sanitize-timestamps [v]
@@ -45,6 +46,15 @@
       (rename-keys {:input_ids  :input-ids,
                     :created_at :created-at,
                     :updated_at :updated-at
+                    :deleted_at :deleted-at})))
+
+(defn- input-entity->map [i]
+  (-> i
+      (assoc :id (.toString (:id i)))
+      (assoc :created_at (.toString (:created_at i)))
+      (assoc :updated_at (.toString (:updated_at i)))
+      (rename-keys {:created_at :created-at,
+                    :updated_at :updated-at,
                     :deleted_at :deleted-at})))
 
 (defn- row-fn
@@ -164,13 +174,13 @@
   "Returns all the active processors"
   []
   (log/debug "Fetching all active processors from db")
-  (map processor-entity->map (processor-list-query {} result->map)))
+  (map processor-entity->map (processor-list-query)))
 
 (defn processor-by-id
   "Find processor by identifier"
   [id]
   (log/debugf "Finding processors with id %s from db" id)
-  (some-> (find-by-id-query {:id (java.util.UUID/fromString id)} result->map)
+  (some-> (find-by-id-query {:id (java.util.UUID/fromString id)})
           first
           processor-entity->map))
 
@@ -198,8 +208,6 @@
         :args (s/cat :t :signal.specs.processor/processor-spec)
         :ret :signal.specs.processor/processor-spec)
 
-(st/instrument)
-
 (defn modify-processor
   "Update processor"
   [id t]
@@ -216,3 +224,49 @@
   "Delete processor"
   [id]
   (delete-processor! {:id (java.util.UUID/fromString id)}))
+
+;;;;;;;;;;;;;;;;INPUT;;;;;;;;;;;;;;
+(defn inputs
+  "Returns all the active inputs"
+  []
+  (log/debug "Fetching all active inputs from db")
+  (map input-entity->map (input-list-query)))
+
+(defn input-by-id
+  "Fetch processor by its identifier"
+  [id]
+  (log/debugf "Finding input with the id %s from db", id)
+  (some-> (find-input-by-id-query {:id (java.util.UUID/fromString id)} result->map)
+          first
+          input-entity->map))
+
+(defn map->input-entity [i]
+  (-> (assoc i :definition (json/write-str (:definition i)))
+      (rename-keys {:created-at :created_at,
+                    :deleted-at :deleted_at,
+                    :updated-at :updated_at})))
+
+(defn create-input
+  "Creates an input"
+  [i]
+  (log/debug "Validating input against spec")
+  (do
+    (let [entity (map->input-entity i)
+          new-input (insert-input<! entity)]
+      (input-entity->map (assoc i :id (:id new-input)
+                                  :created_at (:created_at new-input)
+                                  :updated_at (:updated_at new-input))))))
+
+(defn modify-input
+  "Update input"
+  [id i]
+  (let [entity (map->input-entity (assoc i :id (java.util.UUID/fromString id)))
+        updated-input (update-input<! entity)]
+    (input-entity->map (assoc i :id (:id updated-input)
+                                :created_at (:created_at updated-input)
+                                :updated_at (:updated_at updated-input)))))
+
+(defn delete-input
+  "Delete input"
+  [id]
+  (delete-input! {:id (java.util.UUID/fromString id)}))

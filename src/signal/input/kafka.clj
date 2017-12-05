@@ -1,7 +1,7 @@
 (ns signal.input.kafka
   (:require [signal.input.stream-proto :as proto]))
 
-(def identifier :kafka)
+(def identifier "kafka")
 
 (defrecord KafkaConsumer [id]
   proto/IStreamingInput

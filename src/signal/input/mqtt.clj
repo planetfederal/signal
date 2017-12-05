@@ -40,6 +40,6 @@
   (stop [_]
     (mh/disconnect @connection)))
 
-(defmethod proto/make-streaming-input :mqtt
+(defmethod proto/make-streaming-input "mqtt"
   [cfg cb-fn]
   (map->MqttConsumer (assoc cfg :cb cb-fn)))

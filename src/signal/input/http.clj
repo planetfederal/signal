@@ -2,7 +2,7 @@
   (:require [signal.input.poll-proto :as proto]
             [clj-http.client :as http]))
 
-(def identifier :http)
+(def identifier "http")
 
 (defrecord Http [id url interval]
   proto/IPollingInput
@@ -16,6 +16,8 @@
         (func json))
       (catch Exception e (.getLocalizedMessage e)))))
 
-(defmethod proto/make-polling-input :http
+(defmethod proto/make-polling-input identifier
   [cfg]
-  (map->Http cfg))
+  (->Http (:id cfg)
+          (get-in cfg [:definition :url])
+          (get-in cfg [:definition :interval])))

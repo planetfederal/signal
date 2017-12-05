@@ -18,18 +18,21 @@
             [signal.components.processor :as processor-api]
             [signal.input.poll-proto :as poll-proto]
             [signal.input.stream-proto :as stream-proto]
-            [signal.input.mqtt]
+            [signal.input.http]
+            [signal.components.database :as database-api]
             [overtone.at-at :refer [every, mk-pool, stop, stop-and-reset-pool!]]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [clojure.spec.alpha :as spec]))
 
 (def inputs (ref {}))
 (def sched-polling-pool (mk-pool))
 
 (defn fetch-url
   [polling-input]
+  (log/debugf "Fetching %s" (:url polling-input))
   (poll-proto/poll polling-input (:fn polling-input)))
 
-(defn all [_] inputs)
+(defn all [_] (database-api/inputs))
 
 (defn- start-polling [polling-input]
   (let [seconds (:interval polling-input)]
@@ -59,17 +62,56 @@
   (stream-proto/stop streaming-input)
   (commute inputs dissoc (keyword (:id streaming-input))))
 
-(defn remove-polling-input [_ polling-input]
+(defn remove-polling-input [_ id]
   ; takes a store id string
   (dosync
-   (commute inputs dissoc (keyword (:id polling-input)))
-   (stop (keyword (:id polling-input)) sched-polling-pool)))
+   (commute inputs dissoc (keyword id))
+   (database-api/delete-input id)
+   (stop (keyword id) sched-polling-pool)))
+
+(defn- start-inputs
+  "Fetches all inputs from the database and starts them"
+  [input-comp]
+  (doall (map (partial add-polling-input input-comp) (database-api/inputs))))
+
+(defn create [input-comp i]
+  (let [input (database-api/create-input i)]
+    (add-polling-input input-comp input)
+    input))
+
+(defn modify [input-comp id i]
+  (let [input (database-api/modify-input id i)]
+    (add-polling-input input-comp input)
+    input))
+
+(defn delete [input-comp id]
+  (database-api/delete-input id)
+  (remove-polling-input input-comp id))
+
+;(defn create
+;  [processor-comp t]
+;  (let [processor (db/create-processor t)]
+;    (add-processor processor-comp processor)
+;    processor))
+;
+;(defn modify
+;  [processor-comp id t]
+;  (let [processor (db/modify-processor id t)]
+;    (add-processor processor-comp processor)
+;    processor))
+;
+;(defn delete
+;  [processor-comp id]
+;  (db/delete-processor id)
+;  (evict-processor processor-comp id))
 
 (defrecord InputManagerComponent [processor]
   component/Lifecycle
   (start [this]
     (log/debug "Starting Store Component")
-    (assoc this :processor processor))
+    (let [cmp (assoc this :processor processor)]
+      (do (start-inputs cmp)
+          cmp)))
   (stop [this]
     (log/debug "Stopping Store Component")
     this))

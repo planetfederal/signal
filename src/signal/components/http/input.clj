@@ -39,7 +39,7 @@
   [input-comp]
   #{["/api/inputs" :get
      (conj intercept/common-interceptors
-           (partial http-get-all-inputs))
+           (partial http-get-all-inputs input-comp))
      :route-name :get-inputs]
     ["/api/inputs/:id" :get
      (conj intercept/common-interceptors
