@@ -236,7 +236,7 @@
   "Fetch processor by its identifier"
   [id]
   (log/debugf "Finding input with the id %s from db", id)
-  (some-> (find-input-by-id-query {:id (java.util.UUID/fromString id)} result->map)
+  (some-> (find-input-by-id-query {:id (java.util.UUID/fromString id)})
           first
           input-entity->map))
 

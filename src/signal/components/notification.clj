@@ -19,10 +19,11 @@
             [signal.output.protocol :as proto]))
 
 (defn notify [_ processor payload]
-  (let [recipients (proto/recipients (:output processor))
+  (let [output (get-in processor [:definition :output])
+        recipients (proto/recipients output)
         ids (map :id
                  (db/create-notifications recipients "processor" payload))]
-    (proto/send! (:output processor) (assoc payload :notif-ids ids))))
+    (proto/send! output (assoc payload :notif-ids ids))))
 
 (defn find-notif-by-id
   [_ id]

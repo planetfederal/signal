@@ -41,9 +41,9 @@
    :repeated false
    :persistent false
    :input-ids [input-id]
-   :predicates [{:type :identity}]
-   :output {:type :test
-            :output-fn output-fn}})
+   :definition {:predicates [{:type :identity}]
+                :output {:type :test
+                         :output-fn output-fn}}})
 
 (use-fixtures :once utils/setup-fixtures)
 

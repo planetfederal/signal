@@ -23,9 +23,9 @@
             [clojure.data.json :as json]))
 
 (def input-id (java.util.UUID/randomUUID))
-(def input {:type :http
-            :interval 20
-            :url "http://localhost:8085/api/test/webhook"
+(def input {:type "http"
+            :definition {:interval 20
+                         :url "http://localhost:8085/api/test/webhook"}
             :id input-id})
 
 (def email-test-processor
@@ -35,9 +35,9 @@
    :repeated false
    :persistent false
    :input-ids [input-id]
-   :predicates [{:type :identity}]
-   :output {:type :email
-            :addresses ["wrichardet@boundlessgeo.com"]}})
+   :definition {:predicates [{:type "identity"}]
+                :output {:type "email"
+                         :addresses ["wrichardet@boundlessgeo.com"]}}})
 
 (use-fixtures :once utils/setup-fixtures)
 
@@ -57,9 +57,10 @@
    :description "test-webhook-processor description"
    :repeated false
    :input-ids [input-id]
-   :output {:type :webhook
-            :url "http://localhost:8085/api/test/webhook"
-            :verb :post}})
+   :definition {:predicates [{:type "identity"}]
+                :output {:type "webhook"
+                         :url "http://localhost:8085/api/test/webhook"
+                         :verb :post}}})
 
 (deftest webhook-output
   (testing "Webhook calls"

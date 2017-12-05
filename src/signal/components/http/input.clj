@@ -10,7 +10,9 @@
 (defn http-get-input
   [input-comp request]
   (let [id (get-in request [:path-params :id])]
-    (if-let [input (id (input-manager-api/all input-comp))]
+    (if-let [input (->> (input-manager-api/all input-comp)
+                        (filter #(= id (:id %)))
+                        first)]
       (response/ok input))))
 
 (defn http-put-inputs

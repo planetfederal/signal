@@ -24,56 +24,55 @@
 
 (def input-id (java.util.UUID/randomUUID))
 
-(def input {:type :http
-            :interval 0
-            :url "http://localhost:8085/api/test/webhook"
-            :id input-id})
+(def input {:type       "http"
+            :definition {:interval 0
+                         :url      "http://localhost:8085/api/test/webhook"}
+            :id         input-id})
 
-(def test-value {:id 1 :type "Feature"
-                 :geometry {:type "Point" :coordinates [10.0 10.0]}
+(def test-value {:id         1 :type "Feature"
+                 :geometry   {:type "Point" :coordinates [10.0 10.0]}
                  :properties {}})
 
 (use-fixtures :once utils/setup-fixtures)
 
 (def identity-processor
-  {:id (str (java.util.UUID/randomUUID))
-   :name "test-processor"
+  {:id          (str (java.util.UUID/randomUUID))
+   :name        "test-processor"
    :description "A test processor"
-   :repeated false
-   :persistent false
-   :input-ids [input-id]
-   :predicates [{:type :identity}]
-   :output {:type :webhook
-            :url "http://localhost:8085/api/test/webhook"
-            :verb :post}})
+   :repeated    false
+   :persistent  false
+   :input-ids   [input-id]
+   :definition  {:predicates [{:type "identity"}]
+                 :output     {:type "webhook"
+                              :url  "http://localhost:8085/api/test/webhook"
+                              :verb :post}}})
 
 (deftest identity-processor-test
   (testing "Identity Processor"
     (let [proc-comp (:processor user/system-val)
           input-comp (:input user/system-val)]
       (processor-api/add-processor proc-comp identity-processor)
-      (input-api/add-polling-input input-comp
-                           input)
+      (input-api/add-polling-input input-comp input)
       (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))
 
 (def geowithin-processor
-  {:id (str (java.util.UUID/randomUUID))
-   :name "geowithin-test-processor"
-   :repeated false
+  {:id         (str (java.util.UUID/randomUUID))
+   :name       "geowithin-test-processor"
+   :repeated   false
    :persistent false
-   :input-ids [input-id]
-   :predicates [{:type :geowithin
-                 :def {:id 2 :type "Feature"
-                       :geometry {:type "Polygon"
-                                  :coordinates [[[0.0 0.0]
-                                                 [0.0 20.0]
-                                                 [20.0 20.0]
-                                                 [20.0 0.0]
-                                                 [0.0 0.0]]]}
-                       :properties {}}}]
-   :output {:type :webhook
-            :url "http://localhost:8085/api/test/webhook"
-            :verb :post}})
+   :input-ids  [input-id]
+   :definition {:predicates [{:type "geowithin"
+                              :def  {:id         2 :type "Feature"
+                                     :geometry   {:type        "Polygon"
+                                                  :coordinates [[[0.0 0.0]
+                                                                 [0.0 20.0]
+                                                                 [20.0 20.0]
+                                                                 [20.0 0.0]
+                                                                 [0.0 0.0]]]}
+                                     :properties {}}}]
+                :output     {:type "webhook"
+                             :url  "http://localhost:8085/api/test/webhook"
+                             :verb :post}}})
 
 (deftest geowithin-processor-test
   (testing "Geowithin Processor"
@@ -81,27 +80,27 @@
           input-comp (:input user/system-val)]
       (processor-api/add-processor proc-comp geowithin-processor)
       (input-api/add-polling-input input-comp
-                           input)
+                                   input)
       (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))
 
 (def geodisjoint-processor
-  {:id (str (java.util.UUID/randomUUID))
-   :name "geodisjoint-test-processor"
-   :repeated false
+  {:id         (str (java.util.UUID/randomUUID))
+   :name       "geodisjoint-test-processor"
+   :repeated   false
    :persistent false
-   :input-ids [input-id]
-   :predicates [{:type :geowithin
-                 :def {:id 2 :type "Feature"
-                       :geometry {:type "Polygon"
-                                  :coordinates [[[0.0 0.0]
-                                                 [0.0 20.0]
-                                                 [20.0 20.0]
-                                                 [20.0 0.0]
-                                                 [0.0 0.0]]]}
-                       :properties {}}}]
-   :output {:type :webhook
-            :url "http://localhost:8085/api/test/webhook"
-            :verb :post}})
+   :input-ids  [input-id]
+   :definition {:predicates [{:type "geowithin"
+                              :def  {:id         2 :type "Feature"
+                                     :geometry   {:type        "Polygon"
+                                                  :coordinates [[[0.0 0.0]
+                                                                 [0.0 20.0]
+                                                                 [20.0 20.0]
+                                                                 [20.0 0.0]
+                                                                 [0.0 0.0]]]}
+                                     :properties {}}}]
+                :output     {:type "webhook"
+                             :url  "http://localhost:8085/api/test/webhook"
+                             :verb :post}}})
 
 (deftest geodisjoint-processor-test
   (testing "Geodisjoint Processor"
@@ -109,5 +108,5 @@
           input-comp (:input user/system-val)]
       (processor-api/add-processor proc-comp geodisjoint-processor)
       (input-api/add-polling-input input-comp
-                           input)
+                                   input)
       (is (some? (utils/request-post "/api/check" (json/write-str test-value)))))))
