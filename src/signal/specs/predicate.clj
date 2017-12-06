@@ -23,9 +23,9 @@
                                        #(gen/fmap (fn [u] (str u))
                                                   (gen/uuid))))
 
-(spec/def :geowithin/def :xy.geojson/featurecollectionpolygon-spec)
+(spec/def :geowithin/definition :xy.geojson/featurecollectionpolygon-spec)
 (spec/def :geowithin/type #{"geowithin"})
-(spec/def :predicate/geowithin (spec/keys :req-un [:predicate/id :geowithin/def :geowithin/type]))
+(spec/def :predicate/geowithin (spec/keys :req-un [:predicate/id :geowithin/definition :geowithin/type]))
 
 (spec/def :identity/type #{"identity"})
 (spec/def :predicate/identity (spec/keys :req-un [:predicate/id :identity/type]))

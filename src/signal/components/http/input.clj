@@ -25,15 +25,14 @@
 (defn http-post-inputs
   [input-comp request]
   (do
-    (input-manager-api/add-polling-input
-      input-comp (:json-params request))
+    (input-manager-api/create input-comp (:json-params request))
     (response/ok "success")))
 
 (defn http-delete-inputs
   [input-comp request]
   (let [id (get-in request [:path-params :id])]
     (do
-      (input-manager-api/remove-polling-input input-comp {:id id})
+      (input-manager-api/delete input-comp {:id id})
       (response/ok "success"))))
 
 (defn routes

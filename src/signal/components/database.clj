@@ -174,7 +174,7 @@
   "Returns all the active processors"
   []
   (log/debug "Fetching all active processors from db")
-  (map processor-entity->map (processor-list-query)))
+  (map processor-entity->map (processor-list-query {} result->map)))
 
 (defn processor-by-id
   "Find processor by identifier"

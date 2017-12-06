@@ -106,7 +106,7 @@
   (log/debug "Adding processor" processor)
   ;; builds a compound where clause of (rule AND rule AND ...)
   (let [output (proto-output/make-output (get-in processor [:definition :output]))
-        predicates (map proto-pred/make-predicate (get-in processor [:definition :predicates]))
+        predicates (doall (map proto-pred/make-predicate (get-in processor [:definition :predicates])))
         proc (-> (assoc-in processor [:definition :output] output)
                  (assoc-in [:definition :predicates] predicates))]
     (dosync
@@ -124,7 +124,7 @@
   "Fetches all processors from db and loads them into memory"
   [processor-comp]
   (let [processors (db/processors)]
-    (map add-processor processor-comp processors)))
+    (map (partial add-processor processor-comp) processors)))
 
 (defn all
   [_]

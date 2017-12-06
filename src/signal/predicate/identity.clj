@@ -12,4 +12,4 @@
 
 (defmethod proto/make-predicate identifier
   [pred]
-  (->IdentityClause (:def pred)))
+  (->IdentityClause (:definition pred)))

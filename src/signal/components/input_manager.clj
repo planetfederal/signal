@@ -29,13 +29,12 @@
 
 (defn fetch-url
   [polling-input]
-  (log/debugf "Fetching %s" (:url polling-input))
   (poll-proto/poll polling-input (:fn polling-input)))
 
 (defn all [_] (database-api/inputs))
 
 (defn- start-polling [polling-input]
-  (let [seconds (:interval polling-input)]
+  (let [seconds (poll-proto/interval polling-input)]
     (every (* 1000 seconds)
            #(fetch-url polling-input) sched-polling-pool
            :job (keyword (:id polling-input)) :initial-delay 5000)))
@@ -52,7 +51,7 @@
   (let [proc (:processor input-comp)
         func (partial processor-api/test-value proc)
         polling-input (poll-proto/make-polling-input input)]
-    (if (< 0 (:interval polling-input))
+    (if (< 0 (poll-proto/interval polling-input))
       (let [input-fn (assoc polling-input :fn func)]
         (dosync
          (commute inputs assoc (keyword (:id polling-input)) input-fn)

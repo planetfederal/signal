@@ -1,6 +1,7 @@
 (ns signal.input.http
   (:require [signal.input.poll-proto :as proto]
-            [clj-http.client :as http]))
+            [clj-http.client :as http]
+            [clojure.tools.logging :as log]))
 
 (def identifier "http")
 
@@ -8,9 +9,10 @@
   proto/IPollingInput
   (interval [this] (if (some? (:interval this))
                      (:interval this)
-                     0))
+                     60))
   (poll [this func]
     (try
+      (log/debug "Polling:" (:id this) " " (:url this))
       (let [resp (http/get (:url this))
             json (cheshire.core/parse-string (:body resp))]
         (func json))
