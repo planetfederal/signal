@@ -22,7 +22,6 @@
             [signal.output.webhook]
             [signal.predicate.geowithin]
             [signal.predicate.protocol :as proto-pred]
-            [clojure.spec.alpha :as spec]
             [yesql.core :refer [defqueries]])
   (:import [java.util Date]))
 
@@ -53,12 +52,13 @@
   "Sets processor as valid, then sends a noification"
   [value processor notify]
   (let [geom-map (xy.geojson/write value)
-        body (doall (map #(proto-pred/notification % geom-map)
-                         (get-in processor [:definition :predicates])))
+        body (doall (->> (get-in processor [:definition :predicates])
+                         (map #(proto-pred/notification % geom-map))
+                         (clojure.string/join ",\n and ")))
         payload {:time  (str (Date.))
                  :value geom-map
                  :title (str "Alert from " (:name processor))
-                 :body  body}]
+                 :body  (str geom-map "\n\n" body ".")}]
     (do
       (notificationapi/notify
        notify
@@ -160,6 +160,7 @@
       comp))
   (stop [this]
     (log/debug "Stopping processor Component")
+    ()
     this))
 
 (defn make-processor-component []

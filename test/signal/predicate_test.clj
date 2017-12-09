@@ -14,8 +14,6 @@
 
 (ns signal.predicate-test
   (:require [clojure.test :refer :all]
-            [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
             [signal.test-utils :as utils]
             [signal.components.input-manager :as input-api]
             [signal.components.processor :as processor-api]

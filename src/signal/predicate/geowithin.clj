@@ -14,11 +14,8 @@
 
 (ns signal.predicate.geowithin
   (:require [signal.predicate.protocol :as proto]
-            [signal.utils.geo :as geo-util]
-            [cljts.io :as jtsio]
-            [xy.relations :as relations]
+            [xy.relation :as relation]
             [xy.geojson :as geojson]
-            [cljts.relation :as spatial-relation]
             [clojure.data.json :as json]))
 
 (def identifier "geowithin")
@@ -29,11 +26,11 @@
 (defrecord WithinClause [clause]
   proto/IPredicate
   (check [this geojson-feature]
-    (relations/within? (:geometry geojson-feature)
-                       (get-in this [:clause :geometry])))
-  (notification [_ geojson-feature]
-    (str (notify geojson-feature) " was within.")))
+    (relation/within? (:geometry geojson-feature
+                       (:clause this))))
+  (notification [this _]
+    (str " was within\n " (xy.geojson/write (:clause this)))))
 
 (defmethod proto/make-predicate identifier
   [predicate]
-  (->WithinClause (geojson/parse (:def predicate))))
+  (->WithinClause (geojson/parse (:definition predicate))))

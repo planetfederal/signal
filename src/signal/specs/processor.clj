@@ -14,12 +14,12 @@
 
 (ns signal.specs.processor
   (:require [clojure.spec.alpha :as s]
-            [signal.specs.input :as input]
-            [signal.specs.filter :as filter]
-            [signal.specs.reducer :as reducer]
-            [signal.specs.predicate :as predicate]
-            [signal.specs.mapper :as mapper]
-            [signal.specs.output :as output]))
+            [signal.specs.input :refer :all]
+            [signal.specs.filter :refer :all]
+            [signal.specs.reducer :refer :all]
+            [signal.specs.predicate :refer :all]
+            [signal.specs.mapper :refer :all]
+            [signal.specs.output :refer :all]))
 
 (s/def :processor/id pos-int?)
 (s/def :processor/name string?)

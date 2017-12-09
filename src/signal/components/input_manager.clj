@@ -14,24 +14,26 @@
 
 (ns signal.components.input-manager
   (:require [com.stuartsierra.component :as component]
-            [clj-http.client :as client]
             [signal.components.processor :as processor-api]
             [signal.input.poll-proto :as poll-proto]
             [signal.input.stream-proto :as stream-proto]
             [signal.input.http]
             [signal.components.database :as database-api]
             [overtone.at-at :refer [every, mk-pool, stop, stop-and-reset-pool!]]
-            [clojure.tools.logging :as log]
-            [clojure.spec.alpha :as spec]))
+            [clojure.tools.logging :as log]))
 
 (def inputs (ref {}))
 (def sched-polling-pool (mk-pool))
 
 (defn fetch-url
   [polling-input]
-  (poll-proto/poll polling-input (:fn polling-input)))
+  (try (poll-proto/poll polling-input (:fn polling-input))
+       (catch Exception e
+         (log/error e (.getLocalizedMessage e)))))
 
 (defn all [_] (database-api/inputs))
+
+(defn find-by-id [_ id] (database-api/input-by-id id))
 
 (defn- start-polling [polling-input]
   (let [seconds (poll-proto/interval polling-input)]
@@ -61,17 +63,28 @@
   (stream-proto/stop streaming-input)
   (commute inputs dissoc (keyword (:id streaming-input))))
 
+(defn stop-input [_ id]
+  (stop (keyword id) sched-polling-pool)
+  (dosync
+    (commute inputs dissoc (keyword id))))
+
 (defn remove-polling-input [_ id]
   ; takes a store id string
-  (dosync
-   (commute inputs dissoc (keyword id))
-   (database-api/delete-input id)
-   (stop (keyword id) sched-polling-pool)))
+  (stop-input _ id)
+  (database-api/delete-input id))
 
 (defn- start-inputs
   "Fetches all inputs from the database and starts them"
   [input-comp]
   (doall (map (partial add-polling-input input-comp) (database-api/inputs))))
+
+(defn- stop-inputs
+  [input-comp]
+  (stop-and-reset-pool! sched-polling-pool)
+  (doall (map (fn [i]
+                (stop-input input-comp (:id i)))
+              (database-api/inputs))))
+
 
 (defn create [input-comp i]
   (let [input (database-api/create-input i)]
@@ -87,23 +100,6 @@
   (database-api/delete-input id)
   (remove-polling-input input-comp id))
 
-;(defn create
-;  [processor-comp t]
-;  (let [processor (db/create-processor t)]
-;    (add-processor processor-comp processor)
-;    processor))
-;
-;(defn modify
-;  [processor-comp id t]
-;  (let [processor (db/modify-processor id t)]
-;    (add-processor processor-comp processor)
-;    processor))
-;
-;(defn delete
-;  [processor-comp id]
-;  (db/delete-processor id)
-;  (evict-processor processor-comp id))
-
 (defrecord InputManagerComponent [processor]
   component/Lifecycle
   (start [this]
@@ -113,7 +109,8 @@
           cmp)))
   (stop [this]
     (log/debug "Stopping Store Component")
-    this))
+    (do (stop-inputs this)
+      this)))
 
 (defn make-input-manager-component []
   (map->InputManagerComponent {}))

@@ -14,11 +14,8 @@
 
 (ns signal.predicate.geointersects
   (:require [signal.predicate.protocol :as proto]
-            [signal.utils.geo :as geo-util]
-            [cljts.io :as jtsio]
-            [xy.relations :as relations]
+            [xy.relation :as relations]
             [xy.geojson :as geojson]
-            [cljts.relation :as spatial-relation]
             [clojure.data.json :as json]))
 
 (def identifier "geointersects")

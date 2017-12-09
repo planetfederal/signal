@@ -3,7 +3,7 @@
   :url "http://github.com/boundlessgeo/signal"
   :license {:name "Apache License, Version 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0"}
-  :dependencies [[org.clojure/clojure "1.9.0-beta3"]
+  :dependencies [[org.clojure/clojure "1.9.0-RC2"]
                  [org.clojure/spec.alpha "0.1.134"]
                  [org.clojure/test.check "0.9.0"]
                  [io.pedestal/pedestal.service "0.5.1"
@@ -26,7 +26,6 @@
                  [clojurewerkz/machine_head "1.0.0-beta9"]
                  [com.boundlessgeo/schema "0.12"]
                  [com.google.protobuf/protobuf-java "3.1.0"]
-                 [buddy "1.1.0"]
                  [camel-snake-kebab "0.4.0"]
                  [org.clojars.diogok/cljts "0.5.0"]
                  [org.clojure/tools.nrepl "0.2.12"]
@@ -40,7 +39,7 @@
                  [org.apache.kafka/kafka-streams "0.10.0.0-cp1"
                   :exclusions [org.slf4j/slf4j-log4j12]]
                  [clj-time "0.13.0"]
-                 [tetriscode/xy "0.7.0"]]
+                 [tetriscode/xy "0.8.0"]]
   :repositories  [["osgeo" "http://download.osgeo.org/webdav/geotools/"]
                   ["boundlessgeo-releases" "https://repo.boundlessgeo.com/artifactory/release/"]
                   ["clojars" {:sign-releases false}]
@@ -49,8 +48,8 @@
   :dev-dependencies [[lein-reload "1.0.0"]
                      [pjstadig/humane-test-output "0.8.3"]
                      [com.jakemccrary/lein-test-refresh "0.21.1"]]
-  :test-selectors {:default (complement :integration)}
-                  :integration :integration
+  :test-selectors {:default (complement :integration)
+                   :integration :integration}
   :plugins [[lein-environ "1.0.3"]
             [lein-cljfmt "0.5.6"]
             [ragtime/ragtime.lein "0.3.6"]

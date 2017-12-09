@@ -13,7 +13,7 @@ ON m.id = n.message_id WHERE n.sent IS NULL;
 -- all notifications
 SELECT n.id,n.recipient,n.delivered,n.sent,m.type,m.info
 FROM signal.notifications AS n JOIN signal.messages AS m
-ON m.id = n.message_id;
+ON m.id = n.message_id ORDER BY n.created_at DESC;
 
 -- name: undelivered-notifications-list
 SELECT n.id,n.recipient,n.delivered,n.sent,m.type,m.info

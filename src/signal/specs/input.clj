@@ -15,7 +15,7 @@
 (ns signal.specs.input
   (:require [clojure.spec.alpha :as spec]
             [clojure.spec.gen.alpha :as gen]
-            [signal.specs.output]
+            [signal.specs.output :refer :all]
             [com.gfredericks.test.chuck.generators :as genc]
             [signal.specs.regex :refer [url-regex,uuid-regex]]))
 
@@ -25,12 +25,13 @@
 
 (spec/def ::name string?)
 (spec/def ::description string?)
+(spec/def ::interval (spec/with-gen pos-int?
+                                    #(spec/gen #{100})))
 
 ;;;;;;;;;;;;;;WFS;;;;;;;;;;;;;;;;
 (spec/def :wfs-def/url (spec/with-gen #(re-matches url-regex %)
                                       #(genc/string-from-regex url-regex)))
-(spec/def :wfs/interval pos-int?)
-(spec/def :wfs/definition (spec/keys :req-un [:wfs-def/url :wfs/interval]))
+(spec/def :wfs/definition (spec/keys :req-un [:wfs-def/url ::interval]))
 (spec/def :wfs/type #{"wfs"})
 (spec/def ::input-wfs (spec/keys :req-un [::id ::name ::description :wfs/type :wfs/definition]))
 
@@ -38,12 +39,12 @@
 (spec/def :http/url (spec/with-gen :wfs-def/url
                       #(spec/gen #{"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"})))
 (spec/def :http/interval pos-int?)
-(spec/def :http/definition (spec/keys :req-un [:http/url :http/interval]))
+(spec/def :http/definition (spec/keys :req-un [:http/url ::interval]))
 (spec/def :http/type #{"http"})
 (spec/def ::input-http (spec/keys :req-un [::id ::name ::description :http/type :http/definition]))
 
 ;;;;;;;;;;;FINAL DEF;;;;;;;;;;;;;;
-(spec/def ::input (spec/or ::input-http ::input-wfs))
+(spec/def ::input ::input-http)
 
 (spec/def ::inputs (spec/coll-of ::input))
 (spec/def ::input-ids (spec/or :all empty? :filtered (spec/coll-of ::id)))

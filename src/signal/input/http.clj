@@ -1,6 +1,7 @@
 (ns signal.input.http
   (:require [signal.input.poll-proto :as proto]
             [clj-http.client :as http]
+            [xy.geojson :as geojson]
             [clojure.tools.logging :as log]))
 
 (def identifier "http")
@@ -14,9 +15,9 @@
     (try
       (log/debug "Polling:" (:id this) " " (:url this))
       (let [resp (http/get (:url this))
-            json (cheshire.core/parse-string (:body resp))]
+            json (geojson/str->map (:body resp))]
         (func json))
-      (catch Exception e (.getLocalizedMessage e)))))
+      (catch Exception e (log/error e (.getLocalizedMessage e))))))
 
 (defmethod proto/make-polling-input identifier
   [cfg]

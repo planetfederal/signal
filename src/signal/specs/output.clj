@@ -14,7 +14,7 @@
 
 (ns signal.specs.output
   (:require [clojure.spec.alpha :as spec]
-            [xy.geojson]
+            [xy.geojson :refer :all]
             [com.gfredericks.test.chuck.generators :as genc]
             [signal.specs.regex :refer [email-regex,url-regex]]))
 

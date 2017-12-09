@@ -15,7 +15,7 @@
 (ns signal.specs.predicate
   (:require [clojure.spec.alpha :as spec]
             [clojure.spec.gen.alpha :as gen]
-            [xy.geojson :as geojson]
+            [xy.geojson :refer :all]
             [signal.specs.regex :refer [uuid-regex]]
             [com.gfredericks.test.chuck.generators :as genc]))
 

@@ -9,11 +9,8 @@
 
 (defn http-get-input
   [input-comp request]
-  (let [id (get-in request [:path-params :id])]
-    (if-let [input (->> (input-manager-api/all input-comp)
-                        (filter #(= id (:id %)))
-                        first)]
-      (response/ok input))))
+  (let [input (input-manager-api/find-by-id input-comp (get-in request [:path-params :id]))]
+    (response/ok input)))
 
 (defn http-put-inputs
   [input-comp request]
@@ -24,15 +21,13 @@
 
 (defn http-post-inputs
   [input-comp request]
-  (do
-    (input-manager-api/create input-comp (:json-params request))
-    (response/ok "success")))
+  (response/ok (input-manager-api/create input-comp (:json-params request))))
 
 (defn http-delete-inputs
   [input-comp request]
   (let [id (get-in request [:path-params :id])]
     (do
-      (input-manager-api/delete input-comp {:id id})
+      (input-manager-api/delete input-comp id)
       (response/ok "success"))))
 
 (defn routes
