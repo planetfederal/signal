@@ -38,5 +38,4 @@
 (spec/def :output/wfs-t (spec/keys :req-un [:wfs-t/type :wfs-t/url :wfs-t/geometry]))
 
 (spec/def ::output (spec/or :email :output/email
-                            :webhook :output/webhook
-                            :wfs-t :output/wfs-t))
+                            :webhook :output/webhook))

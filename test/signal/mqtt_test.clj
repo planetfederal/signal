@@ -24,7 +24,7 @@
             [clojurewerkz.machine-head.client :as mh]))
 
 (def input-id (.toString (java.util.UUID/randomUUID)))
-(def input {:type :mqtt
+(def input {:type "mqtt"
             :url "tcp://localhost"
             :port 1883
             :topic "/foo"
@@ -41,7 +41,7 @@
    :repeated false
    :persistent false
    :input-ids [input-id]
-   :definition {:predicates [{:type :identity}]
+   :definition {:predicates [{:type "identity"}]
                 :output {:type :test
                          :output-fn output-fn}}})
 

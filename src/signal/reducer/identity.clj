@@ -1,7 +1,7 @@
 (ns signal.reducer.identity
   (:require [signal.reducer.protocol :as proto]))
 
-(def identifier :identity)
+(def identifier "identity")
 
 (defrecord IdentityReducer [cfg]
   proto/IReducer

@@ -49,7 +49,7 @@
   (log/debug "Deleting processor")
   (let [id (get-in request [:path-params :id])]
     (processorapi/delete processor-comp id)
-    (response/ok (str "Deleted processor " id))))
+    (response/ok "success")))
 
 (defn http-test-processor
   "HTTP endpoint used to test processors.  Takes a geojson feature

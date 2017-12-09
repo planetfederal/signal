@@ -15,7 +15,7 @@
 (ns signal.specs.mapper
   (:require [clojure.spec.alpha :as s]))
 
-(s/def :identity/type #{:identity})
+(s/def :identity/type #{"identity"})
 (s/def :identity/mapper (s/keys :req-un [:identity/type]))
 
 (s/def ::mappers (s/coll-of (s/or :identity :identity/mapper)))
