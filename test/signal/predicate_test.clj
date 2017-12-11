@@ -27,7 +27,8 @@
                          :url      "http://localhost:8085/api/test/webhook"}
             :id         input-id})
 
-(def test-value {:id         1 :type "Feature"
+(def test-value {:id         1
+                 :type       "Feature"
                  :geometry   {:type "Point" :coordinates [10.0 10.0]}
                  :properties {}})
 
@@ -43,7 +44,7 @@
    :definition  {:predicates [{:type "identity"}]
                  :output     {:type "webhook"
                               :url  "http://localhost:8085/api/test/webhook"
-                              :verb :post}}})
+                              :verb "post"}}})
 
 (deftest identity-processor-test
   (testing "Identity Processor"
@@ -59,15 +60,16 @@
    :repeated   false
    :persistent false
    :input-ids  [input-id]
-   :definition {:predicates [{:type "geowithin"
-                              :def  {:id         2 :type "Feature"
-                                     :geometry   {:type        "Polygon"
-                                                  :coordinates [[[0.0 0.0]
-                                                                 [0.0 20.0]
-                                                                 [20.0 20.0]
-                                                                 [20.0 0.0]
-                                                                 [0.0 0.0]]]}
-                                     :properties {}}}]
+   :definition {:predicates [{:type       "geowithin"
+                              :definition {:id 2
+                                           :type       "Feature"
+                                           :geometry   {:type        "Polygon"
+                                                        :coordinates [[[0.0 0.0]
+                                                                       [0.0 20.0]
+                                                                       [20.0 20.0]
+                                                                       [20.0 0.0]
+                                                                       [0.0 0.0]]]}
+                                           :properties {}}}]
                 :output     {:type "webhook"
                              :url  "http://localhost:8085/api/test/webhook"
                              :verb :post}}})
@@ -87,8 +89,9 @@
    :repeated   false
    :persistent false
    :input-ids  [input-id]
-   :definition {:predicates [{:type "geowithin"
-                              :def  {:id         2 :type "Feature"
+   :definition {:predicates [{:type "geodisjoint"
+                              :definition
+                                    {:id         2 :type "Feature"
                                      :geometry   {:type        "Polygon"
                                                   :coordinates [[[0.0 0.0]
                                                                  [0.0 20.0]
@@ -98,7 +101,7 @@
                                      :properties {}}}]
                 :output     {:type "webhook"
                              :url  "http://localhost:8085/api/test/webhook"
-                             :verb :post}}})
+                             :verb "post"}}})
 
 (deftest geodisjoint-processor-test
   (testing "Geodisjoint Processor"
