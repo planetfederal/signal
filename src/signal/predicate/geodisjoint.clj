@@ -26,11 +26,12 @@
 (defrecord DisjointClause [clause]
   proto/IPredicate
   (check [this geojson-feature]
-    (relations/disjoint? (:geometry geojson-feature)
-                         (get-in this [:clause :geometry])))
+    (relations/disjoint? geojson-feature
+                         (:clause this)))
   (notification [_ geojson-feature]
     (str (notify geojson-feature) " was not within.")))
 
+
 (defmethod proto/make-predicate identifier
   [predicate]
-  (->DisjointClause (geojson/parse (:def predicate))))
+  (->DisjointClause (geojson/parse (:definition predicate))))

@@ -72,7 +72,7 @@
                                            :properties {}}}]
                 :output     {:type "webhook"
                              :url  "http://localhost:8085/api/test/webhook"
-                             :verb :post}}})
+                             :verb "post"}}})
 
 (deftest geowithin-processor-test
   (testing "Geowithin Processor"
@@ -91,7 +91,8 @@
    :input-ids  [input-id]
    :definition {:predicates [{:type "geodisjoint"
                               :definition
-                                    {:id         2 :type "Feature"
+                                    {:id         2
+                                     :type "Feature"
                                      :geometry   {:type        "Polygon"
                                                   :coordinates [[[0.0 0.0]
                                                                  [0.0 20.0]

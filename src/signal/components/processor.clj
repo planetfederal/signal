@@ -21,6 +21,7 @@
             [signal.output.protocol :as proto-output]
             [signal.output.webhook]
             [signal.predicate.geowithin]
+            [signal.predicate.geodisjoint]
             [signal.predicate.protocol :as proto-pred]
             [yesql.core :refer [defqueries]])
   (:import [java.util Date]))

@@ -3,7 +3,7 @@
   :url "http://github.com/boundlessgeo/signal"
   :license {:name "Apache License, Version 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0"}
-  :dependencies [[org.clojure/clojure "1.9.0-RC2"]
+  :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/spec.alpha "0.1.134"]
                  [org.clojure/test.check "0.9.0"]
                  [io.pedestal/pedestal.service "0.5.1"
@@ -39,7 +39,7 @@
                  [org.apache.kafka/kafka-streams "0.10.0.0-cp1"
                   :exclusions [org.slf4j/slf4j-log4j12]]
                  [clj-time "0.13.0"]
-                 [tetriscode/xy "0.8.1"]]
+                 [tetriscode/xy "0.8.3"]]
   :repositories  [["boundlessgeo-releases" "https://repo.boundlessgeo.com/artifactory/release/"]
                   ["clojars" {:sign-releases false}]
                   ["confluent" {:url "http://packages.confluent.io/maven/"}]
