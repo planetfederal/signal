@@ -42,7 +42,7 @@
                  [tetriscode/xy "0.8.3"]]
   :repositories  [["boundlessgeo-releases" "https://repo.boundlessgeo.com/artifactory/release/"]
                   ["clojars" {:sign-releases false}]
-                  ["confluent" {:url "http://packages.confluent.io/maven/"}]
+                  ["confluent" {:url "https://packages.confluent.io/maven/"}]
                   ["project" "file:repo"]]
   :dev-dependencies [[lein-reload "1.0.0"]
                      [pjstadig/humane-test-output "0.8.3"]
@@ -67,5 +67,4 @@
                    :plugins [[test2junit "1.2.2"]]}
              :uberjar {:aot :all
                        :dependencies [[org.clojure/test.check "0.9.0"]]}}
-  :uberjar-name "signal-server.jar"
   :main ^{:skip-aot true} signal.server)

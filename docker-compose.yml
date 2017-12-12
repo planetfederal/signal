@@ -1,4 +1,7 @@
 version: '2'
+volumes:
+  pg-data:
+    driver: local
 services:
   mosquitto:
     image: toke/mosquitto
@@ -6,9 +9,26 @@ services:
     ports:
       - '1883:1883'
   postgis:
+    build: ./docker/postgis
+    image: signal/postgis:latest
+    container_name: postgis
     image: mdillon/postgis
+    volumes:
+      - pg-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+  pgweb:
+    container_name: pgweb  # optional
+    restart: always  # optional
+    image: sosedoff/pgweb
+    ports:
+      - "8081:8081"
+    links:
+      - postgis:postgis  # my database container is called postgres, not db
+    environment:
+      - DATABASE_URL=postgres://signal:signal@postgis:5432/signal?sslmode=disable
+    depends_on:
+      - postgis
   signal-server:
     build: .
     command: 'java -jar /opt/server/target/signal-server.jar'
