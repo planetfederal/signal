@@ -14,4 +14,4 @@ before_install:
   - echo "listen_addresses = '*'" | sudo tee -a /etc/postgresql/9.6/main/postgresql.conf
   - sudo service postgresql stop
   - sudo service postgresql start 9.6
-  - sh ./db.sh
+  - sh ./setup/db.sh
