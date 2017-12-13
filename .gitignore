@@ -76,15 +76,7 @@ testdb.json
 # never check in the keystore!
 signal.keystore
 
-Commands.h
-Commands.java
-Scmessage.pbobjc.*
-SCMessageOuterClass.java
-node_modules
-
 server/test.js
-# ignore this file b/c it's generated
-web/public/index.html
 
 # ignore kafka & zookeeper data
 data

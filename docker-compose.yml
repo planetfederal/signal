@@ -38,6 +38,6 @@ services:
     environment:
       - DB_HOST=db
       - VIRTUAL_HOST=signal-server
-      - TRUST_STORE=/opt/server/tls/test-cacerts.jks
-      - KEY_STORE=/opt/server/tls/test-keystore.p12
+      - TRUST_STORE=/usr/src/app/tls/test-cacerts.jks
+      - KEY_STORE=/usr/src/app/tls/test-keystore.p12
       - AUTO_MIGRATE=true
