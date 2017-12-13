@@ -8,11 +8,10 @@ services:
     mem_limit: 32m
     ports:
       - '1883:1883'
-  postgis:
+  db:
+    container_name: db
     build: ./docker/postgis
     image: signal/postgis:latest
-    container_name: postgis
-    image: mdillon/postgis
     volumes:
       - pg-data:/var/lib/postgresql/data
     ports:
@@ -24,20 +23,20 @@ services:
     ports:
       - "8081:8081"
     links:
-      - postgis:postgis  # my database container is called postgres, not db
+      - db:db  # my database container is called postgres, not db
     environment:
-      - DATABASE_URL=postgres://signal:signal@postgis:5432/signal?sslmode=disable
+      - DATABASE_URL=postgres://signal:signal@db:5432/signal?sslmode=disable
     depends_on:
-      - postgis
+      - db
   signal-server:
     build: .
     command: 'java -jar /opt/server/target/signal-server.jar'
     depends_on:
-      - postgis
+      - db
     ports:
       - '8085:8085'
     environment:
-      - DB_HOST=postgis
+      - DB_HOST=db
       - VIRTUAL_HOST=signal-server
       - TRUST_STORE=/opt/server/tls/test-cacerts.jks
       - KEY_STORE=/opt/server/tls/test-keystore.p12
