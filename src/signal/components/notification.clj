@@ -21,7 +21,7 @@
 (defn notify [_ processor payload]
   (let [output (get-in processor [:definition :output])
         recipients (proto/recipients output)
-        ids (map :id (db/create-notifications recipients "processor" payload))]
+        ids (doall (map :id (db/create-notifications recipients "processor" payload)))]
     (proto/send! output (assoc payload :notif-ids ids))))
 
 (defn find-notif-by-id

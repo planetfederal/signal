@@ -10,8 +10,9 @@
 (defn- send!
   [webhook value]
   (log/info (:url webhook))
-  (http/post (:url webhook) {:body (json/generate-string value)
-                             :content-type :json}))
+  (do (http/post (:url webhook) {:body (json/generate-string value)
+                                 :content-type :json})
+    (map db/mark-as-sent (:notif-ids value))))
 
 (defrecord Webhook [url verb]
   proto/IOutput
