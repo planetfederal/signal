@@ -15,7 +15,7 @@
   [id]
   (let [hostname (or (System/getenv "HOSTNAME")
                      (.getHostName (java.net.InetAddress/getLocalHost)))]
-    (str "http://" hostname "/api/notifications/" id)))
+    (str "http://" hostname "/notifications/" id)))
 
 (defn email-recipient
   [recipient message]

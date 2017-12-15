@@ -29,7 +29,7 @@
     (relation/within? geojson-feature
                       (:clause this)))
   (notification [this _]
-    (str " was within\n " (xy.geojson/write (:clause this)))))
+    (str " was within " (xy.geojson/write (:clause this)))))
 
 (defmethod proto/make-predicate identifier
   [predicate]

@@ -57,10 +57,12 @@
                          (map #(proto-pred/notification % geom-map))
                          (clojure.string/join ",\n and ")))
         payload {:time  (str (Date.))
-                 :value geom-map
+                 :processor (db/processor-by-id (:id processor))
+                 :value geom-map ; Value that caused the alert to be true
                  :title (str "Alert from " (:name processor))
                  :body  (str geom-map "\n\n" body ".")}]
     (do
+      (log/debug "Successful processing for:" (:id processor))
       (notificationapi/notify
        notify
        processor

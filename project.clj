@@ -1,4 +1,4 @@
-(defproject signal "0.9.0-SNAPSHOT"
+(defproject signal "1.0.0-SNAPSHOT"
   :description "Signal Server"
   :url "http://github.com/boundlessgeo/signal"
   :license {:name "Apache License, Version 2.0"
@@ -39,7 +39,7 @@
                  [org.apache.kafka/kafka-streams "0.10.0.0-cp1"
                   :exclusions [org.slf4j/slf4j-log4j12]]
                  [clj-time "0.13.0"]
-                 [tetriscode/xy "0.8.3"]]
+                 [tetriscode/xy "0.8.5"]]
   :repositories  [["boundlessgeo-releases" "https://repo.boundlessgeo.com/artifactory/release/"]
                   ["clojars" {:sign-releases false}]
                   ["confluent" {:url "https://packages.confluent.io/maven/"}]

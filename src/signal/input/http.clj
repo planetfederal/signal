@@ -16,7 +16,10 @@
       (log/debug "Polling:" (:id this) " " (:url this))
       (let [resp (http/get (:url this))
             json (geojson/str->map (:body resp))]
-        (func json))
+        (case (:type json)
+          "FeatureCollection" (doseq [x (:features json)] (func x))
+          "GeometryCollection" (doseq [x (:geometries json)] (func x))
+          (func json)))
       (catch Exception e (log/error e (.getLocalizedMessage e))))))
 
 (defmethod proto/make-polling-input identifier
