@@ -1,5 +1,9 @@
 # signal-server
 
+[![Build Status](https://travis-ci.org/boundlessgeo/signal.svg?branch=master)](https://travis-ci.org/boundlessgeo/signal)
+
+### Version 1.0.2
+
 ### To run the migrations
 
 Before running the migration you'll need to create a db and add the
