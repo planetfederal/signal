@@ -1,4 +1,4 @@
-(defproject signal "1.0.2-SNAPSHOT"
+(defproject signal "1.0.3-SNAPSHOT"
   :description "Signal Server"
   :url "http://github.com/boundlessgeo/signal"
   :license {:name "Apache License, Version 2.0"

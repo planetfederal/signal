@@ -23,7 +23,7 @@
             [clojure.tools.logging :as log]))
 
 (def inputs (ref {}))
-(def sched-polling-pool (mk-pool))
+(def schedule-polling-pool (mk-pool))
 
 (defn fetch-url
   [polling-input]
@@ -35,43 +35,54 @@
 
 (defn find-by-id [_ id] (database-api/input-by-id id))
 
-(defn- start-polling [polling-input]
+(defn- start-polling
+  "Returns at-at job with metadata"
+  [polling-input]
   (let [seconds (poll-proto/interval polling-input)]
-    (every (* 1000 seconds)
-           #(fetch-url polling-input) sched-polling-pool
-           :job (keyword (:id polling-input)) :initial-delay 5000)))
+       (every (* 1000 seconds)
+              #(fetch-url polling-input)
+              schedule-polling-pool
+              :initial-delay 5000)))
 
 (defn add-streaming-input [input-comp streaming-input]
-  (let [proc (:processor input-comp)
-        func (partial processor-api/test-value proc)
+  (let [processor (:processor input-comp)
+        func (partial processor-api/test-value processor)
         input (stream-proto/make-streaming-input streaming-input func)]
     (dosync
      (stream-proto/start input)
      (commute inputs assoc (keyword (:id streaming-input)) (assoc streaming-input :fn func)))))
 
 (defn add-polling-input [input-comp input]
-  (let [proc (:processor input-comp)
-        func (partial processor-api/test-value proc)
+  (let [processor (:processor input-comp)
+        func (partial processor-api/test-value processor)
         polling-input (poll-proto/make-polling-input input)]
     (if (< 0 (poll-proto/interval polling-input))
-      (let [input-fn (assoc polling-input :fn func)]
+      (let [input-fn (assoc polling-input :fn func)
+            job (start-polling input-fn)]
         (dosync
-         (commute inputs assoc (keyword (:id polling-input)) input-fn)
-         (start-polling input-fn))))))
+         (commute inputs assoc (keyword (:id polling-input)) {:fn input-fn :job-id (:id job)}))))))
 
 (defn remove-streaming-input [streaming-input]
   (stream-proto/stop streaming-input)
   (commute inputs dissoc (keyword (:id streaming-input))))
 
-(defn stop-input [_ id]
-  (stop (keyword id) sched-polling-pool)
-  (dosync
-    (commute inputs dissoc (keyword id))))
+(defn stop-input
+  [_ id]
+  (let [input (get @inputs (keyword id))
+        job-id (:job-id input)]
+    (log/debug "Stopping Job:" job-id)
+    (if (stop job-id schedule-polling-pool)
+       (dosync
+         (commute inputs dissoc (keyword id))
+         true)
+       false)))
 
-(defn remove-polling-input [_ id]
-  ; takes a store id string
-  (stop-input _ id)
-  (database-api/delete-input id))
+(defn remove-polling-input
+
+  [_ id]
+  (if (stop-input _ id)
+    (database-api/delete-input id)
+    false))
 
 (defn- start-inputs
   "Fetches all inputs from the database and starts them"
@@ -80,7 +91,6 @@
 
 (defn- stop-inputs
   [input-comp]
-  (stop-and-reset-pool! sched-polling-pool)
   (doall (map (fn [i]
                 (stop-input input-comp (:id i)))
               (database-api/inputs))))
@@ -96,9 +106,12 @@
     (add-polling-input input-comp input)
     input))
 
-(defn delete [input-comp id]
-  (database-api/delete-input id)
-  (remove-polling-input input-comp id))
+(defn delete
+  "Return true if successfully deleted"
+  [input-comp id]
+  (do
+    (log/debug "Removing input:" id)
+    (remove-polling-input input-comp id)))
 
 (defrecord InputManagerComponent [processor]
   component/Lifecycle
