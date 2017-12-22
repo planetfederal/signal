@@ -17,7 +17,7 @@ VALUES (:name,:description,:type,:definition::json,NOW(),NOW());
 UPDATE signal.inputs SET
 name = :name,
 description = :description,
-type = :type
+type = :type,
 definition = :definition::json,
 updated_at = NOW()
 WHERE id = :id

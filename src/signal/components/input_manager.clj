@@ -77,8 +77,8 @@
          true)
        false)))
 
-(defn remove-polling-input
-
+(defn remove-polling-input!
+  "Removes input from the scheduler pool, inputs ref, and database"
   [_ id]
   (if (stop-input _ id)
     (database-api/delete-input id)
@@ -96,22 +96,25 @@
               (database-api/inputs))))
 
 
-(defn create [input-comp i]
+(defn create
+  "Creates and input and adds it to the scheduler"
+  [input-comp i]
   (let [input (database-api/create-input i)]
     (add-polling-input input-comp input)
     input))
 
-(defn modify [input-comp id i]
+(defn modify
+  "Updates an existing input"
+  [input-comp id i]
   (let [input (database-api/modify-input id i)]
-    (add-polling-input input-comp input)
-    input))
+    (add-polling-input input-comp input)))
 
 (defn delete
   "Return true if successfully deleted"
   [input-comp id]
   (do
     (log/debug "Removing input:" id)
-    (remove-polling-input input-comp id)))
+    (remove-polling-input! input-comp id)))
 
 (defrecord InputManagerComponent [processor]
   component/Lifecycle

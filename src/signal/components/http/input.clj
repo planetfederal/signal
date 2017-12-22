@@ -14,14 +14,15 @@
 
 (defn http-put-inputs
   [input-comp request]
-  (do
-    (input-manager-api/add-polling-input
-      input-comp (:json-params request))
-    (response/ok "success")))
+  (if (some? (input-manager-api/modify input-comp
+                                       (get-in request [:path-params :id])
+                                       (:json-params request)))
+    (response/ok "success")
+    (response/error "error updating input")))
 
 (defn http-post-inputs
   [input-comp request]
-  (response/ok (input-manager-api/create input-comp (:json-params request))))
+  (response/ok (input-manager-api/add-polling-input input-comp (:json-params request))))
 
 (defn http-delete-inputs
   [input-comp request]
