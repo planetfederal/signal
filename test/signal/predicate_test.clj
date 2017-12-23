@@ -104,7 +104,7 @@
                              :url  "http://localhost:8085/api/test/webhook"
                              :verb "post"}}})
 
-(deftest geodisjoint-processor-test
+(deftest ^:integration geodisjoint-processor-test
   (testing "Geodisjoint Processor"
     (let [proc-comp (:processor user/system-val)
           input-comp (:input user/system-val)]

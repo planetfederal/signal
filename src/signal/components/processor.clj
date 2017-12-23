@@ -157,12 +157,12 @@
 (defrecord ProcessorComponent [notify]
   component/Lifecycle
   (start [this]
-    (log/debug "Starting processor Component")
+    (log/debug "Starting Processor Component")
     (let [comp (assoc this :notify notify)]
       (doall (load-processors comp))
       comp))
   (stop [this]
-    (log/debug "Stopping processor Component")
+    (log/debug "Stopping Processor Component")
     ()
     this))
 

@@ -22,7 +22,9 @@
 
 (defn http-post-inputs
   [input-comp request]
-  (response/ok (input-manager-api/add-polling-input input-comp (:json-params request))))
+  (if-let [input (input-manager-api/create input-comp (:json-params request))]
+    (response/ok input)
+    (response/error "Error creating input")))
 
 (defn http-delete-inputs
   [input-comp request]
