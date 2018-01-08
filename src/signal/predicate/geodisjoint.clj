@@ -31,7 +31,6 @@
   (notification [_ geojson-feature]
     (str (notify geojson-feature) " was not within.")))
 
-
 (defmethod proto/make-predicate identifier
   [predicate]
   (->DisjointClause (geojson/parse (:definition predicate))))

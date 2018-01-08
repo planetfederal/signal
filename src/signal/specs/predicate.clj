@@ -20,8 +20,8 @@
             [com.gfredericks.test.chuck.generators :as genc]))
 
 (spec/def :predicate/id (spec/with-gen #(re-matches uuid-regex %)
-                                       #(gen/fmap (fn [u] (str u))
-                                                  (gen/uuid))))
+                          #(gen/fmap (fn [u] (str u))
+                                     (gen/uuid))))
 
 (spec/def :geowithin/definition :xy.geojson/featurecollectionpolygon-spec)
 (spec/def :geowithin/type #{"geowithin"})

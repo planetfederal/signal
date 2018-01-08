@@ -20,17 +20,21 @@
    [signal.components.http.notification :as notif-http]
    [signal.components.http.processor :as processor-http]
    [signal.components.http.capabilities :as capability-http]
+   [signal.components.http.auth :as auth]
    [signal.components.http.ping :as ping-http]
    [signal.components.http.test :as test-http]
    [signal.components.http.input :as input-http]
+   [signal.components.http.user :as user-http]
    [clojure.tools.logging :as log]))
 
-(defrecord HttpService [http-config notify processor input]
+(defrecord HttpService [http-config user notify processor input]
   component/Lifecycle
   (start [this]
     (log/debug "Starting SignalHttpService")
     (let [routes #(route/expand-routes
                    (clojure.set/union #{}
+                                      (auth/routes)
+                                      (user-http/routes user)
                                       (notif-http/routes notify)
                                       (processor-http/routes processor)
                                       (test-http/routes)

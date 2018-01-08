@@ -12,7 +12,7 @@
   (log/info (:url webhook))
   (do (http/post (:url webhook) {:body (json/generate-string value)
                                  :content-type :json})
-    (map db/mark-as-sent (:notif-ids value))))
+      (map db/mark-as-sent (:notif-ids value))))
 
 (defrecord Webhook [url verb]
   proto/IOutput

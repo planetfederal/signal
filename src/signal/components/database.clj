@@ -27,6 +27,7 @@
 (ysql/defqueries "sql/notification.sql" {:connection db/db-spec})
 (ysql/defqueries "sql/processor.sql" {:connection db/db-spec})
 (ysql/defqueries "sql/input.sql" {:connection db/db-spec})
+(ysql/defqueries "sql/user.sql" {:connection db/db-spec})
 
 ;;;;;;;;;;;SANITIZERS;;;;;;;;
 (defn sanitize-timestamps [v]
@@ -120,7 +121,7 @@
 (defn- create-message [message-type info]
   (let [info-str (json/write-str info)]
     (insert-message<!
-      {:type message-type :info info-str})))
+     {:type message-type :info info-str})))
 
 (defn find-message-by-id [id]
   (find-message-by-id-query {:id id}))
@@ -132,15 +133,15 @@
         id (:id message)]
     (map #(sanitize-timestamps
            (insert-notification<!
-             {:recipient  %
-              :message_id id})) recipients)))
+            {:recipient  %
+             :message_id id})) recipients)))
 
 (defn create-notification
   [recipient message-type info]
   (sanitize-timestamps
-    (insert-notification<!
-      {:recipient  recipient
-       :message_id (:id (create-message message-type info))})))
+   (insert-notification<!
+    {:recipient  recipient
+     :message_id (:id (create-message message-type info))})))
 
 (defn unsent
   "List of all the unsent notifications"
@@ -199,10 +200,10 @@
   (do
     (let [entity (map->processor-entity t)
           new-processor (insert-processor<!
-                          (assoc entity :input_ids (->StringArray (:input_ids entity))))]
+                         (assoc entity :input_ids (->StringArray (:input_ids entity))))]
       (processor-entity->map (assoc t :id (:id new-processor)
-                                      :created_at (:created_at new-processor)
-                                      :updated_at (:updated_at new-processor))))))
+                                    :created_at (:created_at new-processor)
+                                    :updated_at (:updated_at new-processor))))))
 
 (s/fdef create-processor
         :args (s/cat :t :signal.specs.processor/processor-spec)
@@ -213,12 +214,12 @@
   [id t]
   (let [entity (map->processor-entity (assoc t :id (java.util.UUID/fromString id)))
         updated-processor (update-processor<!
-                            (assoc entity
-                              :input_ids
-                              (->StringArray (:input_ids t))))]
+                           (assoc entity
+                                  :input_ids
+                                  (->StringArray (:input_ids t))))]
     (processor-entity->map (assoc t :id (:id updated-processor)
-                                    :created_at (:created_at updated-processor)
-                                    :updated_at (:updated_at updated-processor)))))
+                                  :created_at (:created_at updated-processor)
+                                  :updated_at (:updated_at updated-processor)))))
 
 (defn delete-processor
   "Delete processor"
@@ -254,8 +255,8 @@
     (let [entity (map->input-entity i)
           new-input (insert-input<! entity)]
       (input-entity->map (assoc i :id (:id new-input)
-                                  :created_at (:created_at new-input)
-                                  :updated_at (:updated_at new-input))))))
+                                :created_at (:created_at new-input)
+                                :updated_at (:updated_at new-input))))))
 
 (defn modify-input
   "Update input"
@@ -263,8 +264,8 @@
   (let [entity (map->input-entity (assoc i :id (java.util.UUID/fromString id)))
         updated-input (update-input<! entity)]
     (input-entity->map (assoc i :id (:id updated-input)
-                                :created_at (:created_at updated-input)
-                                :updated_at (:updated_at updated-input)))))
+                              :created_at (:created_at updated-input)
+                              :updated_at (:updated_at updated-input)))))
 
 (defn delete-input
   "Delete input"

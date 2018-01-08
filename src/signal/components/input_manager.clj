@@ -39,10 +39,10 @@
   "Returns at-at job with metadata"
   [polling-input]
   (let [seconds (poll-proto/interval polling-input)]
-       (every (* 1000 seconds)
-              #(fetch-url polling-input)
-              schedule-polling-pool
-              :initial-delay 5000)))
+    (every (* 1000 seconds)
+           #(fetch-url polling-input)
+           schedule-polling-pool
+           :initial-delay 5000)))
 
 (defn add-streaming-input [input-comp streaming-input]
   (let [processor (:processor input-comp)
@@ -72,10 +72,10 @@
         job-id (:job-id input)]
     (log/debug "Stopping Job:" job-id)
     (if (stop job-id schedule-polling-pool)
-       (dosync
-         (commute inputs dissoc (keyword id))
-         true)
-       false)))
+      (dosync
+       (commute inputs dissoc (keyword id))
+       true)
+      false)))
 
 (defn remove-polling-input!
   "Removes input from the scheduler pool, inputs ref, and database"
@@ -94,7 +94,6 @@
   (doall (map (fn [i]
                 (stop-input input-comp (:id i)))
               (database-api/inputs))))
-
 
 (defn create
   "Creates and input and adds it to the scheduler"
@@ -126,7 +125,7 @@
   (stop [this]
     (log/debug "Stopping Store Component")
     (do (stop-inputs this)
-      this)))
+        this)))
 
 (defn make-input-manager-component []
   (map->InputManagerComponent {}))

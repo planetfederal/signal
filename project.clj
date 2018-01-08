@@ -34,6 +34,7 @@
                  [com.gfredericks/test.chuck "0.2.7"]
                  [jonase/eastwood "0.2.3" :exclusions [org.clojure/clojure]]
                  [com.draines/postal "2.0.2"]
+                 [buddy "1.1.0"]
                  [org.clojure/tools.logging "0.3.1"]
                  [org.apache.kafka/kafka-clients "0.10.1.1"]
                  [org.apache.kafka/kafka-streams "0.10.0.0-cp1"

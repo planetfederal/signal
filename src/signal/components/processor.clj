@@ -101,7 +101,7 @@
   ;; the value to be checked must be a geojson map with JTS :geometry
   (if-not (nil? value)
     (do (log/debug "Testing value:" value)
-      (check-predicates processor-comp value))))
+        (check-predicates processor-comp value))))
 
 (defn add-processor
   "Adds a processor to the invalid-processors ref"

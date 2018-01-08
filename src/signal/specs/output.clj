@@ -26,7 +26,7 @@
 
 (spec/def :webhook/type #{"webhook"})
 (spec/def :webhook/url (spec/with-gen #(re-matches url-regex %)
-                                      #(genc/string-from-regex url-regex)))
+                         #(genc/string-from-regex url-regex)))
 (spec/def :webhook/verb #{"get" "put" "post" "delete"})
 (spec/def :output/webhook (spec/keys :req-un [:webhook/type :webhook/verb :webhook/url]))
 

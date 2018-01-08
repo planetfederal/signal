@@ -29,9 +29,9 @@
 (defn http-delete-inputs
   [input-comp request]
   (let [id (get-in request [:path-params :id])]
-      (if (input-manager-api/delete input-comp id)
-        (response/ok "success")
-        (response/error "could not delete input: " id))))
+    (if (input-manager-api/delete input-comp id)
+      (response/ok "success")
+      (response/error "could not delete input: " id))))
 
 (defn routes
   "Makes routes for the current inputs"

@@ -20,17 +20,17 @@
             [signal.specs.regex :refer [url-regex,uuid-regex]]))
 
 (spec/def ::id (spec/with-gen #(re-matches uuid-regex %)
-                              #(gen/fmap (fn [u] (str u))
-                                         (gen/uuid))))
+                 #(gen/fmap (fn [u] (str u))
+                            (gen/uuid))))
 
 (spec/def ::name string?)
 (spec/def ::description string?)
 (spec/def ::interval (spec/with-gen pos-int?
-                                    #(spec/gen #{100})))
+                       #(spec/gen #{100})))
 
 ;;;;;;;;;;;;;;WFS;;;;;;;;;;;;;;;;
 (spec/def :wfs-def/url (spec/with-gen #(re-matches url-regex %)
-                                      #(genc/string-from-regex url-regex)))
+                         #(genc/string-from-regex url-regex)))
 (spec/def :wfs/definition (spec/keys :req-un [:wfs-def/url ::interval]))
 (spec/def :wfs/type #{"wfs"})
 (spec/def ::input-wfs (spec/keys :req-un [::id ::name ::description :wfs/type :wfs/definition]))

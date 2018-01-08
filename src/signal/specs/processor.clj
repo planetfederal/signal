@@ -28,12 +28,12 @@
 (s/def :processor/persistent boolean?)
 
 (s/def :processor/definition (s/keys
-                               :req-un [:signal.specs.output/output]
-                               :opt-un
-                               [:signal.specs.mapper/mappers
-                                :signal.specs.predicate/predicates
-                                :signal.specs.filter/filters
-                                :signal.specs.reducer/reducers]))
+                              :req-un [:signal.specs.output/output]
+                              :opt-un
+                              [:signal.specs.mapper/mappers
+                               :signal.specs.predicate/predicates
+                               :signal.specs.filter/filters
+                               :signal.specs.reducer/reducers]))
 
 (s/def ::processor-spec (s/keys :req-un
                                 [:processor/name
@@ -43,5 +43,4 @@
                                  :processor/definition]
                                 :opt-un [:processor/id
                                          :signal.specs.input/input-ids]))
-
 
