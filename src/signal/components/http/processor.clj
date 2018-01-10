@@ -4,6 +4,7 @@
    [signal.components.http.response :as response]
    [clojure.data.json :as json]
    [xy.geojson :as geojson]
+   [signal.components.http.auth :refer [check-auth]]
    [clojure.tools.logging :as log]
    [signal.components.processor :as processorapi]))
 
@@ -63,26 +64,26 @@
 
 (defn routes [processor-comp]
   #{["/api/processors" :get
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-get-all-processors processor-comp))
      :route-name :get-processors]
     ["/api/processors/:id" :get
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-get-processor processor-comp))
      :route-name :get-processor]
     ["/api/processors/:id" :put
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-put-processor processor-comp))
      :route-name :put-processor]
     ["/api/processors" :post
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-post-processor processor-comp))
      :route-name :post-processor]
     ["/api/processors/:id" :delete
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-delete-processor processor-comp))
      :route-name :delete-processor]
     ["/api/check" :post
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-test-processor processor-comp))
      :route-name :http-test-processor]})

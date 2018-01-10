@@ -15,9 +15,10 @@
 (ns signal.components.http.user
   (:require [signal.components.http.intercept :as intercept]
             [clojure.tools.logging :as log]
-            [clojure.spec :as s]
+            [clojure.spec.alpha :as s]
             [signal.specs.user]
-            [signal.components.user.user :as userapi]
+            [signal.components.http.auth :refer [check-auth]]
+            [signal.components.user :as userapi]
             [signal.components.http.response :as response]))
 
 (defn http-get-all-users
@@ -40,5 +41,9 @@
         (response/error err-msg)))))
 
 (defn routes [user-comp]
-  #{["/api/users" :get  (conj intercept/common-interceptors (partial http-get-all-users user-comp)) :route-name :get-users]
-    ["/api/users" :post (conj intercept/common-interceptors (partial http-post-user user-comp)) :route-name :post-user]})
+  #{["/api/users" :get  (conj intercept/common-interceptors check-auth
+                              (partial http-get-all-users user-comp))
+     :route-name :get-users]
+    ["/api/users" :post (conj intercept/common-interceptors check-auth
+                              (partial http-post-user user-comp))
+     :route-name :post-user]})

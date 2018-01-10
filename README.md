@@ -8,6 +8,7 @@
 
 Before running the migration you'll need to create a db and add the
 extensions:
+
 ```
 createuser signal --createdb -h localhost -U postgres
 createdb signal -O signal -h localhost -U postgres
@@ -19,6 +20,7 @@ psql -U signal   -d signal -c "CREATE SCHEMA IF NOT EXISTS signal" -h localhost
 `lein migrate`
 
 ### Generate Sample Data
+
 This will generate random data in all the tables of the database using [clojure.spec](https://clojure.org/about/spec) by running:
 
 `lein sampledata`
@@ -55,7 +57,7 @@ openssl pkcs12 -export -out keystore.p12 -in client.crt -inkey client.key
 ```
 
 We may also need to tell the JVM to trust the CA that signed the client
-certificate by setting up a custom trust store.  This is required if the default
+certificate by setting up a custom trust store. This is required if the default
 trust store doesn't contain the CA that signed your client certificate.
 
 ```
@@ -70,3 +72,44 @@ Then we can configure the server to use our keystores and truststores by
 setting the following environment variables (which will get set to corresponding JVM system properties):
 
 `TRUST_STORE, TRUST_STORE_TYPE, TRUST_STORE_PASSWORD, KEY_STORE, KEY_STORE_TYPE, KEY_STORE_PASSWORD`
+
+## Using signal
+
+To use signal, you must first sign up for an account, which you can do
+using the [webapp](http://localhost:8080/signup) or the REST API
+
+```
+curl 'http://localhost:8085/api/users' \
+--data-binary '{"name":"Mickey Mouse","email":"mickey@mouse.com","password":"test123"}' \
+-H 'Content-Type: application/json'
+```
+
+Then you can exchange your account credentials for an access token, by
+authenticating using the [webapp](http://localhost:8080/login) or REST
+API
+
+### REST Endpoints
+
+All end points return a response of the for `{result:<result>,error:<error>}`
+
+#### Authenticate (POST)
+
+```
+curl 'http://localhost:8085/api/authenticate' \
+--data-binary '{"email":"mickey@mouse.com","password":"test123"}' \
+-H 'Content-Type: application/json'
+```
+
+#### Create User `POST`
+
+```
+curl -XPOST 'http://localhost:8085/api/authenticate' \
+--data-binary '{"email":"mickey@mouse.com","password":"test123"}' \
+-H 'Content-Type: application/json'
+```
+
+#### List Users `GET`
+
+```
+curl -XGET 'http://localhost:8085/api/users'
+```

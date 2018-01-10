@@ -5,6 +5,8 @@
             [signal.predicate.geodisjoint :as predicate-geodisjoint]
             [signal.predicate.identity :as predicate-identity]
             [signal.input.http :as input-http]
+
+            [signal.components.http.auth :refer [check-auth]]
             [signal.output.email :as output-email]
             [signal.output.webhook :as output-webhook]))
 
@@ -33,11 +35,11 @@
 
 (defn routes []
   #{["/api/capabilities" :get
-     (conj intercept/common-interceptors `http-get-all-capabilities)]
+     (conj intercept/common-interceptors check-auth `http-get-all-capabilities)]
     ["/api/capabilities/predicates" :get
-     (conj intercept/common-interceptors `http-get-predicates)]
+     (conj intercept/common-interceptors check-auth `http-get-predicates)]
     ["/api/capabilities/inputs" :get
-     (conj intercept/common-interceptors `http-get-inputs)]
+     (conj intercept/common-interceptors check-auth `http-get-inputs)]
     ["/api/capabilities/outputs" :get
-     (conj intercept/common-interceptors `http-get-outputs)]})
+     (conj intercept/common-interceptors check-auth `http-get-outputs)]})
 

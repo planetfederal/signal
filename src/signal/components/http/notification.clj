@@ -11,9 +11,9 @@
   (response/ok (notifapi/all-notifs notif-comp)))
 
 (defn routes [notif-comp]
-  #{["/api/notifications/:id" :get (conj intercept/common-interceptors
+  #{["/api/notifications/:id" :get (conj intercept/common-interceptors check-auth
                                          (partial http-get-notif notif-comp))
      :route-name :get-notif]
-    ["/api/notifications" :get (conj intercept/common-interceptors
+    ["/api/notifications" :get (conj intercept/common-interceptors check-auth
                                      (partial http-get-notifs notif-comp))
      :route-name :get-notifs]})

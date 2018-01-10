@@ -17,11 +17,11 @@
             [signal.components.http.intercept :as intercept]
             [signal.components.http.response :as response]
             [buddy.hashers :as hashers]
-            [buddy.auth.protocols :as proto]
+            [buddy.auth.protocols :as auth-proto]
             [buddy.auth.backends :as backends]
             [buddy.sign.jwt :as jwt]
             [clj-time.core :refer [weeks from-now]]
-            [signal.components.user.db :as usermodel]
+            [signal.components.database :as db]
             [clojure.tools.logging :as log]))
 
 (defonce secret "signalsecret")
@@ -47,7 +47,7 @@
   [req]
   (let [email  (get-in req [:json-params :email])
         pwd    (get-in req [:json-params :password])
-        user   (some-> (usermodel/find-by-email {:email email})
+        user   (some-> (db/find-by-email {:email email})
                        first)
         authn? (hashers/check pwd (:password user))]
     (log/debug "Autenticating user" user)
@@ -57,8 +57,8 @@
 
 (defn authorize-user
   [request]
-  (let [auth-data (try (some->> (proto/-parse oauth-backend request)
-                                (proto/-authenticate oauth-backend request))
+  (let [auth-data (try (some->> (auth-proto/-parse oauth-backend request)
+                                (auth-proto/-authenticate oauth-backend request))
                        (catch Exception _))]
     (if (:user auth-data)
       (response/ok "User authorized!")
@@ -69,8 +69,8 @@
   {:name :check-auth
    :enter (fn [context]
             (let [request   (:request context)
-                  auth-data (try (some->> (proto/-parse auth-backend request)
-                                          (proto/-authenticate auth-backend request))
+                  auth-data (try (some->> (auth-proto/-parse auth-backend request)
+                                          (auth-proto/-authenticate auth-backend request))
                                  (catch Exception _))]
               (if (:user auth-data)
                 (assoc-in context [:request :identity] auth-data)

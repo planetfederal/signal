@@ -37,22 +37,22 @@
   "Makes routes for the current inputs"
   [input-comp]
   #{["/api/inputs" :get
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-get-all-inputs input-comp))
      :route-name :get-inputs]
     ["/api/inputs/:id" :get
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-get-input input-comp))
      :route-name :get-input]
     ["/api/inputs/:id" :put
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-put-inputs input-comp))
      :route-name :put-input]
     ["/api/inputs" :post
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-post-inputs input-comp))
      :route-name :post-input]
     ["/api/inputs/:id" :delete
-     (conj intercept/common-interceptors
+     (conj intercept/common-interceptors check-auth
            (partial http-delete-inputs input-comp))
      :route-name :delete-input]})

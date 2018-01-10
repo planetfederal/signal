@@ -17,10 +17,12 @@
             [clojure.data.json :as json]
             [clojure.tools.logging :as log]
             [clojure.set :refer [rename-keys]]
+            [buddy.hashers :as hashers]
             [yesql.core :as ysql]
             [clojure.java.jdbc :as clj-jdbc]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as st]
+            [com.stuartsierra.component :as component]
             [signal.specs.processor]))
 
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
@@ -271,3 +273,18 @@
   "Delete input"
   [id]
   (delete-input! {:id (java.util.UUID/fromString id)}))
+
+;;;;;;;;;;;;;;;;;;USER;;;;;;;;;;;;;;;;;;
+(defn users
+  []
+  (map sanitize-user (find-all-users)))
+
+(defn create-user
+  "Adds a new user to the database.
+   Returns the user with id."
+  [u]
+  (log/debug "Inserting user" u)
+  (let [user-info {:name     (:name u)
+                   :email    (:email u)
+                   :password (hashers/derive (:password u))}]
+    (sanitize-user (create-user<! user-info))))
