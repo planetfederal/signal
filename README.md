@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/boundlessgeo/signal.svg?branch=master)](https://travis-ci.org/boundlessgeo/signal)
 
-### Version 1.0.2
+### Version 1.0.5
 
 ### To run the migrations
 
@@ -72,6 +72,14 @@ Then we can configure the server to use our keystores and truststores by
 setting the following environment variables (which will get set to corresponding JVM system properties):
 
 `TRUST_STORE, TRUST_STORE_TYPE, TRUST_STORE_PASSWORD, KEY_STORE, KEY_STORE_TYPE, KEY_STORE_PASSWORD`
+
+If you need to deploy to a Cloud Foundry environment, you can deploy the container like this:
+
+```
+docker build -t quay.io/boundlessgeo/signal:devio .
+docker push quay.io/boundlessgeo/signal:devio
+cf push signal -o quay.io/boundlessgeo/signal:devio
+```
 
 ## Using signal
 

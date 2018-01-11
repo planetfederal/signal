@@ -5,7 +5,6 @@
             [signal.predicate.geodisjoint :as predicate-geodisjoint]
             [signal.predicate.identity :as predicate-identity]
             [signal.input.http :as input-http]
-
             [signal.components.http.auth :refer [check-auth]]
             [signal.output.email :as output-email]
             [signal.output.webhook :as output-webhook]))

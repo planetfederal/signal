@@ -1,7 +1,8 @@
 (ns signal.components.http.notification
   (:require [signal.components.http.response :as response]
             [signal.components.http.intercept :as intercept]
-            [signal.components.notification :as notifapi]))
+            [signal.components.notification :as notifapi]
+            [signal.components.http.auth :refer [check-auth]]))
 
 (defn http-get-notif [notif-comp context]
   (let [id (Integer/parseInt (get-in context [:path-params :id]))]
