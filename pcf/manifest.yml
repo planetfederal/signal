@@ -1,0 +1,10 @@
+---
+applications:
+  - name: signal-2
+    path: ../target/signal-1.0.4-SNAPSHOT-standalone.jar
+    buildpack: https://github.com/mstine/heroku-buildpack-clojure
+    path: ../target/
+    memory: 2GB
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '[memory_calculator: {memory_sizes: {native: 1500m}}]'
+

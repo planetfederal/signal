@@ -21,7 +21,7 @@
             [clojure.tools.logging :as log]))
 
 (def db-creds (or (some-> (System/getenv "VCAP_SERVICES")
-                          (json/read-str :key-fn clojure.core/keyword) :pg_95_XL_DEV_SHARED_001 first :credentials)
+                          (json/read-str :key-fn clojure.core/keyword) :pg_95_XL_DEV_CONTENT_001 first :credentials)
                   {:db_host  (or (System/getenv "DB_HOST") "localhost")
                    :db_port  5432
                    :db_name  (or (System/getenv "DB_NAME") "signal")
@@ -43,8 +43,13 @@
       :min-pool-size     2
       :initial-pool-size 2})))
 
+(defn create-schema []
+  (log/debug "Creating schema if it doesnt exist")
+  (clojure.java.jdbc/execute! db-spec ["CREATE SCHEMA IF NOT EXISTS signal"]))
+
 (defn loadconfig []
   (log/debug "Loading database migration config")
+  (create-schema)
   {:datastore  (rjdbc/sql-database db-spec {:migrations-table "signal.migrations"})
    :migrations (rjdbc/load-resources "migrations")})
 

@@ -56,6 +56,10 @@
   (log/info "Configuring Signal server...")
   (if (= "true" (System/getenv "AUTO_MIGRATE"))
     (signal.db.conn/migrate))
+  (let [user (System/getenv "ADMIN_USER")
+        pass (System/getenv "ADMIN_PASS")]
+    (if (and (some? user) (some? pass))
+      (do (signal.components.database/create-user {:name "admin" :email user :password pass}))))
   ;; create global uncaught exception handler so threads don't silently die
   (Thread/setDefaultUncaughtExceptionHandler
    (reify Thread$UncaughtExceptionHandler
