@@ -46,8 +46,8 @@
       (assoc :id (.toString (:id t)))
       (assoc :created_at (.toString (:created_at t)))
       (assoc :updated_at (.toString (:updated_at t)))
-      (rename-keys {:input_ids  :input-ids,
-                    :created_at :created-at,
+      (rename-keys {:input_ids  :input-ids
+                    :created_at :created-at
                     :updated_at :updated-at
                     :deleted_at :deleted-at})))
 
@@ -56,8 +56,8 @@
       (assoc :id (.toString (:id i)))
       (assoc :created_at (.toString (:created_at i)))
       (assoc :updated_at (.toString (:updated_at i)))
-      (rename-keys {:created_at :created-at,
-                    :updated_at :updated-at,
+      (rename-keys {:created_at :created-at
+                    :updated_at :updated-at
                     :deleted_at :deleted-at})))
 
 (defn- row-fn
@@ -190,9 +190,9 @@
 (defn map->processor-entity
   [trg]
   (-> (assoc trg :definition (json/write-str (:definition trg)))
-      (rename-keys {:input-ids  :input_ids,
-                    :created-at :created_at,
-                    :deleted-at :deleted_at,
+      (rename-keys {:input-ids  :input_ids
+                    :created-at :created_at
+                    :deleted-at :deleted_at
                     :updated-at :updated_at})))
 
 (defn create-processor
@@ -245,8 +245,8 @@
 
 (defn map->input-entity [i]
   (-> (assoc i :definition (json/write-str (:definition i)))
-      (rename-keys {:created-at :created_at,
-                    :deleted-at :deleted_at,
+      (rename-keys {:created-at :created_at
+                    :deleted-at :deleted_at
                     :updated-at :updated_at})))
 
 (defn create-input
@@ -282,9 +282,21 @@
 (defn create-user
   "Adds a new user to the database.
    Returns the user with id."
-  [u]
-  (log/debug "Inserting user" u)
-  (let [user-info {:name     (:name u)
-                   :email    (:email u)
-                   :password (hashers/derive (:password u))}]
-    (sanitize-user (create-user<! user-info))))
+  ([name email password]
+   (create-user {:name name :email email :password password}))
+  ([u]
+   (log/debug "Inserting user" u)
+   (let [user-info (assoc u :password (hashers/derive (:password u)))]
+     (sanitize-user (create-user<! user-info)))))
+
+;;;;;;;;;;;;;COMPONENT;;;;;;;;;;;;;;;;;;
+
+(defrecord DatabaseComponent []
+  component/Lifecycle
+  (start [this]
+    this)
+  (stop [this]
+    this))
+
+(defn make-database-component []
+  (map->DatabaseComponent {}))

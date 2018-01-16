@@ -26,7 +26,8 @@
                            :clojure.spec.test.check/ret
                            :result))
 
-(defn service-def []
+(defn service-def
+  []
   (:io.pedestal.http/service-fn (:http-server (:server user/system-val))))
 
 (def auth-header (atom {}))
@@ -57,12 +58,14 @@
     (keywordize-keys (json/read-str (:body res)))))
 
 (defn- authenticate [user pass]
-  (let [res (request-post "/api/authenticate" {:email user :password pass})
+  (let [res (request-post "/api/authenticate" (json/write-str {:email user :password pass}))
         token (get-in res [:result :token])]
     {"Authorization" (str "Token " token)}))
 
 (defn setup-fixtures [f]
   (user/go)
-  (f)
-  (user/stop))
-
+  (let [user (signal.components.database/create-user "test" "test@test.com" "test")
+        ah (authenticate (:email user) "test")]
+    (do (reset! auth-header ah)
+        (f)
+        (user/stop))))
