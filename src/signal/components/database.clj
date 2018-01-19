@@ -13,23 +13,73 @@
 ;; limitations under the License.
 
 (ns signal.components.database
-  (:require [signal.db.conn :as db]
-            [clojure.data.json :as json]
+  (:require [clojure.data.json :as json]
             [clojure.tools.logging :as log]
             [clojure.set :refer [rename-keys]]
             [buddy.hashers :as hashers]
             [yesql.core :as ysql]
+            [ragtime.repl :as repl]
+            [ragtime.jdbc :as rjdbc]
+            [clojure.data.json :as json]
+            [jdbc.pool.c3p0 :as pool]
+            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as clj-jdbc]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as st]
             [com.stuartsierra.component :as component]
             [signal.specs.processor]))
 
+(def db-creds (or (some-> (System/getenv "VCAP_SERVICES")
+                          (json/read-str :key-fn clojure.core/keyword)
+                          :pg_95_XL_DEV_CONTENT_001
+                          first
+                          :credentials)
+                  {:db_host  (or (System/getenv "DB_HOST") "localhost")
+                   :db_port  5432
+                   :db_name  (or (System/getenv "DB_NAME") "signal")
+                   :username (or (System/getenv "DB_USER") "signal")
+                   :password (or (System/getenv "DB_PASSWORD") "signal")}))
+
+(def db-spec []
+  (log/debug "Making db connection to"
+             (format "%s:%s/%s" (:db_host db-creds) (:db_port db-creds) (:db_name db-creds)))
+  (pool/make-datasource-spec
+   {:classname   "org.postgresql.Driver"
+    :subprotocol "postgresql"
+    :subname     (format "//%s:%s/%s" (:db_host db-creds) (:db_port db-creds) (:db_name db-creds))
+    :user        (:username db-creds)
+    :password    (:password db-creds)
+    :stringtype  "unspecified"
+    :max-pool-size     10
+    :min-pool-size     2
+    :initial-pool-size 2}))
+
+(defn create-schema
+  "Creates the Signal schema for Postgres"
+  []
+  (log/debug "Creating schema if it doesnt exist")
+  (clojure.java.jdbc/execute! db-spec ["CREATE SCHEMA IF NOT EXISTS signal"]))
+
+(defn loadconfig []
+  (log/debug "Loading database migration config")
+  (create-schema)
+  {:datastore  (rjdbc/sql-database db-spec {:migrations-table "signal.migrations"})
+   :migrations (rjdbc/load-resources "migrations")})
+
+(defn migrate []
+  (log/debug "Running database migration")
+  (repl/migrate (loadconfig)))
+
+(defn rollback []
+  (log/debug "Rolling back database migration")
+  (repl/rollback (loadconfig)))
+
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
-(ysql/defqueries "sql/notification.sql" {:connection db/db-spec})
-(ysql/defqueries "sql/processor.sql" {:connection db/db-spec})
-(ysql/defqueries "sql/input.sql" {:connection db/db-spec})
-(ysql/defqueries "sql/user.sql" {:connection db/db-spec})
+(defn- load-sql [db-spec]
+  (ysql/defqueries "sql/notification.sql" {:connection db-spec})
+  (ysql/defqueries "sql/processor.sql" {:connection db-spec})
+  (ysql/defqueries "sql/input.sql" {:connection db-spec})
+  (ysql/defqueries "sql/user.sql" {:connection db-spec}))
 
 ;;;;;;;;;;;SANITIZERS;;;;;;;;
 (defn sanitize-timestamps [v]
@@ -288,15 +338,3 @@
    (log/debug "Inserting user" u)
    (let [user-info (assoc u :password (hashers/derive (:password u)))]
      (sanitize-user (create-user<! user-info)))))
-
-;;;;;;;;;;;;;COMPONENT;;;;;;;;;;;;;;;;;;
-
-(defrecord DatabaseComponent []
-  component/Lifecycle
-  (start [this]
-    this)
-  (stop [this]
-    this))
-
-(defn make-database-component []
-  (map->DatabaseComponent {}))

@@ -20,6 +20,8 @@
             [signal.components.processor :as processor]
             [signal.components.input-manager :as input]
             [signal.components.notification :as notification]
+            [signal.components.database :as database]
+            [signal.components.config :as config]
             [clojure.tools.logging :as log]))
 
 (defrecord SignalServer [http-service]
@@ -42,6 +44,8 @@
   (log/debug "Making server config with these options" config-options)
   (let [{:keys [http-config]} config-options]
     (component/system-map
+     :config (component/using (config/make-config-component))
+     :db (component/using (db/make-database-component) [:config])
      :notify (component/using (notification/make-signal-notification-component) [])
      :processor (component/using (processor/make-processor-component) [:notify])
      :input (component/using (input/make-input-manager-component) [:processor])
@@ -131,4 +135,3 @@
 (defn reset []
   (stop)
   (go))
-
