@@ -33,32 +33,20 @@
 
 ;;;;;;;;;;;SANITIZERS;;;;;;;;
 (defn sanitize-timestamps [v]
-  (dissoc v :updated_at :deleted_at))
+  (dissoc v :created_at :updated_at :deleted_at))
 
 (defn sanitize-user [u]
   (dissoc (sanitize-timestamps u) :password :created_at))
 
-(defn- sanitize [processor]
-  (dissoc processor :created_at :updated_at :deleted_at))
-
 (defn- processor-entity->map [t]
   (-> t
       (assoc :id (.toString (:id t)))
-      (assoc :created_at (.toString (:created_at t)))
-      (assoc :updated_at (.toString (:updated_at t)))
-      (rename-keys {:input_ids  :input-ids
-                    :created_at :created-at
-                    :updated_at :updated-at
-                    :deleted_at :deleted-at})))
+      (rename-keys {:input_ids :input-ids})))
 
 (defn- input-entity->map [i]
   (-> i
-      (assoc :id (.toString (:id i)))
-      (assoc :created_at (.toString (:created_at i)))
-      (assoc :updated_at (.toString (:updated_at i)))
-      (rename-keys {:created_at :created-at
-                    :updated_at :updated-at
-                    :deleted_at :deleted-at})))
+      sanitize-timestamps
+      (assoc :id (.toString (:id i)))))
 
 (defn- row-fn
   "Modifies the row result while the ResultSet is open. This method
@@ -87,9 +75,6 @@
     (let [as-array (into-array Object items)
           jdbc-array (.createArrayOf (.getConnection stmt) "UUID" as-array)]
       (.setArray stmt ix jdbc-array))))
-
-(deftype UUIDArray [items]
-  clj-jdbc/ISQLParameter)
 
 (defn sqluuid->str [row col-name]
   (if-let [r (col-name row)]
@@ -124,9 +109,6 @@
   (let [info-str (json/write-str info)]
     (insert-message<!
      {:type message-type :info info-str})))
-
-(defn find-message-by-id [id]
-  (find-message-by-id-query {:id id}))
 
 (defn create-notifications
   "Adds a notification to the queue"
@@ -177,7 +159,7 @@
   "Returns all the active processors"
   []
   (log/debug "Fetching all active processors from db")
-  (map processor-entity->map (processor-list-query {} result->map)))
+  (map #(-> % sanitize-timestamps processor-entity->map) (processor-list-query {} result->map)))
 
 (defn processor-by-id
   "Find processor by identifier"
@@ -185,15 +167,13 @@
   (log/debugf "Finding processors with id %s from db" id)
   (some-> (find-by-id-query {:id (java.util.UUID/fromString id)} result->map)
           first
+          sanitize-timestamps
           processor-entity->map))
 
 (defn map->processor-entity
   [trg]
   (-> (assoc trg :definition (json/write-str (:definition trg)))
-      (rename-keys {:input-ids  :input_ids
-                    :created-at :created_at
-                    :deleted-at :deleted_at
-                    :updated-at :updated_at})))
+      (rename-keys {:input-ids  :input_ids})))
 
 (defn create-processor
   "Creates a processor definition"
@@ -203,9 +183,7 @@
     (let [entity (map->processor-entity t)
           new-processor (insert-processor<!
                          (assoc entity :input_ids (->StringArray (:input_ids entity))))]
-      (processor-entity->map (assoc t :id (:id new-processor)
-                                    :created_at (:created_at new-processor)
-                                    :updated_at (:updated_at new-processor))))))
+      (processor-entity->map (assoc t :id (:id new-processor))))))
 
 (s/fdef create-processor
         :args (s/cat :t :signal.specs.processor/processor-spec)

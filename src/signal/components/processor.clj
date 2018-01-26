@@ -159,11 +159,10 @@
   (start [this]
     (log/debug "Starting Processor Component")
     (let [comp (assoc this :notify notify)]
-      (doall (load-processors comp))
+      (do (load-processors comp))
       comp))
   (stop [this]
     (log/debug "Stopping Processor Component")
-    ()
     this))
 
 (defn make-processor-component []
