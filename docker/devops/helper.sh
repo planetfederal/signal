@@ -2,8 +2,8 @@
 
 # Code style checks
 function lint {
-    echo "-------> signal pycodestyle"
-    pycodestyle signal --ignore=E722,E731
+    echo "-------> signal lein eastwood"
+    lein eastwood
     echo "-------> docker-compose yamllint"
     yamllint -d "{extends: relaxed, rules: {line-length: {max: 120}}}" docker-compose.yml
 }
