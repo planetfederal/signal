@@ -47,4 +47,4 @@
 (spec/def ::input ::input-http)
 
 (spec/def ::inputs (spec/coll-of ::input))
-(spec/def ::input-ids (spec/or :all empty? :filtered (spec/coll-of ::id)))
+(spec/def ::input-ids (spec/or :all empty? :filtered (spec/coll-of ::id :kind vector?)))
