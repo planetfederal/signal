@@ -32,7 +32,7 @@
                  [overtone/at-at "1.2.0"]
                  [clj-http "2.3.0"]
                  [com.gfredericks/test.chuck "0.2.7"]
-                 [jonase/eastwood "0.2.3" :exclusions [org.clojure/clojure]]
+                 [jonase/eastwood "0.2.5" :exclusions [org.clojure/clojure]]
                  [com.draines/postal "2.0.2"]
                  [buddy "1.1.0"]
                  [org.clojure/tools.logging "0.3.1"]

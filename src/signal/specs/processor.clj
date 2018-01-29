@@ -40,7 +40,7 @@
                                  :processor/description
                                  :processor/repeated
                                  :processor/persistent
-                                 :processor/definition]
-                                :opt-un [:processor/id
-                                         :signal.specs.input/input-ids]))
+                                 :processor/definition
+                                 :signal.specs.input/input-ids]
+                                :opt-un [:processor/id]))
 

@@ -107,5 +107,7 @@
   ([kafka-comp topic f]
    (let [^Consumer consumer (:consumer kafka-comp)]
      (.subscribe consumer #{topic})
-     (while true
-       (-> (.poll consumer 100) f)))))
+     (async/go-loop []
+       (-> (.poll consumer 100) f)
+       (recur)))))
+
