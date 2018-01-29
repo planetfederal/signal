@@ -33,7 +33,7 @@ function sonar-scan {
 # Jenkins function for signal healthcheck
 function signal-healthcheck {
     for i in $(seq 1 20);
-        do echo $(docker inspect --format '{{ .State.Health.Status }}' signal) | grep -w healthy && s=0 && break || \
+        do echo $(docker inspect --format '{{ .State.Health.Status }}' signal-server) | grep -w healthy && s=0 && break || \
            s=$? && echo "signal is not ready, trying again in 30 seconds" && sleep 30;
     done; docker-compose logs && (exit $s)
 }
