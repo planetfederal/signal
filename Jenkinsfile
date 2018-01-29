@@ -33,8 +33,9 @@ node {
           """
       }
 
-      stage('Exchange-Healthcheck'){
+      stage('Signal-Healthcheck'){
         sh """
+	  docker ps
           /bin/bash -c ". docker/devops/helper.sh && signal-healthcheck"
           """
       }
