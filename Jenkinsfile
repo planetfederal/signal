@@ -27,7 +27,7 @@ node {
           docker system prune -f
           docker run -v \$(pwd -P):/code \
 	            -w /code quay.io/boundlessgeo/bex-nodejs-bower-grunt bash \
-	            -e -c
+	            -e
           docker-compose up --build --force-recreate -d
           echo "Waiting for signal to finish loading"
           """
