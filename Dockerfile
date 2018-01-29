@@ -8,6 +8,8 @@ RUN lein deps
 COPY . /usr/src/app
 RUN mv "$(lein uberjar | sed -n 's/^Created \(.*standalone\.jar\)/\1/p')" signal-server.jar
 
+ARG PORT=8085
+
 ENV PORT "$PORT"
 
 EXPOSE ${PORT}
