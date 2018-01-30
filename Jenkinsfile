@@ -37,7 +37,7 @@ node {
          // test
         sh """
 	  docker run -v \$(pwd -P):/web \
-		-w /web bash sh \
+		-w /web clojure:lein-2.7.1 sh \
 		-c 'bash -c "lein test" &&
 		    bash -c "lein test2junit"'
           """
