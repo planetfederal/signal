@@ -40,7 +40,8 @@ node {
 	  docker network ls
 	  docker run -v \$(pwd -P):/web --net=host \
 		-w /web clojure:lein-2.7.1 sh \
-		-c 'bash -c "lein test2junit"'
+		-c 'bash -c "netstat -ano | grep 8085" &&
+		bash -c "lein test"'
           """
       }
 
