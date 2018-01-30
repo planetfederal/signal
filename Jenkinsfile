@@ -36,8 +36,10 @@ node {
       stage('Unit-Tests'){
          // test
         sh """
-          lein test
-          lein test2junit
+	  docker run -v \$(pwd -P):/web \
+		-w /web bash sh \
+		-c 'bash -c "lein test" &&
+		    bash -c "lein test2junit"'
           """
       }
 
