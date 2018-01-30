@@ -36,7 +36,7 @@ node {
       stage('Unit-Tests'){
          // test
         sh """
-	  docker run -v \$(pwd -P):/web \
+	  docker run -v \$(pwd -P):/web --net=db \
 		-w /web clojure:lein-2.7.1 sh \
 		-c 'bash -c "lein test" &&
 		    bash -c "lein test2junit"'
