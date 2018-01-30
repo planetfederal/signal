@@ -38,7 +38,7 @@ node {
         sh """
 	  docker ps
 	  docker network ls
-	  docker run -v \$(pwd -P):/web --net=db \
+	  docker run -v \$(pwd -P):/web --net=signal \
 		-w /web clojure:lein-2.7.1 sh \
 		-c 'bash -c "lein test" &&
 		    bash -c "lein test2junit"'
