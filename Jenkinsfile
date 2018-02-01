@@ -22,13 +22,7 @@ node {
       stage('Set-Up'){
         // ensure docker volumes are cleared, build, wait for startup
         sh """
-          docker-compose down
-          docker rm -f \$(docker ps -aq) || echo "no containers to remove"
-          docker system prune -f
-          docker run -v \$(pwd -P):/code \
-	            -w /code quay.io/boundlessgeo/bex-nodejs-bower-grunt bash \
-	            -e
-          docker-compose up -d db pgweb 
+          docker-compose up -d db 
           echo "Waiting for signal to finish loading"
           """
       }
@@ -36,7 +30,9 @@ node {
       stage('Unit-Tests'){
          // test
         sh """
-		        bash -c "lein test"'
+	        docker run -v \$(pwd -P):/web --net=host \
+		        -w /web clojure:lein-2.7.1 sh \
+		        -c 'bash -c "lein test"'
           """
       }
 
@@ -44,7 +40,7 @@ node {
         // cleanup volumes
         sh """
           docker-compose down
-          docker system prune -f
+          docker-compose rm db
           """
       }
 
