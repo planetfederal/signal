@@ -28,7 +28,7 @@ node {
           docker run -v \$(pwd -P):/code \
 	            -w /code quay.io/boundlessgeo/bex-nodejs-bower-grunt bash \
 	            -e
-          docker-compose up --build --force-recreate -d
+          docker-compose up -d db pgweb 
           echo "Waiting for signal to finish loading"
           """
       }
@@ -36,12 +36,6 @@ node {
       stage('Unit-Tests'){
          // test
         sh """
-	          docker ps
-	          docker network ls
-	          docker run -v \$(pwd -P):/web --net=host \
-		          -w /web clojure:lein-2.7.1 sh \
-		          -c 'bash -c "lsof -i:8085" &&
-            docker-compose up db pgweb -d &&
 		        bash -c "lein test"'
           """
       }
