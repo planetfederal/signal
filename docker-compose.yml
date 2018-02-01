@@ -29,6 +29,7 @@ services:
     depends_on:
       - db
   signal-server:
+    container_name: signal-server # optional
     build: .
     command: 'java -jar /usr/src/app/signal-server.jar'
     depends_on:

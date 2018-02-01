@@ -8,9 +8,11 @@ RUN lein deps
 COPY . /usr/src/app
 RUN mv "$(lein uberjar | sed -n 's/^Created \(.*standalone\.jar\)/\1/p')" signal-server.jar
 
-ENV PORT "$PORT"
+ARG PORT=8085
 
-EXPOSE ${PORT}
+ENV PORT $PORT
+
+EXPOSE $PORT
 
 CMD ["java","-Xmn64m -Xms512m -Xmx512m -XX:MaxMetaspaceSize=256m \
       -XX:COMPRESSEDCLASSSPACESIZE=32M -Xss256k -XX:InitialCodeCacheSize=8m \
