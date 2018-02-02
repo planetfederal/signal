@@ -80,3 +80,8 @@ server/test.js
 
 # ignore kafka & zookeeper data
 data
+
+.lein-env
+.lein-failures
+.lein-repl-history
+.nrepl-port

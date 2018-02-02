@@ -1,7 +1,7 @@
 ---
 applications:
   - name: signal
-    path: ../target/signal-1.0.6-SNAPSHOT-standalone.jar
+    path: ../target/signal-1.0.7-SNAPSHOT-standalone.jar
     buildpack: https://github.com/mstine/heroku-buildpack-clojure
     path: ../target/
     memory: 2GB
