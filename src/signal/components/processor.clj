@@ -49,6 +49,14 @@
    (commute falsey-processors assoc (keyword (:id processor)) processor)
    (commute truthy-processors dissoc (keyword (:id processor)))))
 
+(defn- evict-processor
+  "Removes processor from both valid-processors and invalid-processors ref"
+  [processor-id]
+  (log/trace "Removing processor" processor-id)
+  (dosync
+   (commute falsey-processors dissoc (keyword processor-id))
+   (commute truthy-processors dissoc (keyword processor-id))))
+
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
   [value processor notify]
@@ -70,6 +78,7 @@
       (if-not (:repeated processor)
         (do
           (log/info "Removing processor " (:name processor) " with id:" (:id processor))
+          (evict-processor (:id processor))
           (db/delete-processor (:id processor)))
         (set-truthy-processor processor)))))
 
@@ -115,13 +124,6 @@
     (dosync
      (commute falsey-processors assoc (keyword (:id proc)) proc))))
 
-(defn- evict-processor
-  "Removes processor from both valid-processors and invalid-processors ref"
-  [processor-comp processor]
-  (log/trace "Removing processor" processor)
-  (dosync
-   (commute falsey-processors dissoc (keyword (:id processor)))
-   (commute truthy-processors dissoc (keyword (:id processor)))))
 
 (defn- load-processors
   "Fetches all processors from db and loads them into memory"
@@ -152,7 +154,7 @@
 (defn delete
   [processor-comp id]
   (db/delete-processor id)
-  (evict-processor processor-comp id))
+  (evict-processor id))
 
 (defrecord ProcessorComponent [notify]
   component/Lifecycle

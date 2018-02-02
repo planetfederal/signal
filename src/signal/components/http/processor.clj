@@ -52,11 +52,11 @@
 (defn http-post-processor
   "Creates a new processor using the json body"
   [processor-comp request]
-  (log/debug "Adding new processor")
+  (log/info "Adding new processor")
   (let [t (:json-params request)]
-    (log/debug "Validating processor")
     (let [processor (processorapi/create processor-comp t)]
-      (response/ok processor))))
+      (do (log/info processor)
+          (response/ok processor)))))
 
 (defn http-delete-processor
   "Deletes a processor"

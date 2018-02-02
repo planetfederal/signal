@@ -178,7 +178,7 @@
 (defn create-processor
   "Creates a processor definition"
   [t]
-  (log/debug "Validating processor against spec")
+  (log/info "Validating processor against spec")
   (do
     (let [entity (map->processor-entity t)
           new-processor (insert-processor<!
