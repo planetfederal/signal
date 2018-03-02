@@ -44,8 +44,6 @@
   (log/debug "Making server config with these options" config-options)
   (let [{:keys [http-config]} config-options]
     (component/system-map
-     :config (component/using (config/make-config-component))
-     :db (component/using (db/make-database-component) [:config])
      :notify (component/using (notification/make-signal-notification-component) [])
      :processor (component/using (processor/make-processor-component) [:notify])
      :input (component/using (input/make-input-manager-component) [:processor])
@@ -59,7 +57,7 @@
   [& _]
   (log/info "Configuring Signal server...")
   (if (= "true" (System/getenv "AUTO_MIGRATE"))
-    (signal.db.conn/migrate))
+    (signal.components.database/migrate))
   (let [user (System/getenv "ADMIN_USER")
         pass (System/getenv "ADMIN_PASS")]
     (if (and (some? user) (some? pass))
@@ -94,7 +92,7 @@
 
 (defn init-dev []
   (log/info "Initializing dev system for repl")
-  (signal.db.conn/migrate)
+  (signal.components.database/migrate)
   (System/setProperty "javax.net.ssl.trustStore"
                       (or (System/getenv "TRUST_STORE")
                           "tls/test-cacerts.jks"))

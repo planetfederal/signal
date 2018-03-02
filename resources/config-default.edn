@@ -1,0 +1,23 @@
+{:shared {:kafka {:broker-url "kafka"
+                  :broker-port 9092
+                  :zookeeper "zookeeper"
+                  :zookeeper-port 2181}
+          :mqtt {:broker "localhost"
+                 :port 1883
+                 :username ""
+                 :password ""}
+          :hostname "signal"
+          :database {:username
+                     :password
+                     :port
+                     :dbname }}
+
+ :input {:kafka {:topic "input_test"}
+         :mqtt {:topic "input_test"}}
+ :output {:kafka {:topic "output_test"}
+          :mqtt {:topic "output_test"}
+          :email {:smtp-host #env SMTP_HOST
+                  :smtp-password #env SMTP_PASSWORD
+                  :smtp-user #env SMTP_USERNAME}}
+ :http {:port 8085}}
+

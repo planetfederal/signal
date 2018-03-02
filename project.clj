@@ -13,6 +13,8 @@
                  [ragtime "0.5.3"]
                  [yesql "0.5.2"]
                  [cljfmt "0.5.1"]
+                 [environ "1.1.0"]
+                 [aero "1.1.3"]
                  [org.postgresql/postgresql "9.4-1201-jdbc4"]
                  [com.gfredericks/test.chuck "0.2.7"]
                  [clojure.jdbc/clojure.jdbc-c3p0 "0.3.1"]

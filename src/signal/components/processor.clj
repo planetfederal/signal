@@ -168,4 +168,3 @@
 
 (defn make-processor-component []
   (map->ProcessorComponent {}))
-

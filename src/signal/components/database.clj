@@ -25,28 +25,21 @@
             [clojure.tools.logging :as log]
             [clojure.java.jdbc :as clj-jdbc]
             [clojure.spec.alpha :as s]
+            [signal.config :refer [config]]
             [clojure.spec.test.alpha :as st]
             [com.stuartsierra.component :as component]
             [signal.specs.processor]))
 
-(def db-creds (or (some-> (System/getenv "VCAP_SERVICES")
-                          (json/read-str :key-fn clojure.core/keyword)
-                          :pg_95_XL_DEV_CONTENT_001
-                          first
-                          :credentials)
-                  {:db_host  (or (System/getenv "DB_HOST") "localhost")
-                   :db_port  5432
-                   :db_name  (or (System/getenv "DB_NAME") "signal")
-                   :username (or (System/getenv "DB_USER") "signal")
-                   :password (or (System/getenv "DB_PASSWORD") "signal")}))
+(def db-creds (get-in config [:shared :database]))
 
-(def db-spec []
-  (log/debug "Making db connection to"
-             (format "%s:%s/%s" (:db_host db-creds) (:db_port db-creds) (:db_name db-creds)))
+(def db-spec
   (pool/make-datasource-spec
    {:classname   "org.postgresql.Driver"
     :subprotocol "postgresql"
-    :subname     (format "//%s:%s/%s" (:db_host db-creds) (:db_port db-creds) (:db_name db-creds))
+    :subname     (format "//%s:%s/%s"
+                         (:host db-creds)
+                         (:port db-creds)
+                         (:dbname db-creds))
     :user        (:username db-creds)
     :password    (:password db-creds)
     :stringtype  "unspecified"
@@ -75,11 +68,10 @@
   (repl/rollback (loadconfig)))
 
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
-(defn- load-sql [db-spec]
-  (ysql/defqueries "sql/notification.sql" {:connection db-spec})
-  (ysql/defqueries "sql/processor.sql" {:connection db-spec})
-  (ysql/defqueries "sql/input.sql" {:connection db-spec})
-  (ysql/defqueries "sql/user.sql" {:connection db-spec}))
+(ysql/defqueries "sql/notification.sql" {:connection db-spec})
+(ysql/defqueries "sql/processor.sql" {:connection db-spec})
+(ysql/defqueries "sql/input.sql" {:connection db-spec})
+(ysql/defqueries "sql/user.sql" {:connection db-spec})
 
 ;;;;;;;;;;;SANITIZERS;;;;;;;;
 (defn sanitize-timestamps [v]
