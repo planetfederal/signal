@@ -30,7 +30,7 @@
             [com.stuartsierra.component :as component]
             [signal.specs.processor]))
 
-(def db-creds (get-in config [:shared :database]))
+(def db-creds (get-in config [:resource :database]))
 
 (def db-spec
   (pool/make-datasource-spec

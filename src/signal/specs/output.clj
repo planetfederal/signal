@@ -16,7 +16,7 @@
   (:require [clojure.spec.alpha :as spec]
             [xy.geojson :refer :all]
             [com.gfredericks.test.chuck.generators :as genc]
-            [signal.specs.regex :refer [email-regex,url-regex]]))
+            [signal.specs.util :refer [email-regex,url-regex]]))
 
 (spec/def :email/email (spec/with-gen #(re-matches email-regex %)
                          #(genc/string-from-regex email-regex)))
