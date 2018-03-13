@@ -49,7 +49,7 @@
         func (partial processor-api/test-value processor)
         input (stream-proto/make-streaming-input streaming-input func)]
     (dosync
-     (stream-proto/start input)
+     (stream-proto/start input func)
      (commute inputs assoc (keyword (:id streaming-input)) (assoc streaming-input :fn func)))))
 
 (defn add-polling-input [input-comp input]
