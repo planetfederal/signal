@@ -21,7 +21,6 @@
             [signal.components.input-manager :as input]
             [signal.components.notification :as notification]
             [signal.components.database :as database]
-            [signal.components.config :as config]
             [clojure.tools.logging :as log]))
 
 (defrecord SignalServer [http-service]
