@@ -30,7 +30,7 @@
             [com.stuartsierra.component :as component]
             [signal.specs.processor]))
 
-(def db-creds (get-in config [:shared :database]))
+(def db-creds (get-in config [:resource :database]))
 
 (def db-spec
   (pool/make-datasource-spec
@@ -54,16 +54,19 @@
   (clojure.java.jdbc/execute! db-spec ["CREATE SCHEMA IF NOT EXISTS signal"]))
 
 (defn loadconfig []
+  "Loads the local config"
   (log/debug "Loading database migration config")
   (create-schema)
   {:datastore  (rjdbc/sql-database db-spec {:migrations-table "signal.migrations"})
    :migrations (rjdbc/load-resources "migrations")})
 
 (defn migrate []
+  "Runs the database migration. Also available on the REPL"
   (log/debug "Running database migration")
   (repl/migrate (loadconfig)))
 
 (defn rollback []
+  "Runs the database migration rollback. Also available on the REPL"
   (log/debug "Rolling back database migration")
   (repl/rollback (loadconfig)))
 

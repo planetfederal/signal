@@ -15,9 +15,8 @@
 (ns signal.specs.input
   (:require [clojure.spec.alpha :as spec]
             [clojure.spec.gen.alpha :as gen]
-            [signal.specs.output :refer :all]
             [com.gfredericks.test.chuck.generators :as genc]
-            [signal.specs.regex :refer [url-regex,uuid-regex]]))
+            [signal.specs.util :refer [url-regex,uuid-regex]]))
 
 (spec/def ::id (spec/with-gen #(re-matches uuid-regex %)
                  #(gen/fmap (fn [u] (str u))

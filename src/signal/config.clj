@@ -18,18 +18,17 @@
             [aero.core :refer [read-config]]))
 
 (defn pcf []
-  {:shared {:database (or (some-> (System/getenv "VCAP_SERVICES")
-                                  (json/read-str :key-fn
-                                                 clojure.core/keyword)
-                                  :pg_95_XL_DEV_CONTENT_001
-                                  first
-                                  :credentials
-                                  (clojure.set/rename-keys
-                                   {:db_host :host
-                                    :db_port :port
-                                    :db_name :name}))
-                          {})}})
+  {:resource {:database (or (some-> (System/getenv "VCAP_SERVICES")
+                                    (json/read-str :key-fn
+                                                   clojure.core/keyword)
+                                    :pg_95_XL_DEV_CONTENT_001
+                                    first
+                                    :credentials
+                                    (clojure.set/rename-keys)
+                                    {:db_host :host
+                                     :db_port :port
+                                     :db_name :name})
+                            {})}})
 
 (defonce config (merge (read-config "resources/config-default.edn")
-                       (read-config "resources/config-local.edn")
-                       (pcf)))
+                       (read-config "resources/config-local.edn")))

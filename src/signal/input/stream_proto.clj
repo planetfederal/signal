@@ -1,7 +1,7 @@
 (ns signal.input.stream-proto)
 
 (defprotocol IStreamingInput
-  (start [this])
+  (start [this func])
   (stop [this]))
 
 (defmulti make-streaming-input :type)

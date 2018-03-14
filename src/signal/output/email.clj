@@ -1,19 +1,19 @@
 (ns signal.output.email
   (:require [signal.output.protocol :as proto]
             [postal.core :as postal]
+            [signal.config :as config]
             [signal.components.database :as db]))
 
 (def identifier "email")
 
-(def conn {:host (or (System/getenv "SMTP_HOST")
-                     "email-smtp.us-east-1.amazonaws.com")
+(def conn {:host (get-in config/config [:output :email :smtp-host])
            :ssl  true
-           :user (System/getenv "SMTP_USERNAME")
-           :pass (System/getenv "SMTP_PASSWORD")})
+           :user (get-in config/config [:output :email :smtp-user])
+           :pass (get-in config/config [:output :email :smtp-password])})
 
 (defn- build-notification-link
   [id]
-  (let [hostname (or (System/getenv "HOSTNAME")
+  (let [hostname (or (get-in config/config [:app :hostname])
                      (.getHostName (java.net.InetAddress/getLocalHost)))]
     (str "http://" hostname "/notifications/" id)))
 
@@ -44,4 +44,3 @@
 (defmethod proto/make-output identifier
   [cfg]
   (map->Email cfg))
-

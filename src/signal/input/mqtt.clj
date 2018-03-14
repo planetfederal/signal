@@ -33,10 +33,10 @@
    (log/debugf "Subscribing to topic" topic)
    (mh/subscribe @connection {topic 2} (partial receive cb))))
 
-(defrecord MqttConsumer [id url port topic cb]
+(defrecord MqttConsumer [id url port topic]
   proto/IStreamingInput
-  (start [_]
-    (subscribe id url port topic cb))
+  (start [this func]
+    (subscribe id url port topic func))
   (stop [_]
     (mh/disconnect @connection)))
 

@@ -3,40 +3,41 @@ volumes:
   pg-data:
     driver: local
 services:
+
   mosquitto:
     image: toke/mosquitto
     mem_limit: 32m
     ports:
       - '1883:1883'
-  db:
-    container_name: db
+  signal-db:
+    container_name: signal-db
     build: ./docker/postgis
     image: signal/postgis:latest
     volumes:
       - pg-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
-  pgweb:
-    container_name: pgweb  # optional
+  signal-pgweb:
+    container_name: signal-pgweb  # optional
     restart: always  # optional
     image: sosedoff/pgweb
     ports:
       - "8081:8081"
     links:
-      - db:db  # my database container is called postgres, not db
+      - signal-db:signal-db
     environment:
-      - DATABASE_URL=postgres://signal:signal@db:5432/signal?sslmode=disable
+      - DATABASE_URL=postgres://signal:signal@signal-db:5432/signal?sslmode=disable
     depends_on:
-      - db
+      - signal-db
   signal-server:
     build: .
     command: 'java -jar /usr/src/app/signal-server.jar'
     depends_on:
-      - db
+      - signal-db
     ports:
       - '8085:8085'
     environment:
-      - DB_HOST=db
+      - DB_HOST=signal-db
       - VIRTUAL_HOST=signal-server
       - TRUST_STORE=/usr/src/app/tls/test-cacerts.jks
       - KEY_STORE=/usr/src/app/tls/test-keystore.p12
