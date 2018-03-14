@@ -265,10 +265,17 @@
                                   :created_at (:created_at updated-processor)
                                   :updated_at (:updated_at updated-processor)))))
 
+(s/fdef modify-processor
+        :args (s/cat :id string? :t :signal.specs.processor/processor-spec)
+        :ret :signal.specs.processor/processor-spec)
+
 (defn delete-processor
   "Delete processor"
   [id]
   (delete-processor! {:id (java.util.UUID/fromString id)}))
+
+(s/fdef delete-processor
+        :args (s/cat :id string?))
 
 ;;;;;;;;;;;;;;;;INPUT;;;;;;;;;;;;;;
 (defn inputs
