@@ -1,10 +1,10 @@
-(defproject signal "1.0.6-SNAPSHOT"
+(defproject signal "1.1.0-SNAPSHOT"
   :description "Signal Server"
   :url "http://github.com/boundlessgeo/signal"
   :license {:name "Apache License, Version 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/spec.alpha "0.1.134"]
+                 [org.clojure/spec.alpha "0.1.143"]
                  [org.clojure/test.check "0.9.0"]
                  [io.pedestal/pedestal.service "0.5.1"
                   :exclusions [org.clojure/core.async]]

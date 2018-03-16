@@ -1,16 +1,16 @@
-{:resource {:kafka {:broker-url "kafka"}
-                  :broker-port 9092
-                  :zookeeper "zookeeper"
-                  :zookeeper-port 2181}
-          :mqtt {:broker "localhost"
-                 :port 1883
-                 :username ""
-                 :password ""}
-          :database {:username "signal"
-                     :password "signal"
-                     :host "localhost"
-                     :port 5432
-                     :dbname "signal"}
+{:resource {:kafka {:broker-url "kafka"
+                    :broker-port 9092
+                    :zookeeper "zookeeper"
+                    :zookeeper-port 2181}
+            :mqtt {:broker "localhost"
+                   :port 1883
+                   :username ""
+                   :password ""}
+            :database {:username "signal"
+                       :password "signal"
+                       :host "localhost"
+                       :port 5432
+                       :dbname "signal"}}
  :input {:kafka {:topic "input_test"}
          :mqtt {:topic "input_test"}}
  :output {:kafka {:topic "output_test"}
@@ -18,7 +18,7 @@
           :email {:smtp-host #env SMTP_HOST
                   :smtp-password #env SMTP_PASSWORD
                   :smtp-user #env SMTP_USERNAME}}
- :http {:port 8085}
+ :http {:port 8085 :auth false}
  :app {:hostname #or [#env HOSTNAME "signal-server"]
        :trust-store #or [#env TRUST_STORE "/usr/src/app/tls/test-cacerts.jks"]
        :key-store #or [#env "/usr/src/app/tls/test-keystore.p12"]

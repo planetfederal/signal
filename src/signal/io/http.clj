@@ -12,10 +12,10 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.input.http
-  (:require [signal.input.poll-proto :as proto]
-            [clj-http.client :as http]
+(ns signal.io.http
+  (:require [clj-http.client :as http]
             [xy.geojson :as geojson]
+            [signal.input.poll-proto :as proto]
             [clojure.tools.logging :as log]))
 
 (def identifier "http")

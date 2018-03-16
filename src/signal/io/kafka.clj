@@ -1,4 +1,4 @@
-(ns signal.input.kafka
+(ns signal.io.kafka
   (:require [signal.input.stream-proto :as proto]))
 
 (def identifier "kafka")

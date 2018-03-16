@@ -1,9 +1,11 @@
-(ns signal.input.mqtt
+(ns signal.io.mqtt
   (:require [signal.input.stream-proto :as proto]
             [clojurewerkz.machine-head.client :as mh]
             [clojure.tools.logging :as log]
             [xy.geojson :as geojson])
   (:import (org.eclipse.paho.client.mqttv3 MqttException)))
+
+(def identifier "mqtt")
 
 (def connection (atom nil))
 
@@ -40,6 +42,6 @@
   (stop [_]
     (mh/disconnect @connection)))
 
-(defmethod proto/make-streaming-input "mqtt"
+(defmethod proto/make-streaming-input identifier
   [cfg cb-fn]
   (map->MqttConsumer (assoc cfg :cb cb-fn)))

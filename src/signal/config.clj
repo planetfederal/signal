@@ -30,5 +30,5 @@
                                      :db_name :name})
                             {})}})
 
-(defonce config (merge (read-config "resources/config-default.edn")
-                       (read-config "resources/config-local.edn")))
+(def config (merge (read-config "resources/config-default.edn")
+                   (read-config "resources/config-local.edn")))
