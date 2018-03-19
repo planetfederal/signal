@@ -1,4 +1,4 @@
-;; Copyright 2016-2017 Boundless, http://boundlessgeo.com
+;; Copyright 2016-2018 Boundless, http://boundlessgeo.com
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -53,20 +53,23 @@
   (log/debug "Creating schema if it doesnt exist")
   (clojure.java.jdbc/execute! db-spec ["CREATE SCHEMA IF NOT EXISTS signal"]))
 
-(defn loadconfig []
+(defn loadconfig
   "Loads the local config"
+  []
   (log/debug "Loading database migration config")
   (create-schema)
   {:datastore  (rjdbc/sql-database db-spec {:migrations-table "signal.migrations"})
    :migrations (rjdbc/load-resources "migrations")})
 
-(defn migrate []
+(defn migrate
   "Runs the database migration. Also available on the REPL"
+  []
   (log/debug "Running database migration")
   (repl/migrate (loadconfig)))
 
-(defn rollback []
+(defn rollback
   "Runs the database migration rollback. Also available on the REPL"
+  []
   (log/debug "Rolling back database migration")
   (repl/rollback (loadconfig)))
 
@@ -169,9 +172,6 @@
   (let [info-str (json/write-str info)]
     (insert-message<!
      {:type message-type :info info-str})))
-
-(defn find-message-by-id [id]
-  (find-message-by-id-query {:id id}))
 
 (defn create-notifications
   "Adds a notification to the queue"

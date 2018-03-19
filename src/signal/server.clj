@@ -20,7 +20,6 @@
             [signal.components.processor :as processor]
             [signal.components.input-manager :as input]
             [signal.components.notification :as notification]
-            [signal.components.database :as database]
             [clojure.tools.logging :as log]))
 
 (defrecord SignalServer [http-service]
@@ -55,12 +54,12 @@
   "The entry-point for 'lein run'"
   [& _]
   (log/info "Configuring Signal server...")
-  (if (= "true" (System/getenv "AUTO_MIGRATE"))
+  (if (get-in signal.config/config [:app :auto-migrate])
     (signal.components.database/migrate))
-  (let [user (System/getenv "ADMIN_USER")
-        pass (System/getenv "ADMIN_PASS")]
-    (if (and (some? user) (some? pass))
-      (do (signal.components.database/create-user {:name "admin" :email user :password pass}))))
+  (let [email (get-in signal.config/config [:app :admin-email])
+        pass (get-in signal.config/config [:app :admin-pass])]
+    (if (and (some? email) (some? pass))
+      (do (signal.components.database/create-user {:name "admin" :email email :password pass}))))
   ;; create global uncaught exception handler so threads don't silently die
   (Thread/setDefaultUncaughtExceptionHandler
    (reify Thread$UncaughtExceptionHandler

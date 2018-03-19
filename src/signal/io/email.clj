@@ -12,8 +12,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.output.email
-  (:require [signal.output.protocol :as proto]
+(ns signal.io.email
+  (:require [signal.io.protocol :as proto]
             [postal.core :as postal]
             [signal.config :as config]
             [signal.components.database :as db]))
@@ -49,7 +49,7 @@
                 recipients))))
 
 (defrecord Email [recipients]
-  proto/IOutput
+  proto/Output
   (recipients [this]
     (:recipients this))
   (send! [this message]

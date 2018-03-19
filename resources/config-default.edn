@@ -22,5 +22,7 @@
  :app {:hostname #or [#env HOSTNAME "signal-server"]
        :trust-store #or [#env TRUST_STORE "/usr/src/app/tls/test-cacerts.jks"]
        :key-store #or [#env "/usr/src/app/tls/test-keystore.p12"]
-       :auto-migrate true}}
+       :auto-migrate true
+       :admin-email "admin@something.com"
+       :admin-pass "something"}}
 

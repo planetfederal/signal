@@ -16,7 +16,7 @@
   (:require [com.stuartsierra.component :as component]
             [signal.components.database :as db]
             [clojure.tools.logging :as log]
-            [signal.output.protocol :as proto]))
+            [signal.io.protocol :as proto]))
 
 (defn notify [_ processor payload]
   (let [output (get-in processor [:definition :output])
@@ -42,4 +42,4 @@
     this))
 
 (defn make-signal-notification-component []
-  (->NotificationComponent))
+  (map->NotificationComponent {}))

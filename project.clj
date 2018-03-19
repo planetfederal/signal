@@ -12,7 +12,7 @@
                  [org.clojure/core.async "0.3.443"]
                  [ragtime "0.5.3"]
                  [yesql "0.5.2"]
-                 [cljfmt "0.5.1"]
+                 [cljfmt "0.5.7"]
                  [environ "1.1.0"]
                  [aero "1.1.3"]
                  [org.postgresql/postgresql "9.4-1201-jdbc4"]
@@ -53,7 +53,7 @@
   :test-selectors {:default (complement :integration)
                    :integration :integration}
   :plugins [[lein-environ "1.0.3"]
-            [lein-cljfmt "0.5.6"]
+            [lein-cljfmt "0.5.7"]
             [ragtime/ragtime.lein "0.3.6"]
             [jonase/eastwood "0.2.3"]
             [lein-codox "0.10.2"]

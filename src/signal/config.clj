@@ -24,10 +24,10 @@
                                     :pg_95_XL_DEV_CONTENT_001
                                     first
                                     :credentials
-                                    (clojure.set/rename-keys)
-                                    {:db_host :host
-                                     :db_port :port
-                                     :db_name :name})
+                                    (clojure.set/rename-keys
+                                      {:db_host :host
+                                       :db_port :port
+                                       :db_name :name}))
                             {})}})
 
 (def config (merge (read-config "resources/config-default.edn")

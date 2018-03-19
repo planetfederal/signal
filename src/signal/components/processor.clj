@@ -17,9 +17,9 @@
             [clojure.tools.logging :as log]
             [signal.components.database :as db]
             [signal.components.notification :as notificationapi]
-            [signal.output.email]
-            [signal.output.protocol :as proto-output]
-            [signal.output.webhook]
+            [signal.io.protocol :as io-proto]
+            [signal.io.email]
+            [signal.io.webhook]
             [signal.predicate.geowithin]
             [signal.predicate.geodisjoint]
             [signal.predicate.protocol :as proto-pred]
@@ -108,7 +108,7 @@
   [processor-comp processor]
   (log/debug "Adding processor" (:name processor))
   ;; builds a compound where clause of (rule AND rule AND ...)
-  (let [output (proto-output/make-output (get-in processor [:definition :output]))
+  (let [output (io-proto/make-output (get-in processor [:definition :output]))
         predicates (doall (map proto-pred/make-predicate (get-in processor [:definition :predicates])))
         proc (-> (assoc-in processor [:definition :output] output)
                  (assoc-in [:definition :predicates] predicates))]
@@ -127,7 +127,7 @@
   "Fetches all processors from db and loads them into memory"
   [processor-comp]
   (let [processors (db/processors)]
-    (map (partial add-processor processor-comp) processors)))
+    (doseq [[ p ] processors] (add-processor processor-comp p))))
 
 (defn all
   [_]
@@ -137,7 +137,7 @@
   [_ id]
   (db/processor-by-id id))
 
-(defn create
+(defn create-notifications
   [processor-comp t]
   (let [processor (db/create-processor t)]
     (add-processor processor-comp processor)
@@ -159,11 +159,10 @@
   (start [this]
     (log/debug "Starting Processor Component")
     (let [comp (assoc this :notify notify)]
-      (doall (load-processors comp))
+      (load-processors comp)
       comp))
   (stop [this]
     (log/debug "Stopping Processor Component")
-    ()
     this))
 
 (defn make-processor-component []

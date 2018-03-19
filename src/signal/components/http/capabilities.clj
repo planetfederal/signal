@@ -21,8 +21,8 @@
             [signal.io.http :as io-http]
             [signal.io.mqtt :as io-mqtt]
             [signal.components.http.auth :refer [check-auth]]
-            [signal.output.email :as output-email]
-            [signal.output.webhook :as output-webhook]))
+            [signal.io.email :as output-email]
+            [signal.io.webhook :as output-webhook]))
 
 (def predicates
   #{{:type predicate-identity/identifier}
@@ -35,7 +35,8 @@
 
 (def outputs
   #{{:type output-email/identifier}
-    {:type output-webhook/identifier}})
+    {:type output-webhook/identifier}
+    {:type io-mqtt/identifier}})
 
 (defn http-get-all-capabilities
   "Returns http response of all capabilities"

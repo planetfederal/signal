@@ -20,20 +20,20 @@
    [xy.geojson :as geojson]
    [signal.components.http.auth :refer [check-auth]]
    [clojure.tools.logging :as log]
-   [signal.components.processor :as processorapi]))
+   [signal.components.processor :as processor-api]))
 
 (defn http-get-all-processors
   "Returns http response of all processors"
   [processor-comp _]
   (log/debug "Getting all processors")
-  (response/ok (processorapi/all processor-comp)))
+  (response/ok (processor-api/all processor-comp)))
 
 (defn http-get-processor
   "Gets a processor by id"
   [processor-comp request]
   (log/debug "Getting processor by id")
   (let [id (get-in request [:path-params :id])]
-    (if-let [processor (processorapi/find-by-id processor-comp id)]
+    (if-let [processor (processor-api/find-by-id processor-comp id)]
       (response/ok processor)
       (let [err-msg (str "No processor found for id" id)]
         (log/warn err-msg)
@@ -45,25 +45,24 @@
   (log/debug "Updating processor")
   (let [t (:json-params request)]
     (log/debug "Validating processor")
-    (let [processor (processorapi/modify processor-comp
-                                         (get-in request [:path-params :id]) t)]
+    (let [processor (processor-api/modify processor-comp
+                                          (get-in request [:path-params :id]) t)]
       (response/ok processor))))
 
 (defn http-post-processor
   "Creates a new processor using the json body"
   [processor-comp request]
   (log/debug "Adding new processor")
-  (let [t (:json-params request)]
-    (log/debug "Validating processor")
-    (let [processor (processorapi/create processor-comp t)]
-      (response/ok processor))))
+  (let [t (:json-params request)
+        processor (processor-api/add-processor processor-comp t)]
+    (response/ok processor)))
 
 (defn http-delete-processor
   "Deletes a processor"
   [processor-comp request]
   (log/debug "Deleting processor")
   (let [id (get-in request [:path-params :id])]
-    (processorapi/delete processor-comp id)
+    (processor-api/delete processor-comp id)
     (response/ok "success")))
 
 (defn http-test-processor
@@ -72,7 +71,7 @@
   [processor-comp request]
   (if-let [params (:json-params request)]
     (do
-      (processorapi/test-value processor-comp (geojson/parse params))
+      (processor-api/test-value processor-comp (geojson/parse params))
       (response/ok "success"))
     (response/bad-request "Request was empty")))
 

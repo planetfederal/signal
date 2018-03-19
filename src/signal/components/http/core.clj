@@ -17,7 +17,7 @@
    [io.pedestal.http :as http]
    [io.pedestal.http.route :as route]
    [com.stuartsierra.component :as component]
-   [signal.components.http.notification :as notif-http]
+   [signal.components.http.notification :as notify-http]
    [signal.components.http.processor :as processor-http]
    [signal.components.http.capabilities :as capability-http]
    [signal.components.http.auth :as auth]
@@ -35,7 +35,7 @@
                    (clojure.set/union #{}
                                       (auth/routes)
                                       (user-http/routes user)
-                                      (notif-http/routes notify)
+                                      (notify-http/routes notify)
                                       (processor-http/routes processor)
                                       (test-http/routes)
                                       (input-http/routes input)
@@ -46,9 +46,7 @@
                                        ::http/routes            routes
                                        ::http/resource-path     "/public"
                                        ::http/type              :jetty
-                                       ::http/port              (or (some-> (System/getenv "PORT")
-                                                                            Integer/parseInt)
-                                                                    8085)
+                                       ::http/port              (get-in signal.config/config [:http :port])
                                        ::http/allowed-origins   {:creds           true
                                                                  :allowed-origins (constantly true)}
                                        ::http/container-options {:h2c? true
@@ -59,6 +57,6 @@
     (log/debug "Stopping SignalHttpService")
     this))
 
-(defn make-http-service-component [http-config]
-  (map->HttpService {:http-config http-config}))
+(defn make-http-service-component [config]
+    (map->HttpService {:http-config config}))
 

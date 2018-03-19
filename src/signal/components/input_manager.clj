@@ -15,9 +15,8 @@
 (ns signal.components.input-manager
   (:require [com.stuartsierra.component :as component]
             [signal.components.processor :as processor-api]
-            [signal.input.poll-proto :as poll-proto]
-            [signal.input.stream-proto :as stream-proto]
-            [signal.input.http]
+            [signal.io.protocol :as io-proto]
+            [signal.io.http]
             [signal.components.database :as database-api]
             [overtone.at-at :refer [every, mk-pool, stop, stop-and-reset-pool!]]
             [clojure.tools.logging :as log]))
@@ -27,7 +26,7 @@
 
 (defn fetch-url
   [polling-input]
-  (try (poll-proto/poll polling-input (:fn polling-input))
+  (try (io-proto/poll polling-input (:fn polling-input))
        (catch Exception e
          (log/error e (.getLocalizedMessage e)))))
 
@@ -38,7 +37,7 @@
 (defn- start-polling
   "Returns at-at job with metadata"
   [polling-input]
-  (let [seconds (poll-proto/interval polling-input)]
+  (let [seconds (io-proto/interval polling-input)]
     (every (* 1000 seconds)
            #(fetch-url polling-input)
            schedule-polling-pool
@@ -47,23 +46,23 @@
 (defn add-streaming-input [input-comp streaming-input]
   (let [processor (:processor input-comp)
         func (partial processor-api/test-value processor)
-        input (stream-proto/make-streaming-input streaming-input func)]
+        input (io-proto/make-streaming-input streaming-input func)]
     (dosync
-     (stream-proto/start input func)
+     (io-proto/start-input input func)
      (commute inputs assoc (keyword (:id streaming-input)) (assoc streaming-input :fn func)))))
 
 (defn add-polling-input [input-comp input]
   (let [processor (:processor input-comp)
         func (partial processor-api/test-value processor)
-        polling-input (poll-proto/make-polling-input input)]
-    (if (< 0 (poll-proto/interval polling-input))
+        polling-input (io-proto/make-polling-input input)]
+    (if (< 0 (io-proto/interval polling-input))
       (let [input-fn (assoc polling-input :fn func)
             job (start-polling input-fn)]
         (dosync
          (commute inputs assoc (keyword (:id polling-input)) {:fn input-fn :job-id (:id job)}))))))
 
 (defn remove-streaming-input [streaming-input]
-  (stream-proto/stop streaming-input)
+  (io-proto/stop-input streaming-input)
   (commute inputs dissoc (keyword (:id streaming-input))))
 
 (defn stop-input

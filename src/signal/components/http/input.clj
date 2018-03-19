@@ -16,6 +16,7 @@
   (:require [signal.components.http.intercept :as intercept]
             [signal.components.http.response :as response]
             [signal.components.input-manager :as input-manager-api]
+            [signal.components.processor :as processorapi]
             [signal.components.http.auth :refer [check-auth]]))
 
 (defn http-get-all-inputs
