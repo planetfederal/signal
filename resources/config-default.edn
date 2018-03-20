@@ -12,7 +12,10 @@
                        :port 5432
                        :dbname "signal"}}
  :input {:kafka {:topic "input_test"}
-         :mqtt {:topic "input_test"}}
+         :mqtt {:topic "input_test"
+                :url "localhost"
+                :port 1883
+                :subscriber-id "signal-mqtt-subscriber"}}
  :output {:kafka {:topic "output_test"}
           :mqtt {:topic "output_test"}
           :email {:smtp-host #env SMTP_HOST

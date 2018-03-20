@@ -16,6 +16,7 @@
   (:require [signal.io.protocol :as io-proto]
             [clojurewerkz.machine-head.client :as mh]
             [clojure.tools.logging :as log]
+            [signal.config :refer [config]]
             [xy.geojson :as geojson])
   (:import (org.eclipse.paho.client.mqttv3 MqttException)))
 
@@ -41,32 +42,37 @@
 
 (defn subscribe
   "Subscribe to mqtt topic with message handler function f"
-  ([[id url port topic cb]]
-   (subscribe id url port topic cb))
-  ([id url port topic cb]
+  ([topic cb]
    (if (or (nil? @connection) (not (mh/connected? @connection)))
-     (do (connect id url port)))
+     (let [ident (get-in config [:input :mqtt :subscriber-id])
+           url (get-in config [:input :mqtt :url])
+           port (get-in config [:input :mqtt :port])]
+       (do (connect ident url port))))
    (log/debugf "Subscribing to topic" topic)
    (mh/subscribe @connection {topic 2} (partial receive cb))))
 
 (defrecord MqttConsumer [id url port topic]
   io-proto/StreamingInput
   (start-input [this func]
+    (subscribe topic func)
     this)
   (stop-input [this]
     (mh/disconnect @connection)
     this))
 
 (defmethod io-proto/make-streaming-input identifier
-  [cfg cb-fn]
-  (map->MqttConsumer (assoc cfg :cb cb-fn)))
+  [cfg]
+  (map->MqttConsumer cfg))
 
 (defrecord MqttProducer [id url port topic]
   io-proto/StreamingOutput
   (start-output [this func]
+    (subscribe topic func)
     this)
-  (stop-output [this] this))
+  (stop-output [this]
+    (mh/disconnect @connection)
+    this))
 
 (defmethod io-proto/make-streaming-output identifier
-  [cfg cb-fn]
-  (map->MqttProducer (assoc cfg :cb cb-fn)))
+  [cfg]
+  (map->MqttProducer cfg))

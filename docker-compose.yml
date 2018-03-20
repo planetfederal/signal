@@ -3,7 +3,7 @@ volumes:
   pg-data:
     driver: local
 services:
-  mosquitto:
+  signal-mosquitto:
     image: toke/mosquitto
     mem_limit: 32m
     ports:

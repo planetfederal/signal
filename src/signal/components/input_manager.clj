@@ -17,6 +17,7 @@
             [signal.components.processor :as processor-api]
             [signal.io.protocol :as io-proto]
             [signal.io.http]
+            [signal.io.mqtt]
             [signal.components.database :as database-api]
             [overtone.at-at :refer [every, mk-pool, stop, stop-and-reset-pool!]]
             [clojure.tools.logging :as log]))
@@ -43,27 +44,50 @@
            schedule-polling-pool
            :initial-delay 5000)))
 
-(defn add-streaming-input [input-comp streaming-input]
-  (let [processor (:processor input-comp)
-        func (partial processor-api/test-value processor)
-        input (io-proto/make-streaming-input streaming-input func)]
+(defn- add-streaming-input [input-comp streaming-input]
+  (let [processor-comp (:processor input-comp)
+        func (partial processor-api/test-value processor-comp)]
     (dosync
-     (io-proto/start-input input func)
-     (commute inputs assoc (keyword (:id streaming-input)) (assoc streaming-input :fn func)))))
+      (io-proto/start-input streaming-input func)
+      (commute inputs assoc (keyword (:id streaming-input)) (assoc streaming-input :fn func))
+      true)))
 
-(defn add-polling-input [input-comp input]
+(defn- add-polling-input [input-comp polling-input]
   (let [processor (:processor input-comp)
-        func (partial processor-api/test-value processor)
-        polling-input (io-proto/make-polling-input input)]
+        func (partial processor-api/test-value processor)]
     (if (< 0 (io-proto/interval polling-input))
       (let [input-fn (assoc polling-input :fn func)
             job (start-polling input-fn)]
         (dosync
-         (commute inputs assoc (keyword (:id polling-input)) {:fn input-fn :job-id (:id job)}))))))
+         (commute inputs assoc (keyword (:id polling-input)) {:fn input-fn :job-id (:id job)})
+         true)))))
 
-(defn remove-streaming-input [streaming-input]
-  (io-proto/stop-input streaming-input)
-  (commute inputs dissoc (keyword (:id streaming-input))))
+(defn- try-or-nil [func & args]
+  (try (apply func args) (catch Exception _ nil)))
+
+(defn- construct-input
+  "Since values of JSON are sent from the rest endpoint, this construction
+  of multimethods must use a try catch in order to avoid building a switch
+  statement for streaming types vs polling types. This method will try to
+  make a streaming or polling input and return nil if neither work."
+  [input]
+  (if-let [mm-input (try-or-nil io-proto/make-polling-input input)]
+    mm-input
+    (try-or-nil io-proto/make-streaming-input input)))
+
+(defn add-input [input-comp input]
+  (let [mm-input (construct-input input)]
+    (cond
+      (satisfies? io-proto/PollingInput mm-input) (add-polling-input input-comp mm-input)
+      (satisfies? io-proto/StreamingInput mm-input) (add-streaming-input input-comp mm-input))))
+
+(defn remove-streaming-input! [_ id]
+  (let [input (get @inputs (keyword id))]
+    (log/debug "Stopping Input:" (:id input))
+    (dosync
+      (io-proto/stop-input input)
+      (commute inputs dissoc (keyword (:id input)))
+      true)))
 
 (defn stop-input
   [_ id]
@@ -86,7 +110,7 @@
 (defn- start-inputs
   "Fetches all inputs from the database and starts them"
   [input-comp]
-  (doall (map (partial add-polling-input input-comp) (database-api/inputs))))
+  (doall (map (partial add-input input-comp) (database-api/inputs))))
 
 (defn- stop-inputs
   [input-comp]
@@ -94,25 +118,29 @@
                 (stop-input input-comp (:id i)))
               (database-api/inputs))))
 
+
+
 (defn create
   "Creates and input and adds it to the scheduler"
   [input-comp i]
   (let [input (database-api/create-input i)]
-    (add-polling-input input-comp input)
-    input))
+    (if (add-input input-comp input)
+      input)))
 
 (defn modify
   "Updates an existing input"
   [input-comp id i]
   (let [input (database-api/modify-input id i)]
-    (add-polling-input input-comp input)))
+    (if (add-input input-comp input)
+      input)))
 
 (defn delete
   "Return true if successfully deleted"
   [input-comp id]
-  (do
-    (log/debug "Removing input:" id)
-    (remove-polling-input! input-comp id)))
+  (log/debug "Removing input:" id)
+  (cond
+    (satisfies? io-proto/PollingInput (get @inputs (keyword id))) (remove-polling-input! input-comp id)
+    (satisfies? io-proto/StreamingInput (get @inputs (keyword id))) (remove-streaming-input! input-comp id)))
 
 (defrecord InputManagerComponent [processor]
   component/Lifecycle
