@@ -54,12 +54,12 @@
   "The entry-point for 'lein run'"
   [& _]
   (log/info "Configuring Signal server...")
-  (if (= "true" (System/getenv "AUTO_MIGRATE"))
-    (signal.db.conn/migrate))
-  (let [user (System/getenv "ADMIN_USER")
-        pass (System/getenv "ADMIN_PASS")]
-    (if (and (some? user) (some? pass))
-      (do (signal.components.database/create-user {:name "admin" :email user :password pass}))))
+  (if (get-in signal.config/config [:app :auto-migrate])
+    (signal.components.database/migrate))
+  (let [email (get-in signal.config/config [:app :admin-email])
+        pass (get-in signal.config/config [:app :admin-pass])]
+    (if (and (some? email) (some? pass))
+      (do (signal.components.database/create-user {:name "admin" :email email :password pass}))))
   ;; create global uncaught exception handler so threads don't silently die
   (Thread/setDefaultUncaughtExceptionHandler
    (reify Thread$UncaughtExceptionHandler
@@ -90,7 +90,7 @@
 
 (defn init-dev []
   (log/info "Initializing dev system for repl")
-  (signal.db.conn/migrate)
+  (signal.components.database/migrate)
   (System/setProperty "javax.net.ssl.trustStore"
                       (or (System/getenv "TRUST_STORE")
                           "tls/test-cacerts.jks"))
@@ -111,8 +111,9 @@
                           "somepass"))
   (make-signal-server {:http-config {:env                     :dev
                                      ::server/join?           false
-                                     ::server/allowed-origins {:creds true
-                                                               :allowed-origins (constantly true)}}}))
+                                     ::server/allowed-origins ["localhost:8084"]}}))
+                                     ;::server/allowed-origins {:creds true
+                                     ;                          :allowed-origins (constantly true)}}))
 
 (defn init []
   (alter-var-root #'system-val (constantly (init-dev))))
@@ -131,4 +132,3 @@
 (defn reset []
   (stop)
   (go))
-

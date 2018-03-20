@@ -1,0 +1,8 @@
+config:
+  predicates:
+    geodisjoint: { path: signal.predicate.geodisjoint, name: GeoDisjoint}
+    geowithin: { path: signal.predicate.geowithin, name: GeoWithin}
+    geointersects: {path: signal.predicate.geointersects, name: GeoIntersects}
+  capabilities:
+
+

@@ -1,10 +1,11 @@
-(defproject signal "1.0.7-SNAPSHOT"
+
+(defproject signal "1.0.8-SNAPSHOT"
   :description "Signal Server"
   :url "http://github.com/boundlessgeo/signal"
   :license {:name "Apache License, Version 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0"}
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/spec.alpha "0.1.134"]
+                 [org.clojure/spec.alpha "0.1.143"]
                  [org.clojure/test.check "0.9.0"]
                  [io.pedestal/pedestal.service "0.5.1"
                   :exclusions [org.clojure/core.async]]
@@ -12,7 +13,9 @@
                  [org.clojure/core.async "0.3.443"]
                  [ragtime "0.5.3"]
                  [yesql "0.5.2"]
-                 [cljfmt "0.5.1"]
+                 [cljfmt "0.5.7"]
+                 [environ "1.1.0"]
+                 [aero "1.1.3"]
                  [org.postgresql/postgresql "9.4-1201-jdbc4"]
                  [com.gfredericks/test.chuck "0.2.7"]
                  [clojure.jdbc/clojure.jdbc-c3p0 "0.3.1"]
@@ -51,7 +54,7 @@
   :test-selectors {:default (complement :integration)
                    :integration :integration}
   :plugins [[lein-environ "1.0.3"]
-            [lein-cljfmt "0.5.6"]
+            [lein-cljfmt "0.5.7"]
             [ragtime/ragtime.lein "0.3.6"]
             [jonase/eastwood "0.2.3"]
             [lein-codox "0.10.2"]

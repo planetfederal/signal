@@ -15,9 +15,8 @@
 (ns signal.specs.input
   (:require [clojure.spec.alpha :as spec]
             [clojure.spec.gen.alpha :as gen]
-            [signal.specs.output :refer :all]
             [com.gfredericks.test.chuck.generators :as genc]
-            [signal.specs.regex :refer [url-regex,uuid-regex]]))
+            [signal.specs.util :refer [url-regex,uuid-regex]]))
 
 (spec/def ::id (spec/with-gen #(re-matches uuid-regex %)
                  #(gen/fmap (fn [u] (str u))
@@ -38,10 +37,15 @@
 ;;;;;;;;;;;;;;HTTP;;;;;;;;;;;;;;;;
 (spec/def :http/url (spec/with-gen :wfs-def/url
                       #(spec/gen #{"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"})))
-(spec/def :http/interval pos-int?)
 (spec/def :http/definition (spec/keys :req-un [:http/url ::interval]))
 (spec/def :http/type #{"http"})
 (spec/def ::input-http (spec/keys :req-un [::id ::name ::description :http/type :http/definition]))
+
+;;;;;;;;;;;;;;MQTT;;;;;;;;;;;;;;;;
+(spec/def :mqtt/topic string?)
+(spec/def :mqtt/type #{"mqtt"})
+(spec/def :mqtt/definition (spec/keys :req-un [:mqtt/topic]))
+(spec/def ::input-mqtt (spec/keys :req-un [::id ::name ::description :mqtt/type :mqtt/definition]))
 
 ;;;;;;;;;;;FINAL DEF;;;;;;;;;;;;;;
 (spec/def ::input ::input-http)

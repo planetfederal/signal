@@ -14,7 +14,7 @@
 
 (ns signal.specs.user
   (:require [clojure.spec.alpha :as s]
-            [signal.specs.regex :refer [email-regex]]))
+            [signal.specs.util :refer [email-regex]]))
 
 ;;; specs about user account data
 (s/def :user/email (s/and string? #(re-matches email-regex %)))

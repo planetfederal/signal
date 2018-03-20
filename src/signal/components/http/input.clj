@@ -16,6 +16,7 @@
   (:require [signal.components.http.intercept :as intercept]
             [signal.components.http.response :as response]
             [signal.components.input-manager :as input-manager-api]
+            [signal.components.processor :as processorapi]
             [signal.components.http.auth :refer [check-auth]]))
 
 (defn http-get-all-inputs
@@ -24,7 +25,8 @@
 
 (defn http-get-input
   [input-comp request]
-  (let [input (input-manager-api/find-by-id input-comp (get-in request [:path-params :id]))]
+  (let [input (input-manager-api/find-by-id input-comp
+                                            (get-in request [:path-params :id]))]
     (response/ok input)))
 
 (defn http-put-inputs

@@ -1,5 +1,7 @@
-(ns signal.output.webhook
-  (:require [signal.output.protocol :as proto]
+
+
+(ns signal.io.webhook
+  (:require [signal.io.protocol :as proto]
             [clj-http.client :as http]
             [cheshire.core :as json]
             [clojure.tools.logging :as log]
@@ -15,7 +17,7 @@
       (map db/mark-as-sent (:notif-ids value))))
 
 (defrecord Webhook [url verb]
-  proto/IOutput
+  proto/Output
   (recipients [this] [(:url this)])
   (send! [this value]
     (send! this value)))

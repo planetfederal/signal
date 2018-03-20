@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/boundlessgeo/signal.svg?branch=master)](https://travis-ci.org/boundlessgeo/signal)
 
-### Version 1.0.7
+### Version 1.0.8
 
 ### To run the migrations
 

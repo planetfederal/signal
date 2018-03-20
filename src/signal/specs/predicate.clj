@@ -16,7 +16,7 @@
   (:require [clojure.spec.alpha :as spec]
             [clojure.spec.gen.alpha :as gen]
             [xy.geojson :refer :all]
-            [signal.specs.regex :refer [uuid-regex]]
+            [signal.specs.util :refer [uuid-regex]]
             [com.gfredericks.test.chuck.generators :as genc]))
 
 (spec/def :predicate/id (spec/with-gen #(re-matches uuid-regex %)

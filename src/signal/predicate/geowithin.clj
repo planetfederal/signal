@@ -1,4 +1,4 @@
-;; Copyright 2016-2017 Boundless, http://boundlessgeo.com
+;; Copyright 2016-2018 Boundless, http://boundlessgeo.com
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -26,8 +26,7 @@
 (defrecord WithinClause [clause]
   proto/IPredicate
   (check [this geojson-feature]
-    (relation/within? geojson-feature
-                      (:clause this)))
+    (relation/within? geojson-feature (:clause this)))
   (notification [this _]
     (str " was within " (xy.geojson/write (:clause this)))))
 

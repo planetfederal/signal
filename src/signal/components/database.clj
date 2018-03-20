@@ -1,4 +1,4 @@
-;; Copyright 2016-2017 Boundless, http://boundlessgeo.com
+;; Copyright 2016-2018 Boundless, http://boundlessgeo.com
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -13,23 +13,71 @@
 ;; limitations under the License.
 
 (ns signal.components.database
-  (:require [signal.db.conn :as db]
-            [clojure.data.json :as json]
+  (:require [clojure.data.json :as json]
             [clojure.tools.logging :as log]
             [clojure.set :refer [rename-keys]]
             [buddy.hashers :as hashers]
             [yesql.core :as ysql]
+            [ragtime.repl :as repl]
+            [ragtime.jdbc :as rjdbc]
+            [clojure.data.json :as json]
+            [jdbc.pool.c3p0 :as pool]
+            [clojure.tools.logging :as log]
             [clojure.java.jdbc :as clj-jdbc]
             [clojure.spec.alpha :as s]
+            [signal.config :refer [config]]
             [clojure.spec.test.alpha :as st]
             [com.stuartsierra.component :as component]
             [signal.specs.processor]))
 
+(def db-creds (get-in config [:resource :database]))
+
+(def db-spec
+  (pool/make-datasource-spec
+   {:classname   "org.postgresql.Driver"
+    :subprotocol "postgresql"
+    :subname     (format "//%s:%s/%s"
+                         (:host db-creds)
+                         (:port db-creds)
+                         (:dbname db-creds))
+    :user        (:username db-creds)
+    :password    (:password db-creds)
+    :stringtype  "unspecified"
+    :max-pool-size     10
+    :min-pool-size     2
+    :initial-pool-size 2}))
+
+(defn create-schema
+  "Creates the Signal schema for Postgres"
+  []
+  (log/debug "Creating schema if it doesnt exist")
+  (clojure.java.jdbc/execute! db-spec ["CREATE SCHEMA IF NOT EXISTS signal"]))
+
+(defn loadconfig
+  "Loads the local config"
+  []
+  (log/debug "Loading database migration config")
+  (create-schema)
+  {:datastore  (rjdbc/sql-database db-spec {:migrations-table "signal.migrations"})
+   :migrations (rjdbc/load-resources "migrations")})
+
+(defn migrate
+  "Runs the database migration. Also available on the REPL"
+  []
+  (log/debug "Running database migration")
+  (repl/migrate (loadconfig)))
+
+(defn rollback
+  "Runs the database migration rollback. Also available on the REPL"
+  []
+  (log/debug "Rolling back database migration")
+  (repl/rollback (loadconfig)))
+
 ;;;;;;;;;;;;;;;;;SQL;;;;;;;;;;;;;;
-(ysql/defqueries "sql/notification.sql" {:connection db/db-spec})
-(ysql/defqueries "sql/processor.sql" {:connection db/db-spec})
-(ysql/defqueries "sql/input.sql" {:connection db/db-spec})
-(ysql/defqueries "sql/user.sql" {:connection db/db-spec})
+(ysql/defqueries "sql/notification.sql" {:connection db-spec})
+(ysql/defqueries "sql/processor.sql" {:connection db-spec})
+(ysql/defqueries "sql/input.sql" {:connection db-spec})
+(ysql/defqueries "sql/user.sql" {:connection db-spec})
 
 ;;;;;;;;;;;SANITIZERS;;;;;;;;
 (defn sanitize-timestamps [v]
@@ -273,15 +321,3 @@
    (log/debug "Inserting user" u)
    (let [user-info (assoc u :password (hashers/derive (:password u)))]
      (sanitize-user (create-user<! user-info)))))
-
-;;;;;;;;;;;;;COMPONENT;;;;;;;;;;;;;;;;;;
-
-(defrecord DatabaseComponent []
-  component/Lifecycle
-  (start [this]
-    this)
-  (stop [this]
-    this))
-
-(defn make-database-component []
-  (map->DatabaseComponent {}))

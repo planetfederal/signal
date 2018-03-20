@@ -1,4 +1,4 @@
-;; Copyright 2016-2017 Boundless, http://boundlessgeo.com
+;; Copyright 2016-2018 Boundless, http://boundlessgeo.com
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
             [clojure.tools.logging :as log]
             [signal.components.database :as db]
             [signal.components.notification :as notificationapi]
-            [signal.output.email]
-            [signal.output.protocol :as proto-output]
-            [signal.output.webhook]
+            [signal.io.protocol :as io-proto]
+            [signal.io.email]
+            [signal.io.webhook]
             [signal.predicate.geowithin]
             [signal.predicate.geodisjoint]
             [signal.predicate.protocol :as proto-pred]
@@ -60,6 +60,7 @@
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
   [value processor notify]
+  (log/debugf "Processor passed check %s" (:name processor))
   (let [geom-map (xy.geojson/write value)
         body (doall (->> (get-in processor [:definition :predicates])
                          (map #(proto-pred/notification % geom-map))
@@ -78,13 +79,13 @@
       (if-not (:repeated processor)
         (do
           (log/info "Removing processor " (:name processor) " with id:" (:id processor))
-          (evict-processor (:id processor))
-          (db/delete-processor (:id processor)))
-        (set-truthy-processor processor)))))
+          (db/delete-processor (:id processor)))))))
+        ;(set-truthy-processor processor)))))
 
 (defn- handle-failure
   "Makes the processor invalid b/c it failed the test value."
   [processor]
+  (log/debugf "Processor failed check %s" (:name processor))
   (if (nil? ((keyword (:id processor)) @truthy-processors))
     (set-falsey-processor processor)))
 
@@ -92,15 +93,17 @@
   "Maps over all invalid processors to check if they evaluate to true based
   on the value to test against all rules for a processor."
   [processor-comp value]
-  (doall (map (fn [k]
-                (if-let [processor (k @falsey-processors)]
-                  (loop [preds (get-in processor [:definition :predicates])]
-                    (if (empty? preds)
-                      (handle-success value processor (:notify processor-comp))
-                      (if-let [pred (first preds)]
-                        (if (proto-pred/check pred value)
-                          (recur (rest preds))
-                          (handle-failure processor))))))) (keys @falsey-processors))))
+  (doseq [k (keys @falsey-processors)]
+      (if-let [processor (k @falsey-processors)]
+        (do
+          (log/debugf "Testing value against processor:%s" (:name processor))
+          (loop [preds (get-in processor [:definition :predicates])]
+            (if (empty? preds)
+              (handle-success value processor (:notify processor-comp))
+              (if-let [pred (first preds)]
+                (if (proto-pred/check pred value)
+                  (recur (rest preds))
+                  (handle-failure processor)))))))))
 
 (defn test-value
   "Posts a value to be checked on the source channel"
@@ -117,7 +120,7 @@
   [processor-comp processor]
   (log/debug "Adding processor" (:name processor))
   ;; builds a compound where clause of (rule AND rule AND ...)
-  (let [output (proto-output/make-output (get-in processor [:definition :output]))
+  (let [output (io-proto/make-output (get-in processor [:definition :output]))
         predicates (doall (map proto-pred/make-predicate (get-in processor [:definition :predicates])))
         proc (-> (assoc-in processor [:definition :output] output)
                  (assoc-in [:definition :predicates] predicates))]
@@ -129,7 +132,7 @@
   "Fetches all processors from db and loads them into memory"
   [processor-comp]
   (let [processors (db/processors)]
-    (map (partial add-processor processor-comp) processors)))
+    (doseq [p processors] (add-processor processor-comp p))))
 
 (defn all
   [_]
@@ -161,7 +164,7 @@
   (start [this]
     (log/debug "Starting Processor Component")
     (let [comp (assoc this :notify notify)]
-      (do (load-processors comp))
+      (load-processors comp)
       comp))
   (stop [this]
     (log/debug "Stopping Processor Component")

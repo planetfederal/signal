@@ -1,4 +1,4 @@
-;; Copyright 2016-2017 Boundless, http://boundlessgeo.com
+;; Copyright 2016-2018 Boundless, http://boundlessgeo.com
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -12,16 +12,16 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns signal.input.http
-  (:require [signal.input.poll-proto :as proto]
-            [clj-http.client :as http]
+(ns signal.io.http
+  (:require [clj-http.client :as http]
             [xy.geojson :as geojson]
+            [signal.io.protocol :as io-proto]
             [clojure.tools.logging :as log]))
 
 (def identifier "http")
 
 (defrecord Http [id url interval]
-  proto/IPollingInput
+  io-proto/PollingInput
   (interval [this] (if (some? (:interval this))
                      (:interval this)
                      60))
@@ -36,7 +36,7 @@
           (func json)))
       (catch Exception e (log/error e (.getLocalizedMessage e))))))
 
-(defmethod proto/make-polling-input identifier
+(defmethod io-proto/make-polling-input identifier
   [cfg]
   (->Http (:id cfg)
           (get-in cfg [:definition :url])
