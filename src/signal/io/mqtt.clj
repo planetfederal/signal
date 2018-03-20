@@ -28,33 +28,32 @@
   "Connects to mqtt broker"
   ([id url port]
    (while (or (nil? @connection) (not (mh/connected? @connection)))
-     (let [uri (str url ":" port)]
+     (let [uri (str url ":" (str port))]
        (log/debug (str "Connecting MQTT Client to " uri))
        (try (reset! connection (mh/connect uri id))
             (catch MqttException e
               (Thread/sleep 1000)))))))
 
 (defn receive
-  [f _ _ ^bytes payload]
+  [f ^String topic _ ^bytes payload]
+  (log/debugf "Received message on %s" topic)
   (-> (String. payload "UTF-8")
       geojson/str->map
       f))
 
 (defn subscribe
   "Subscribe to mqtt topic with message handler function f"
-  ([topic cb]
+  ([id url port topic cb]
    (if (or (nil? @connection) (not (mh/connected? @connection)))
-     (let [ident (get-in config [:input :mqtt :subscriber-id])
-           url (get-in config [:input :mqtt :url])
-           port (get-in config [:input :mqtt :port])]
-       (do (connect ident url port))))
-   (log/debugf "Subscribing to topic" topic)
+     (let []
+       (do (connect id url port))))
+   (log/debugf "Subscribing to topic %s" topic)
    (mh/subscribe @connection {topic 2} (partial receive cb))))
 
 (defrecord MqttConsumer [id url port topic]
   io-proto/StreamingInput
   (start-input [this func]
-    (subscribe topic func)
+    (subscribe id url port topic func)
     this)
   (stop-input [this]
     (mh/disconnect @connection)
@@ -62,12 +61,16 @@
 
 (defmethod io-proto/make-streaming-input identifier
   [cfg]
-  (map->MqttConsumer cfg))
+  (let [ident (get-in config [:input :mqtt :subscriber-id])
+        url (get-in config [:input :mqtt :url])
+        port (get-in config [:input :mqtt :port])
+        topic (get-in cfg [:definition :topic])]
+    (->MqttConsumer ident url port topic)))
 
 (defrecord MqttProducer [id url port topic]
   io-proto/StreamingOutput
   (start-output [this func]
-    (subscribe topic func)
+    (subscribe id url port topic func)
     this)
   (stop-output [this]
     (mh/disconnect @connection)
@@ -75,4 +78,8 @@
 
 (defmethod io-proto/make-streaming-output identifier
   [cfg]
-  (map->MqttProducer cfg))
+  (let [ident (get-in config [:input :mqtt :subscriber-id])
+        url (get-in config [:input :mqtt :url])
+        port (get-in config [:input :mqtt :port])
+        topic (get-in cfg [:definition :topic])]
+    (->MqttConsumer ident url port topic)))

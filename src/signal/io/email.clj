@@ -16,7 +16,8 @@
   (:require [signal.io.protocol :as proto]
             [postal.core :as postal]
             [signal.config :as config]
-            [signal.components.database :as db]))
+            [signal.components.database :as db]
+            [clojure.tools.logging :as log]))
 
 (def identifier "email")
 
@@ -33,10 +34,11 @@
 
 (defn email-recipient
   [recipient message]
-  (postal/send-message conn {:from    "mobile@boundlessgeo.com"
-                             :to      (str recipient)
-                             :subject (str (:title message))
-                             :body    (str (:body message))}))
+  (log/debugf "Sending Email message to %s" recipient)
+  (postal/send-message signal.io.email/conn {:from    "mobile@boundlessgeo.com"
+                                             :to      (str recipient)
+                                             :subject (str (:title message))
+                                             :body    (str (:body message))}))
 
 (defn- send!
   [email-output message]

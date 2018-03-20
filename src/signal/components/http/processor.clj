@@ -54,7 +54,7 @@
   [processor-comp request]
   (log/debug "Adding new processor")
   (let [t (:json-params request)
-        processor (processor-api/add-processor processor-comp t)]
+        processor (processor-api/create processor-comp t)]
     (response/ok processor)))
 
 (defn http-delete-processor

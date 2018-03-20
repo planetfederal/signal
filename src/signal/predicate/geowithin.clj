@@ -26,8 +26,7 @@
 (defrecord WithinClause [clause]
   proto/IPredicate
   (check [this geojson-feature]
-    (relation/within? geojson-feature
-                      (:clause this)))
+    (relation/within? geojson-feature (:clause this)))
   (notification [this _]
     (str " was within " (xy.geojson/write (:clause this)))))
 

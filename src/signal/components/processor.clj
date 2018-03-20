@@ -52,6 +52,7 @@
 (defn- handle-success
   "Sets processor as valid, then sends a noification"
   [value processor notify]
+  (log/debugf "Processor passed check %s" (:name processor))
   (let [geom-map (xy.geojson/write value)
         body (doall (->> (get-in processor [:definition :predicates])
                          (map #(proto-pred/notification % geom-map))
@@ -70,12 +71,13 @@
       (if-not (:repeated processor)
         (do
           (log/info "Removing processor " (:name processor) " with id:" (:id processor))
-          (db/delete-processor (:id processor)))
-        (set-truthy-processor processor)))))
+          (db/delete-processor (:id processor)))))))
+        ;(set-truthy-processor processor)))))
 
 (defn- handle-failure
   "Makes the processor invalid b/c it failed the test value."
   [processor]
+  (log/debugf "Processor failed check %s" (:name processor))
   (if (nil? ((keyword (:id processor)) @truthy-processors))
     (set-falsey-processor processor)))
 
@@ -83,15 +85,17 @@
   "Maps over all invalid processors to check if they evaluate to true based
   on the value to test against all rules for a processor."
   [processor-comp value]
-  (doall (map (fn [k]
-                (if-let [processor (k @falsey-processors)]
-                  (loop [preds (get-in processor [:definition :predicates])]
-                    (if (empty? preds)
-                      (handle-success value processor (:notify processor-comp))
-                      (if-let [pred (first preds)]
-                        (if (proto-pred/check pred value)
-                          (recur (rest preds))
-                          (handle-failure processor))))))) (keys @falsey-processors))))
+  (doseq [k (keys @falsey-processors)]
+      (if-let [processor (k @falsey-processors)]
+        (do
+          (log/debugf "Testing value against processor:%s" (:name processor))
+          (loop [preds (get-in processor [:definition :predicates])]
+            (if (empty? preds)
+              (handle-success value processor (:notify processor-comp))
+              (if-let [pred (first preds)]
+                (if (proto-pred/check pred value)
+                  (recur (rest preds))
+                  (handle-failure processor)))))))))
 
 (defn test-value
   "Posts a value to be checked on the source channel"
@@ -127,7 +131,7 @@
   "Fetches all processors from db and loads them into memory"
   [processor-comp]
   (let [processors (db/processors)]
-    (doseq [[ p ] processors] (add-processor processor-comp p))))
+    (doseq [p processors] (add-processor processor-comp p))))
 
 (defn all
   [_]
@@ -137,7 +141,7 @@
   [_ id]
   (db/processor-by-id id))
 
-(defn create-notifications
+(defn create
   [processor-comp t]
   (let [processor (db/create-processor t)]
     (add-processor processor-comp processor)

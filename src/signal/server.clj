@@ -111,8 +111,9 @@
                           "somepass"))
   (make-signal-server {:http-config {:env                     :dev
                                      ::server/join?           false
-                                     ::server/allowed-origins {:creds true
-                                                               :allowed-origins (constantly true)}}}))
+                                     ::server/allowed-origins ["localhost:8084"]}}))
+                                     ;::server/allowed-origins {:creds true
+                                     ;                          :allowed-origins (constantly true)}}))
 
 (defn init []
   (alter-var-root #'system-val (constantly (init-dev))))

@@ -138,9 +138,11 @@
   "Return true if successfully deleted"
   [input-comp id]
   (log/debug "Removing input:" id)
-  (cond
-    (satisfies? io-proto/PollingInput (get @inputs (keyword id))) (remove-polling-input! input-comp id)
-    (satisfies? io-proto/StreamingInput (get @inputs (keyword id))) (remove-streaming-input! input-comp id)))
+  (do
+    (cond
+      (satisfies? io-proto/PollingInput (get @inputs (keyword id))) (remove-polling-input! input-comp id)
+      (satisfies? io-proto/StreamingInput (get @inputs (keyword id))) (remove-streaming-input! input-comp id))
+    (database-api/delete-input id)))
 
 (defrecord InputManagerComponent [processor]
   component/Lifecycle

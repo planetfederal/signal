@@ -13,19 +13,19 @@
                        :dbname "signal"}}
  :input {:kafka {:topic "input_test"}
          :mqtt {:topic "input_test"
-                :url "localhost"
+                :url "tcp://localhost"
                 :port 1883
                 :subscriber-id "signal-mqtt-subscriber"}}
  :output {:kafka {:topic "output_test"}
           :mqtt {:topic "output_test"}
-          :email {:smtp-host #env SMTP_HOST
+          :email {:smtp-host #or [#env SMTP_HOST "email-smtp.us-east-1.amazonaws.com"]
                   :smtp-password #env SMTP_PASSWORD
                   :smtp-user #env SMTP_USERNAME}}
  :http {:port 8085 :auth false}
  :app {:hostname #or [#env HOSTNAME "signal-server"]
        :trust-store #or [#env TRUST_STORE "/usr/src/app/tls/test-cacerts.jks"]
-       :key-store #or [#env "/usr/src/app/tls/test-keystore.p12"]
-       :auto-migrate true
-       :admin-email "admin@something.com"
-       :admin-pass "something"}}
+       :key-store #or [#env KEY_STORE "/usr/src/app/tls/test-keystore.p12"]
+       :auto-migrate #or [#env AUTO_MIGRATE true]
+       :admin-email #or [#env ADMIN_USER "admin@something.com"]
+       :admin-pass #or [#env ADMIN_PASS "something"]}}
 
