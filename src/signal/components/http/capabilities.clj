@@ -19,6 +19,8 @@
             [signal.predicate.geodisjoint :as predicate-geodisjoint]
             [signal.predicate.identity :as predicate-identity]
             [signal.io.http :as io-http]
+            [signal.io.wfs :as wfs]
+            [signal.io.elastic :as elastic]
             [signal.io.mqtt :as io-mqtt]
             [signal.components.http.auth :refer [check-auth]]
             [signal.io.email :as output-email]
@@ -36,7 +38,9 @@
 (def outputs
   #{{:type output-email/identifier}
     {:type output-webhook/identifier}
-    {:type io-mqtt/identifier}})
+    {:type io-mqtt/identifier}
+    {:type elastic/identifier}
+    {:type wfs/identifier}})
 
 (defn http-get-all-capabilities
   "Returns http response of all capabilities"

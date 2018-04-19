@@ -13,7 +13,7 @@ services:
     build: ./docker/postgis
     image: signal/postgis:latest
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - './data/pg:/var/lib/postgresql/data'
     ports:
       - '5432:5432'
   signal-pgweb:
@@ -42,3 +42,4 @@ services:
       - TRUST_STORE=/usr/src/app/tls/test-cacerts.jks
       - KEY_STORE=/usr/src/app/tls/test-keystore.p12
       - AUTO_MIGRATE=true
+
